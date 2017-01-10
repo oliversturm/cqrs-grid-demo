@@ -9,10 +9,18 @@ services:
       - "3000:3000"
     links:
       - query-service
-
+      - command-service
+      
   query-service:
     build: ./query-service/
     volumes:
       - ./query-service:/usr/src/app
     ports:
       - "3001:3001"
+
+  command-service:
+    build: ./command-service/
+    volumes:
+      - ./command-service:/usr/src/app
+    ports:
+      - "3002:3002"
