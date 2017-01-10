@@ -10,7 +10,6 @@ var config = {
   context: express()
 };
 
-
 seneca.
     client({
 	type: "tcp",

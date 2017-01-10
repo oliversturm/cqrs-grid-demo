@@ -3,6 +3,8 @@ version: '2'
 services:
   web-proxy:
     build: ./web-proxy/
+    volumes:
+      - ./web-proxy:/usr/src/app
     ports:
       - "3000:3000"
     links:
@@ -10,5 +12,7 @@ services:
 
   query-service:
     build: ./query-service/
+    volumes:
+      - ./query-service:/usr/src/app
     ports:
       - "3001:3001"
