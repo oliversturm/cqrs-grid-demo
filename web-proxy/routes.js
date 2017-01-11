@@ -1,6 +1,6 @@
 module.exports = [
     {
-	pin: "role:getvalues,cmd:*",
+	pin: "role:web,domain:values,cmd:fetch",
 	prefix: "/data/v1/values",
 	map: {
 	    all: {
@@ -9,7 +9,7 @@ module.exports = [
 	}
     },
     {
-	pin: "role:modifyvalues,cmd:*",
+	pin: "role:web,domain:values,cmd:create",
 	prefix: "/data/v1/values",
 	map: {
 	    create: {

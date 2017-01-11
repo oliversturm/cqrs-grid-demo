@@ -9,9 +9,15 @@
   "author": "Oliver Sturm",
   "license": "SEE LICENSE IN LICENSE",
   "dependencies": {
+    "body-parser": "^1.15.2",
     "express": "^4.14.0",
+    "parambulator": "^1.5.2",
     "seneca": "^3.2.2",
     "seneca-web": "^2.0.0",
-    "seneca-web-adapter-express": "^1.0.2"
+    "seneca-web-adapter-express": "^1.0.2",
+    "seneca-web-http-status": "^1.0.4"
+  },
+  "devDependencies": {
+    "nodemon": "^1.11.0"
   }
 }

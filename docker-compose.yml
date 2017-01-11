@@ -17,6 +17,8 @@ services:
       - ./query-service:/usr/src/app
     ports:
       - "3001:3001"
+    links:
+      - mongo
 
   command-service:
     build: ./command-service/
@@ -24,3 +26,11 @@ services:
       - ./command-service:/usr/src/app
     ports:
       - "3002:3002"
+    links:
+      - mongo
+
+  mongo:
+    image: mongo:latest
+    ports:
+      - "27017:27017"
+

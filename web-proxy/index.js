@@ -1,23 +1,32 @@
 var seneca = require("seneca")();
 var web = require("seneca-web");
 var express = require("express");
+var bodyParser = require("body-parser");
 
 var routes = require("./routes");
+var expressApp = express();
+
+expressApp.use(bodyParser.json());
 
 var config = {
-  routes: routes,
-  adapter: require("seneca-web-adapter-express"),
-  context: express()
+    routes: routes,
+    adapter: require("seneca-web-adapter-express"),
+    context: expressApp,
+    options: {
+	parseBody: false
+    }
 };
 
+
 seneca.
+    use("proxy").
     client({
 	type: "tcp",
 	// expecting "query-service" to be available
 	// as a docker link
 	host: process.env.QRYSRVC_HOST || "query-service",
 	port: process.env.QRYSRVC_PORT || 3001,
-	pin: "role:getvalues"
+	pin: "role:entitiesQuery"
     }).
     client({
 	type: "tcp",
@@ -25,7 +34,7 @@ seneca.
 	// as a docker link
 	host: process.env.CMDSRVC_HOST || "command-service",
 	port: process.env.CMDSRVC_PORT || 3002,
-	pin: "role:modifyvalues"
+	pin: "role:entitiesCommand"
     }).
     use(web, config).
     ready(() => {

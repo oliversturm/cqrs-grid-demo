@@ -1,11 +1,15 @@
 const seneca = require("seneca")();
 
 seneca.
-    use("basic").
     use("entity").
-    use("modifyvalues").
+    use("mongo-store", {
+	name: process.env.MONGO_DBNAME || "valuedb",
+	host: process.env.MONGO_HOST || "mongo",
+	port: process.env.MONGO_PORT || 27017
+    }).
+    use("command-values").
     listen({
 	type: "tcp",
 	port: process.env.QRYSRVC_PORT || 3002,
-	pin: "role:modifyvalues"
+	pin: "role:entitiesCommand"
     });

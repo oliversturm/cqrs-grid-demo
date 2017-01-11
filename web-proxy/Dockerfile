@@ -8,5 +8,5 @@ RUN npm install
 
 EXPOSE 3000
 
-CMD [ "node", "index.js" ]
+CMD [ "node", "node_modules/nodemon/bin/nodemon", "index.js" ]
 
