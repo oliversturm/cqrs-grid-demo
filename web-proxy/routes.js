@@ -4,7 +4,8 @@ module.exports = [
 	prefix: "/data/v1/values",
 	map: {
 	    all: {
-		GET: true
+		GET: true,
+		alias: "/data/v1/values"
 	    }
 	}
     },
@@ -14,6 +15,7 @@ module.exports = [
 	map: {
 	    create: {
 		POST: true,
+		alias: "/data/v1/values",
 		autoreply: false
 	    }
 	}
