@@ -14,8 +14,7 @@
     "parambulator": "^1.5.2",
     "seneca": "^3.2.2",
     "seneca-web": "^2.0.0",
-    "seneca-web-adapter-express": "^1.0.2",
-    "seneca-web-http-status": "^1.0.4"
+    "seneca-web-adapter-express": "^1.0.2"
   },
   "devDependencies": {
     "nodemon": "^1.11.0"

@@ -23,21 +23,30 @@ module.exports = function(o) {
 	});
 	
 	check.validate(instance, function(err) {
-	    if (err) return r(null, statusCodes.custom(400, err));
+	    if (err) {
+		m.response$.status(400).send({
+		    message: err
+		});
+		return r();
+	    }
 	    
 	    return seneca.act({
 		role: "entitiesCommand",
 		domain: "values",
 		cmd: "create",
 		instance: instance
-	    }, function(err, id) {
-		if (err) return r(null, statusCodes.custom(400, err));
-		const res = statusCodes[201];
-		res.http$.headers = {
-		    "Location": "/data/v1/values/" + id
-		};
+	    }, function(err, res) {
+		if (err) {
+		    m.response$.status(400).send({
+			message: err
+		    });
+		    return r();
+		}
+
+		m.response$.location("/data/v1/values/" + res.id);
+		m.response$.sendStatus(201);
 		
-		return r(err, res);
+		return r();
 	    });
 	});
     });

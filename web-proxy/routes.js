@@ -13,7 +13,8 @@ module.exports = [
 	prefix: "/data/v1/values",
 	map: {
 	    create: {
-		POST: true
+		POST: true,
+		autoreply: false
 	    }
 	}
     }
