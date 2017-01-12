@@ -15,4 +15,20 @@ module.exports = function(o) {
 	    r(err, { id: result.id });
 	});
     });
+
+    this.add("role:entitiesCommand, domain:values, cmd:update", (m, r) => {
+	const value = this.make("value");
+	value.find$({ id: m.id }, function(err, result) {
+	    if (err) return r(err, null);
+
+	    if (res) {
+		return res[0].data$(m.instance).save$(r);
+	    }
+	    else {
+		return r(new Error("ID unknown"), null);
+	    }
+
+	});
+    });
+    
 };

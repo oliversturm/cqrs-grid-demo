@@ -1,21 +1,33 @@
 module.exports = [
     {
-	pin: "role:web,domain:values,cmd:fetch",
+	pin: "role:web,domain:values,cmd:*",
 	prefix: "/data/v1/values",
 	map: {
-	    all: {
+	    list: {
 		GET: true,
-		alias: "/data/v1/values"
-	    }
-	}
-    },
-    {
-	pin: "role:web,domain:values,cmd:create",
-	prefix: "/data/v1/values",
-	map: {
+		name: ""
+	    },
 	    create: {
 		POST: true,
-		alias: "/data/v1/values",
+		name: "",
+		autoreply: false
+	    },
+	    fetch: {
+		GET: true,
+		name: "",
+		suffix: "/:id",
+		autoreply: false
+	    },
+	    update: {
+		PUT: true,
+		name: "",
+		suffix: "/:id",
+		autoreply: false
+	    },
+	    delete: {
+		DELETE: true,
+		name: "",
+		suffix: "/:id",
 		autoreply: false
 	    }
 	}

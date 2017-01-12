@@ -13,7 +13,7 @@ function testQueryValues(done) {
 
 describe("query-values", function() {
     describe("#entitiesQuery.values", function() {
-	it("should retrieve all entities", function(done) {
+	it("list should retrieve all entities", function(done) {
 	    var seneca = testQueryValues(done);
 
 	    const value = seneca.make("value");
@@ -24,13 +24,42 @@ describe("query-values", function() {
 		seneca.act({
 		    role: "entitiesQuery",
 		    domain: "values",
-		    cmd: "all"
+		    cmd: "list"
 		}, function(err, res) {
 		    expect(err, "err").to.be.null;
-		    expect(res.result, "res.result").to.be.instanceof(Array);
-		    expect(res.result, "result").to.have.lengthOf(1);
-		    expect(res.result[0].id, "result.id").to.equal(result.id);
-		    expect(res.result[0].test, "result.test").to.equal(42);
+		    expect(res, "res.result").to.be.instanceof(Array);
+		    expect(res, "result").to.have.lengthOf(1);
+		    expect(res[0], "result item").to.eql({
+			id: result.id,
+			test: 42
+		    });
+		    
+		    done();
+		});
+
+	    });
+	    
+	});
+
+    	it("fetch should retrieve one entity by id", function(done) {
+	    var seneca = testQueryValues(done);
+
+	    const value = seneca.make("value");
+	    value.test = 42;
+	    value.save$(function(err, result) {
+		expect(err, "saveerr").to.be.null;
+
+		seneca.act({
+		    role: "entitiesQuery",
+		    domain: "values",
+		    cmd: "fetch",
+		    id: result.id
+		}, function(err, res) {
+		    expect(err, "err").to.be.null;
+		    expect(res, "result").to.eql({
+			id: result.id,
+			test: 42
+		    });
 		    
 		    done();
 		});
