@@ -9,10 +9,10 @@ module.exports = function(o) {
 
 	const seneca = this;
 	
-	value.save$(function(err, result){
-	    seneca.log.info("Done saving", value);
+	value.save$(function(err, result) {
+	    seneca.log.info("Done saving", result);
 	    
-	    r(err, { id: value.id });
+	    r(err, { id: result.id });
 	});
     });
 };
