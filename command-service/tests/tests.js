@@ -8,6 +8,7 @@ function testCommandValues(done) {
 	test(done/* use this for test debugging *//*, "print"*/).
 	use("basic").
 	use("entity").
+	use(require("../../validator/validator")).
 	use(require("../command-values"));
 }
 

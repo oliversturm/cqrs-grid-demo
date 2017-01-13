@@ -29,6 +29,7 @@ services:
       - "3002:3002"
     links:
       - mongo
+      - validator
 
   validator:
     build: ./validator/

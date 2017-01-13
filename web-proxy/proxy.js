@@ -8,7 +8,6 @@ module.exports = function(o) {
     this.add("role:web, domain:values, cmd:create", function(m, r) {
 	const seneca = this;
 	const instance = m.args.body;
-	seneca.log.info("web.values.create got instance", instance);
 
 	seneca.act({
 	    role: "validation",

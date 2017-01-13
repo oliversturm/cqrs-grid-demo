@@ -1,7 +1,7 @@
 export SHELL=/bin/bash
 export PATH := ./node_modules/.bin:$(PATH)
 
-PROJECTS = command-service query-service web-proxy
+PROJECTS = command-service query-service web-proxy validator
 
 .PHONY: dcup dcupb test
 
