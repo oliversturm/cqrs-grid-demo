@@ -1,5 +1,5 @@
 {
-  "name": "web-proxy",
+  "name": "validator",
   "version": "1.0.0",
   "description": "",
   "main": "index.js",
@@ -9,19 +9,12 @@
   "author": "Oliver Sturm",
   "license": "SEE LICENSE IN LICENSE",
   "dependencies": {
-    "body-parser": "^1.15.2",
-    "express": "^4.14.0",
-    "seneca": "^3.2.2",
-    "seneca-web": "^2.0.0",
-    "seneca-web-adapter-express": "^1.0.2"
+    "parambulator": "^1.5.2",
+    "seneca": "^3.2.2"
   },
   "devDependencies": {
     "chai": "^3.5.0",
-    "chai-http": "^3.0.0",
     "mocha": "^3.2.0",
-    "morgan": "^1.7.0",
-    "nodemon": "^1.11.0",
-    "seneca-basic": "^0.5.0",
-    "seneca-entity": "^1.3.0"
+    "nodemon": "^1.11.0"
   }
 }

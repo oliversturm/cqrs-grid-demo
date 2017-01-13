@@ -14,6 +14,7 @@ const routes = require("../routes");
 const proxy = require("../proxy");
 const queryService = require("../../query-service/query-values");
 const commandService = require("../../command-service/command-values");
+const validator = require("../../validator/validator");
 
 const BASE = "/data/v1/values";
 
@@ -61,6 +62,7 @@ describe("REST tests", () => {
 	    use(proxy).
 	    use(queryService).
 	    use(commandService).
+	    use(validator).
 	    use(web, config).
 	    ready(() => {
 		const server = seneca.export('web/context')();

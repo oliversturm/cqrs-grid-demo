@@ -1,16 +1,3 @@
-const parambulator = require("parambulator");
-const statusCodes = require("seneca-web-http-status");
-
-const valueSpec = parambulator({
-    required$: ["test", "val"],
-    test: {
-	type$: "integer"
-    },
-    val: {
-	type$: "string"
-    }
-});
-
 
 module.exports = function(o) {
 
@@ -22,11 +9,19 @@ module.exports = function(o) {
 	const seneca = this;
 	const instance = m.args.body;
 	seneca.log.info("web.values.create got instance", instance);
-	
-	valueSpec.validate(instance, function(err) {
-	    if (err) {
+
+	seneca.act({
+	    role: "validation",
+	    domain: "values",
+	    cmd: "validateOne",
+	    instance: instance,
+	    preventExtraFields: true
+	}, (err, res) => {
+	    if (err) r(err);
+	    
+	    if (!res.valid) {
 		m.response$.status(400).send({
-		    message: err
+		    message: res.err
 		});
 		return r();
 	    }

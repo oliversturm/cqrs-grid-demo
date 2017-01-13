@@ -10,6 +10,7 @@ services:
     links:
       - query-service
       - command-service
+      - validator
       
   query-service:
     build: ./query-service/
@@ -28,6 +29,13 @@ services:
       - "3002:3002"
     links:
       - mongo
+
+  validator:
+    build: ./validator/
+    volumes:
+      - ./validator:/usr/src/app
+    ports:
+      - "3003:3003"
 
   mongo:
     image: mongo:latest
