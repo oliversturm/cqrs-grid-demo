@@ -31,12 +31,13 @@ module.exports = function(o) {
 	    role: "validation",
 	    domain: "values",
 	    cmd: "validateOne",
-	    instance: m.instance
+	    instance: m.instance,
+	    allowIncomplete: true
 	}, (err, res) => {
 	    if (err) return r(err);
 	    if (res.valid) {
-		const value = this.make("value");
-		return value.find$({ id: m.id }, function(err, result) {
+		const value = seneca.make("value");
+		return value.list$({ id: m.id }, function(err, res) {
 		    if (err) return r(err, null);
 
 		    if (res) {

@@ -51,13 +51,54 @@ describe("validator", function() {
 	    });
 	});
 
-	it("should accept an instance with additional fields by default", function(done) {
+	it("should recognize an invalid instance with missing fields", function(done) {
 	    var seneca = testValidator(done);
 
 	    seneca.act({
 		role: "validation",
 		domain: "values",
 		cmd: "validateOne",
+		instance: {
+		    val: "something"
+		}
+	    }, function(err, res) {
+		expect(err, "err").to.be.null;
+		expect(res, "res").to.not.be.undefined;
+		expect(res.valid, "res.valid").to.be.false;
+		
+		done();
+	    });
+	});
+
+    	it("should recognize an instance with additional fields by default", function(done) {
+	    var seneca = testValidator(done);
+
+	    seneca.act({
+		role: "validation",
+		domain: "values",
+		cmd: "validateOne",
+		instance: {
+		    test: 42,
+		    val: "something",
+		    additional: "something else"
+		}
+	    }, function(err, res) {
+		expect(err, "err").to.be.null;
+		expect(res, "res").to.not.be.undefined;
+		expect(res.valid, "res.valid").to.be.false;
+		
+		done();
+	    });
+	});
+
+	it("should accept an instance with additional fields when told", function(done) {
+	    var seneca = testValidator(done);
+
+	    seneca.act({
+		role: "validation",
+		domain: "values",
+		cmd: "validateOne",
+		allowExtraFields: true,
 		instance: {
 		    test: 42,
 		    val: "something",
@@ -72,26 +113,47 @@ describe("validator", function() {
 	    });
 	});
 
-    	it("should recognize an instance with additional fields when told", function(done) {
+	it("should accept an instance with missing fields when told", function(done) {
 	    var seneca = testValidator(done);
 
 	    seneca.act({
 		role: "validation",
 		domain: "values",
 		cmd: "validateOne",
-		preventExtraFields: true,
+		allowIncomplete: true,
 		instance: {
-		    test: 42,
-		    val: "something",
-		    additional: "something else"
+		    test: 42
 		}
 	    }, function(err, res) {
 		expect(err, "err").to.be.null;
 		expect(res, "res").to.not.be.undefined;
-		expect(res.valid, "res.valid").to.be.false;
+		expect(res.valid, "res.valid").to.be.true;
 		
 		done();
 	    });
 	});
+
+	it("should accept an instance with missing fields and extra fields when told", function(done) {
+	    var seneca = testValidator(done);
+
+	    seneca.act({
+		role: "validation",
+		domain: "values",
+		cmd: "validateOne",
+		allowExtraFields: true,
+		allowIncomplete: true,
+		instance: {
+		    test: 42,
+		    barg: "text"
+		}
+	    }, function(err, res) {
+		expect(err, "err").to.be.null;
+		expect(res, "res").to.not.be.undefined;
+		expect(res.valid, "res.valid").to.be.true;
+		
+		done();
+	    });
+	});
+
     });
 });

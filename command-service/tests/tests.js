@@ -38,5 +38,73 @@ describe("command-values", function() {
 		//     done();
 		// });
 	});
+
+	it("should update an existing entity", function(done) {
+	    var seneca = testCommandValues(done);
+
+	    seneca.act({
+		role: "entitiesCommand",
+		domain: "values",
+		cmd: "create",
+		instance: {
+		    test: 42,
+		    val: "something"
+		}
+	    }, function(err, res) {
+		if (err) throw err;
+
+		console.log("res.id " + res.id);
+		
+
+		seneca.act({
+		    role: "entitiesCommand",
+		    domain: "values",
+		    cmd: "update",
+		    id: res.id,
+		    instance: {
+			test: 55,
+			val: "changed value"
+		    }
+		}, function(err, res) {
+		    expect(err, "err").to.be.null;
+		    expect(res, "res").to.not.be.undefined;
+		    done();
+		});
+	    });
+	});
+
+	it("should update an existing entity partially", function(done) {
+	    var seneca = testCommandValues(done);
+
+	    seneca.act({
+		role: "entitiesCommand",
+		domain: "values",
+		cmd: "create",
+		instance: {
+		    test: 42,
+		    val: "something"
+		}
+	    }, function(err, res) {
+		if (err) throw err;
+
+		console.log("res.id " + res.id);
+		
+
+		seneca.act({
+		    role: "entitiesCommand",
+		    domain: "values",
+		    cmd: "update",
+		    id: res.id,
+		    instance: {
+			val: "changed value"
+		    }
+		}, function(err, res) {
+		    expect(err, "err").to.be.null;
+		    expect(res, "res").to.not.be.undefined;
+		    done();
+		});
+	    });
+	});
+
     });
 });
