@@ -40,16 +40,23 @@ module.exports = function(o) {
 		return value.list$({ id: m.id }, function(err, res) {
 		    if (err) return r(err, null);
 
-		    if (res) {
-			return res[0].data$(m.instance).save$(r);
+		    if (res && res.length === 1) {
+			console.log("have result");
+			
+			return res[0].data$(m.instance).save$((err, res) => {
+			    return r(err, null);
+			});
 		    }
 		    else {
-			return r(new Error("ID unknown"), null);
+			console.log("returning error unknownid");
+			
+			return r(null, { err: "unknownid" });
 		    }
 		});
 	    }
 	    else {
-		return r(new Error("Object invalid"));
+		console.log("returning error invalid");
+		return r(null, { err: "invalid" });
 	    }
 	});
     });

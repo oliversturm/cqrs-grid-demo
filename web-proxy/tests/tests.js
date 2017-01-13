@@ -111,6 +111,19 @@ describe("REST tests", () => {
 	    });
 	});
 
+	it("POST should fail on invalid json", tdone => {
+	    testServer(tdone, (server, ldone) => {
+		chai.request(server).
+		    post(BASE).
+		    send("test: 42, barg: something }").
+		    end((err, res) => {
+			expect(err).to.not.be.null;
+			expect(res).to.have.status(400);
+			ldone();
+		    });
+	    });
+	});
+
         it("POST should fail on additional fields", tdone => {
 	    testServer(tdone, (server, ldone) => {
 		const newVal = {

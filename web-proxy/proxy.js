@@ -13,8 +13,7 @@ module.exports = function(o) {
 	    role: "validation",
 	    domain: "values",
 	    cmd: "validateOne",
-	    instance: instance,
-	    preventExtraFields: true
+	    instance: instance
 	}, (err, res) => {
 	    if (err) r(err);
 	    
@@ -70,6 +69,49 @@ module.exports = function(o) {
 	    
 	    m.response$.status(200).send(res);
 	    return r();
+	});
+    });
+
+    this.add("role:web, domain:values, cmd:update", function(m, r) {
+	const seneca = this;
+	const id = m.args.params.id;
+
+	if (!(/^[\dA-Za-z]+$/.test(id))) {
+	    m.response$.sendStatus(404);
+	    return r();
+	}
+
+	const instance = m.args.body;
+
+	return seneca.act({
+	    role: "entitiesCommand",
+	    domain: "values",
+	    cmd: "update",
+	    id: id,
+	    instance: instance
+	}, function(err, res) {
+	    if (err) return r(err);
+	    
+	    if (res && res.err) {
+		console.log("have error " + res.err);
+		
+		if (res.err === "unknownid") {
+		    console.log("have error unknownid");
+		    m.response$.status(404).send({
+			message: "The given ID is invalid"
+		    });
+		} 
+		else if (res.err === "invalid") {
+		    console.log("have error invalid");
+		    m.response$.status(400).send({
+			message: "The update data is invalid"
+		    });
+		}
+		return r();
+	    }	    
+	    m.response$.sendStatus(204);
+	    return r();
+	    
 	});
     });
 };
