@@ -5,8 +5,7 @@ WORKDIR /usr/src/app
 
 COPY . /usr/src/app
 RUN npm install
-RUN cd /usr/src/app/static
-RUN bower install
+RUN cd /usr/src/app/static && ../node_modules/.bin/bower --allow-root install
 
 EXPOSE 8080
 
