@@ -30,10 +30,14 @@ module.exports = function(o) {
 		cmd: "create",
 		instance: instance
 	    }, function(err, res) {
-		if (err) {
-		    m.response$.status(400).send({
-			message: err
-		    });
+		if (err) return r(err);
+		
+		if (res && res.err) {
+		    if (res.err === "invalid") {
+			m.response$.status(400).send({
+			    message: "The creation data is invalid"
+			});
+		    }
 		    return r();
 		}
 
@@ -50,7 +54,9 @@ module.exports = function(o) {
 	const id = m.args.params.id;
 
 	if (!(/^[\dA-Za-z]+$/.test(id))) {
-	    m.response$.sendStatus(404);
+	    m.response$.status(404).send({
+		message: "The given ID is invalid"
+	    });
 	    return r();
 	}
 
@@ -60,10 +66,14 @@ module.exports = function(o) {
 	    cmd: "fetch",
 	    id: id
 	}, function(err, res) {
-	    if (err) {
-		m.response$.status(404).send({
-		    message: err
-		});
+	    if (err) return r(err);
+
+	    if (res && res.err) {
+		if (res.err === "unknownid") {
+		    m.response$.status(404).send({
+			message: "The given ID is invalid"
+		    });
+		}
 		return r();
 	    }
 	    
@@ -96,13 +106,11 @@ module.exports = function(o) {
 		console.log("have error " + res.err);
 		
 		if (res.err === "unknownid") {
-		    console.log("have error unknownid");
 		    m.response$.status(404).send({
 			message: "The given ID is invalid"
 		    });
 		} 
 		else if (res.err === "invalid") {
-		    console.log("have error invalid");
 		    m.response$.status(400).send({
 			message: "The update data is invalid"
 		    });

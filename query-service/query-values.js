@@ -11,13 +11,13 @@ module.exports = function(o) {
 	const seneca = this;
 	
 	value.list$({ id: m.id }, function(err, res) {
-	    if (err) return r(err, null);
+	    if (err) return r(err);
 
-	    if (res) {
+	    if (res && res.length === 1) {
 		return r(null, res[0].data$(false) );
 	    }
 	    else {
-		return r(new Error("ID unknown"), null);
+		return r(null, { err: "unknownid" });
 	    }
 	});
     });

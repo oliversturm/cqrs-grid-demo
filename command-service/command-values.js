@@ -19,7 +19,7 @@ module.exports = function(o) {
 		});
 	    }
 	    else {
-		return r(new Error("Object invalid"));
+		return r(null, { err: "invalid" });
 	    }
 	});
     });
@@ -41,21 +41,16 @@ module.exports = function(o) {
 		    if (err) return r(err, null);
 
 		    if (res && res.length === 1) {
-			console.log("have result");
-			
 			return res[0].data$(m.instance).save$((err, res) => {
 			    return r(err, null);
 			});
 		    }
 		    else {
-			console.log("returning error unknownid");
-			
 			return r(null, { err: "unknownid" });
 		    }
 		});
 	    }
 	    else {
-		console.log("returning error invalid");
 		return r(null, { err: "invalid" });
 	    }
 	});

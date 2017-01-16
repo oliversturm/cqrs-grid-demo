@@ -144,6 +144,77 @@ describe("REST tests", () => {
 	});
     });
 
+    describe("PUT value", () => {
+	it ("changes a value", tdone => {
+	    testServer(tdone, (server, ldone) => {
+		create(server, val1, res => {
+		    const newVal = {
+			test: 52
+		    };
+
+		    const location = res.header.location;
+		    
+		    chai.request(server).
+			put(location).
+			send(newVal).
+			then(res => {
+			    expect(res).to.have.status(204);
+			    ldone();
+			}).
+			catch(err =>  {
+			    throw err;
+			});
+		});
+		
+	    });
+	});
+
+    	it ("should fail on additional fields", tdone => {
+	    testServer(tdone, (server, ldone) => {
+		create(server, val1, res => {
+		    const newVal = {
+			test: 52,
+			unknown: 10
+		    };
+
+		    const location = res.header.location;
+		    
+		    chai.request(server).
+			put(location).
+			send(newVal).
+			end((err, res) => {
+			    expect(res).to.have.status(400);
+			    ldone();
+			});
+		});
+		
+	    });
+	});
+
+        it ("should fail on invalid id", tdone => {
+	    testServer(tdone, (server, ldone) => {
+		create(server, val1, res => {
+		    const newVal = {
+			test: 52
+		    };
+
+		    const location = BASE + "/12345";
+		    
+		    
+		    chai.request(server).
+			put(location).
+			send(newVal).
+			end((err, res) => {
+			    expect(res).to.have.status(404);
+			    ldone();
+			});
+		});
+		
+	    });
+	});
+});
+    
+
     describe("GET value(s)", () => {
 	it("retrieves all values", tdone => {
 	    testServer(tdone, (server, ldone) => {
@@ -191,6 +262,17 @@ describe("REST tests", () => {
 			    });
 		    });
 		});
+		
+	    });
+	});
+	it("GET should fail on invalid id", tdone => {
+	    testServer(tdone, (server, ldone) => {
+		chai.request(server).
+		    get(BASE + "/12345").
+		    end((err, res) => {
+			expect(res).to.have.status(404);
+			ldone();
+		    });
 		
 	    });
 	});
