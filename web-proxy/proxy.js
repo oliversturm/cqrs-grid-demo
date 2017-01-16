@@ -1,7 +1,29 @@
-function sendError(m, status, msg="") {
+function sendErrorStatus(m, status, msg="") {
     m.response$.status(status).send({
 	message: msg
     });
+}
+
+const errors = {
+    invalid: {
+	status: 400,
+	message: "Invalid data"
+    },
+    unknownid: {
+	status: 404,
+	message: "Invalid ID"
+    }
+};
+
+
+function checkError(m, res) {
+    if (res && res.err) {
+	const details = errors[res.err];
+	if (details) sendErrorStatus(m, details.status, details.message);
+	else sendError(m, 500);
+	return true;
+    }
+    return false;
 }
 
 module.exports = function(o) {
@@ -23,7 +45,7 @@ module.exports = function(o) {
 	    if (err) r(err);
 	    
 	    if (!res.valid) {
-		sendError(m, 400, res.err);
+		sendErrorStatus(m, 400, res.err);
 		return r();
 	    }
 	    
@@ -34,14 +56,8 @@ module.exports = function(o) {
 		instance: instance
 	    }, function(err, res) {
 		if (err) return r(err);
+		if (checkError(m, res)) return r();
 		
-		if (res && res.err) {
-		    if (res.err === "invalid") {
-			sendError(m, 400, "The creation data is invalid");
-		    }
-		    return r();
-		}
-
 		m.response$.location("/data/v1/values/" + res.id);
 		m.response$.sendStatus(201);
 		
@@ -55,7 +71,7 @@ module.exports = function(o) {
 	const id = m.args.params.id;
 
 	if (!(/^[\dA-Za-z]+$/.test(id))) {
-	    sendError(m, 404, "The given ID is invalid");
+	    sendErrorStatus(m, 404, "The given ID is invalid");
 	    return r();
 	}
 
@@ -66,13 +82,7 @@ module.exports = function(o) {
 	    id: id
 	}, function(err, res) {
 	    if (err) return r(err);
-
-	    if (res && res.err) {
-		if (res.err === "unknownid") {
-		    sendError(m, 404, "The given ID is invalid");
-		}
-		return r();
-	    }
+	    if (checkError(m, res)) return r();
 	    
 	    m.response$.status(200).send(res);
 	    return r();
@@ -98,18 +108,8 @@ module.exports = function(o) {
 	    instance: instance
 	}, function(err, res) {
 	    if (err) return r(err);
-	    
-	    if (res && res.err) {
-		console.log("have error " + res.err);
-		
-		if (res.err === "unknownid") {
-		    sendError(m, 404, "The given ID is invalid");
-		} 
-		else if (res.err === "invalid") {
-		    sendError(m, 400, "The update data is invalid");
-		}
-		return r();
-	    }	    
+	    if (checkError(m, res)) return r();
+
 	    m.response$.sendStatus(204);
 	    return r();
 	    
