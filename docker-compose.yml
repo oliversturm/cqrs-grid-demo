@@ -43,3 +43,10 @@ services:
     ports:
       - "27017:27017"
 
+  webapp:
+    build: ./webapp/
+    volumes:
+      - ./webapp:/usr/src/app
+    ports:
+      - "8080:8080"
+      
