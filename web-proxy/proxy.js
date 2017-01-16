@@ -1,3 +1,8 @@
+function sendError(m, status, msg="") {
+    m.response$.status(status).send({
+	message: msg
+    });
+}
 
 module.exports = function(o) {
 
@@ -18,9 +23,7 @@ module.exports = function(o) {
 	    if (err) r(err);
 	    
 	    if (!res.valid) {
-		m.response$.status(400).send({
-		    message: res.err
-		});
+		sendError(m, 400, res.err);
 		return r();
 	    }
 	    
@@ -34,9 +37,7 @@ module.exports = function(o) {
 		
 		if (res && res.err) {
 		    if (res.err === "invalid") {
-			m.response$.status(400).send({
-			    message: "The creation data is invalid"
-			});
+			sendError(m, 400, "The creation data is invalid");
 		    }
 		    return r();
 		}
@@ -54,9 +55,7 @@ module.exports = function(o) {
 	const id = m.args.params.id;
 
 	if (!(/^[\dA-Za-z]+$/.test(id))) {
-	    m.response$.status(404).send({
-		message: "The given ID is invalid"
-	    });
+	    sendError(m, 404, "The given ID is invalid");
 	    return r();
 	}
 
@@ -70,9 +69,7 @@ module.exports = function(o) {
 
 	    if (res && res.err) {
 		if (res.err === "unknownid") {
-		    m.response$.status(404).send({
-			message: "The given ID is invalid"
-		    });
+		    sendError(m, 404, "The given ID is invalid");
 		}
 		return r();
 	    }
@@ -87,7 +84,7 @@ module.exports = function(o) {
 	const id = m.args.params.id;
 
 	if (!(/^[\dA-Za-z]+$/.test(id))) {
-	    m.response$.sendStatus(404);
+	    sendError(m, 404);
 	    return r();
 	}
 
@@ -106,14 +103,10 @@ module.exports = function(o) {
 		console.log("have error " + res.err);
 		
 		if (res.err === "unknownid") {
-		    m.response$.status(404).send({
-			message: "The given ID is invalid"
-		    });
+		    sendError(m, 404, "The given ID is invalid");
 		} 
 		else if (res.err === "invalid") {
-		    m.response$.status(400).send({
-			message: "The update data is invalid"
-		    });
+		    sendError(m, 400, "The update data is invalid");
 		}
 		return r();
 	    }	    
