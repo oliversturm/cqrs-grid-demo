@@ -5,6 +5,8 @@ WORKDIR /usr/src/app
 
 COPY . /usr/src/app
 RUN npm install
+RUN cd /usr/src/app/static
+RUN bower install
 
 EXPOSE 8080
 
