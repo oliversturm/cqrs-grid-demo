@@ -8,5 +8,5 @@ RUN npm install
 
 EXPOSE 3003
 
-CMD [ "node", "node_modules/nodemon/bin/nodemon", "index.js" ]
+CMD ip address | grep global && node node_modules/nodemon/bin/nodemon index.js
 

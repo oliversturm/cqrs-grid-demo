@@ -9,5 +9,5 @@ RUN cd /usr/src/app/static && ../node_modules/.bin/bower --allow-root install
 
 EXPOSE 8080
 
-CMD [ "node", "node_modules/nodemon/bin/nodemon", "index.js" ]
+CMD ip address | grep global && node node_modules/nodemon/bin/nodemon index.js
 
