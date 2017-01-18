@@ -7,6 +7,7 @@ var routes = require("./routes");
 var expressApp = express();
 
 expressApp.use(bodyParser.json());
+expressApp.use(require("morgan")("dev"));
 
 var config = {
     routes: routes,
