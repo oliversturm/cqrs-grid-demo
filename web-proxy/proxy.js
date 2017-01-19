@@ -27,9 +27,30 @@ function checkError(m, res) {
 }
 
 module.exports = function(o) {
+    this.add("role:web, domain:values, cmd:createTestData", (m, r) => {
+	this.act({
+	    role: "testing",
+	    domain: "values",
+	    cmd: "createTestData",
+	    count: m.args.query.count
+	}, r);
+    });
 
     this.add("role:web, domain:values, cmd:list", function(m, r) {
-	this.act("role:entitiesQuery, domain:values, cmd:list", r);
+	let p = {};
+
+	const take = parseInt(m.args.query.take);
+	if (take && take >= 0) p.take = take;
+
+	const skip = parseInt(m.args.query.skip);
+	if (skip && skip >= 0) p.skip = skip;
+	
+	this.act({
+	    role: "entitiesQuery",
+	    domain: "values",
+	    cmd: "list",
+	    params: p
+	}, r);
     });
 
     this.add("role:web, domain:values, cmd:create", function(m, r) {

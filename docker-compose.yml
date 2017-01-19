@@ -11,6 +11,7 @@ services:
       - query-service
       - command-service
       - validator
+      - testing
       
   query-service:
     build: ./query-service/
@@ -49,4 +50,12 @@ services:
       - ./webapp:/usr/src/app
     ports:
       - "8080:8080"
-      
+
+  testing:
+    build: ./testing/
+    volumes:
+      - ./testing:/usr/src/app
+    ports:
+      - "3005:3005"
+    links:
+      - command-service

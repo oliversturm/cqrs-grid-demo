@@ -224,8 +224,8 @@ describe("REST tests", () => {
 			    get(BASE).
 			    then(res => {
 				expect(res).to.have.status(200);
-				expect(res.body).to.be.a("array");
-				expect(res.body).to.have.lengthOf(2);
+				expect(res.body.data).to.be.a("array");
+				expect(res.body.data).to.have.lengthOf(2);
 				ldone();
 			    }).
 			    catch(err =>  {

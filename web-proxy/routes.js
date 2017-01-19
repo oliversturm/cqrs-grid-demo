@@ -31,5 +31,14 @@ module.exports = [
 		autoreply: false
 	    }
 	}
+    },
+    {
+	pin: "role:web,domain:values,cmd:*",
+	prefix: "/api/v1",
+	map: {
+	    createTestData: {
+		GET: true
+	    }
+	}
     }
 ];

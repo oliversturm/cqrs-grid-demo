@@ -27,9 +27,11 @@ describe("query-values", function() {
 		    cmd: "list"
 		}, function(err, res) {
 		    expect(err, "err").to.be.null;
-		    expect(res, "res.result").to.be.instanceof(Array);
-		    expect(res, "result").to.have.lengthOf(1);
-		    expect(res[0], "result item").to.eql({
+		    expect(res.totalCount).to.eql(1);
+		    
+		    expect(res.data, "res.data").to.be.instanceof(Array);
+		    expect(res.data, "result").to.have.lengthOf(1);
+		    expect(res.data[0], "result item").to.eql({
 			id: result.id,
 			test: 42
 		    });

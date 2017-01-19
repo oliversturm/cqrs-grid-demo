@@ -45,6 +45,14 @@ seneca.
 	port: process.env.CMDSRVC_PORT || 3003,
 	pin: "role:validation"
     }).
+    client({
+	type: "tcp",
+	// expecting "testing" to be available
+	// as a docker link
+	host: process.env.CMDSRVC_HOST || "testing",
+	port: process.env.CMDSRVC_PORT || 3005,
+	pin: "role:testing"
+    }).
     use(web, config).
     ready(() => {
 	var server = seneca.export('web/context')();
