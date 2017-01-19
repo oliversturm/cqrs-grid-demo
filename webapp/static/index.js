@@ -37,8 +37,8 @@ var dataStore = new DevExpress.data.CustomStore({
 	
 	var d = $.Deferred();
 	$.getJSON(BASEDATA, params).done(function(res) {
-	    d.resolve(res, {
-		totalCount: res.length
+	    d.resolve(res.data, {
+		totalCount: res.totalCount
 	    });
 	});
 	return d.promise();

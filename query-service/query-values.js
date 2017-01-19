@@ -16,7 +16,7 @@ function connect(f) {
 
 function count(f) {
     connect(db => {
-	db.collection("values").count().then(c => f(c));
+	db.collection("value").count().then(c => f(c));
 	db.close();
     });
 }
