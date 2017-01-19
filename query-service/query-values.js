@@ -7,20 +7,23 @@ function skip(a, n) {
     return n ? a.slice(n) : a;
 }
 
-function connect(f) {
-    MongoClient.connect(`mongodb://${process.env.MONGO_HOST || "mongo"}:${process.env.MONGO_PORT || 27017}/${process.env.MONGO_DBNAME || "valuedb"}`, (err, db) => {
-	if (err) throw err;
-	f(db);
-    });
-}
-
-function count(f) {
-    connect(db => {
-	db.collection("value").count().then(c => f(c));
-	db.close();
-    });
-}
-
+var connect = (function() {
+    let connectedDb;
+    return function(f) {
+	let result;
+	
+	if (connectedDb) result = f(connectedDb);
+	else {
+	    MongoClient.connect(`mongodb://${process.env.MONGO_HOST || "mongo"}:${process.env.MONGO_PORT || 27017}/${process.env.MONGO_DBNAME || "valuedb"}`, (err, db) => {
+		if (err) throw err;
+		connectedDb = db;
+		result = f(connectedDb);
+	    });
+	}
+	if (result && result.close)
+	    db.close();
+    };
+})();
 
 
 module.exports = function(o) {
@@ -34,8 +37,7 @@ module.exports = function(o) {
 
 	console.log("Using query params", p);
 
-	count(function(totalCount) {
-	    console.log("Count is " + totalCount);
+	connect(db => db.collection("value").count().then(function(totalCount) {
 	    seneca.make("value").list$(
 		p, (err, res) => {
 		    let result = {
@@ -47,8 +49,7 @@ module.exports = function(o) {
 		    r(err, result);
 		});
 	    
-	});
-	
+	}));
     });
 
     this.add("role:entitiesQuery, domain:values, cmd:fetch", (m, r) => {
