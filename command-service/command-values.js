@@ -1,4 +1,58 @@
+const MongoClient = require("mongodb").MongoClient;
+
+function Sem() {
+    return {
+	queue: [],
+	blocked: false,
+	acquire: function(f) {
+	    if (!this.blocked) {
+		this.blocked = true;
+		this.call(f);
+	    }
+	    else this.queue.push(f);
+	},
+	release: function() {
+	    const next = this.queue.shift();
+	    if (next === undefined) this.blocked = false;
+	    else this.call(next);
+	},
+	call: function(f) {
+	    let released = false;
+	    const that = this;
+	    
+	    f(() => {
+		if (!released) {
+		    released = true;
+		    that.release();
+		}
+	    });
+	}
+    };
+}
+
 module.exports = function(o) {
+    const db = (function() {
+	let connectedDb = o.connectedDb;
+	const sem = Sem();
+	
+	return function(f) {
+	    sem.acquire(release => {
+		if (connectedDb) {
+		    f(connectedDb);
+		    release();
+		}
+		else {
+		    MongoClient.connect(`mongodb://${o.mongoHost || process.env.MONGO_HOST || "mongo"}:${o.mongoPort || process.env.MONGO_PORT || 27017}/${o.mongoDbName || process.env.MONGO_DBNAME || "valuedb"}`, (err, db) => {
+			if (err) throw err;
+			connectedDb = db;
+			f(connectedDb);
+			release();
+		    });
+		}
+	    });
+	};
+    })();
+    
     this.add("role:entitiesCommand, domain:values, cmd:create", (m, r) => {
 	const seneca = this;
 	
@@ -8,18 +62,15 @@ module.exports = function(o) {
 	    cmd: "validateOne",
 	    instance: m.instance
 	}, (err, res) => {
-	    if (err) return r(err);
+	    if (err) r(err);
 	    if (res.valid) {
-		const value = this.make("value");
-		value.data$(m.instance);
-
-		return value.save$(function(err, result) {
-		    if (err) return r(err);
-		    return r(null, { id: result.id });
-		});
+		db(db => db.collection("values").insertOne(m.instance, (err, res) => {
+		    if (err) r(null, { err: err });
+		    else r(null, { id: res.insertedId.toHexString() });
+		}));
 	    }
 	    else {
-		return r(null, { err: "invalid" });
+		r(null, { err$: "invalid" });
 	    }
 	});
     });
@@ -34,25 +85,19 @@ module.exports = function(o) {
 	    instance: m.instance,
 	    allowIncomplete: true
 	}, (err, res) => {
-	    if (err) return r(err);
-	    if (res.valid) {
-		const value = seneca.make("value");
-		return value.list$({ id: m.id }, function(err, res) {
-		    if (err) return r(err, null);
-
-		    if (res && res.length === 1) {
-			return res[0].data$(m.instance).save$((err, res) => {
-			    return r(err, null);
-			});
-		    }
-		    else {
-			return r(null, { err: "unknownid" });
-		    }
-		});
+	    if (err) r(err);
+	    else if (res.valid) {
+		db(db => db.collection("values").
+			updateOne({ _id: m.id },
+				  { $set: m.instance }, null, (err, res) => {
+				      if (err) r(null, { err: err });
+				      else if (res.modifiedCount == 0) {
+					  r(null, { err: "unknownid" });
+				      }
+				      else r();
+				  }));
 	    }
-	    else {
-		return r(null, { err: "invalid" });
-	    }
+	    else r(null, { err$: "invalid" });
 	});
     });
 };

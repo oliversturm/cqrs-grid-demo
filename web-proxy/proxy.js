@@ -17,10 +17,10 @@ const errors = {
 
 
 function checkError(m, res) {
-    if (res && res.err) {
-	const details = errors[res.err];
+    if (res && res.err$) {
+	const details = errors[res.err$];
 	if (details) sendErrorStatus(m, details.status, details.message);
-	else sendError(m, 500);
+	else sendErrorStatus(m, 500);
 	return true;
     }
     return false;
@@ -66,7 +66,7 @@ module.exports = function(o) {
 	    if (err) r(err);
 	    
 	    if (!res.valid) {
-		sendErrorStatus(m, 400, res.err);
+		sendErrorStatus(m, 400, res.err$);
 		return r();
 	    }
 	    
@@ -92,7 +92,7 @@ module.exports = function(o) {
 	const id = m.args.params.id;
 
 	if (!(/^[\dA-Za-z]+$/.test(id))) {
-	    sendErrorStatus(m, 404, "The given ID is invalid");
+	    sendErrorStatus(m, 404, "Invalid ID");
 	    return r();
 	}
 
@@ -114,10 +114,14 @@ module.exports = function(o) {
 	const seneca = this;
 	const id = m.args.params.id;
 
+	console.log("Checking id", id);
+	
 	if (!(/^[\dA-Za-z]+$/.test(id))) {
-	    sendError(m, 404);
+	    sendErrorStatus(m, 404, "Invalid ID");
 	    return r();
 	}
+
+	console.log("Id okay, moving on");
 
 	const instance = m.args.body;
 
@@ -128,6 +132,8 @@ module.exports = function(o) {
 	    id: id,
 	    instance: instance
 	}, function(err, res) {
+	    console.log("Back after action, with err and res", err, res);
+	    
 	    if (err) return r(err);
 	    if (checkError(m, res)) return r();
 

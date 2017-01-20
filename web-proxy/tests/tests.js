@@ -16,6 +16,8 @@ const queryService = require("../../query-service/query-values");
 const commandService = require("../../command-service/command-values");
 const validator = require("../../validator/validator");
 
+const MongoClient = require("../../command-service/node_modules/mongodb").MongoClient;
+
 const BASE = "/data/v1/values";
 
 const val1 = {
@@ -40,37 +42,41 @@ function create(server, val, cont) {
 describe("REST tests", () => {
 
     function testServer(tdone, test) {
-	const expressApp = express();
+	MongoClient.connect("mongodb://localhost:27017/valuedb_test", (err, db) => {
+	    db.dropDatabase((err, res) => {
+		const expressApp = express();
 
-	expressApp.use(bodyParser.json());
-	//expressApp.use(require("morgan")("dev"));
+		expressApp.use(bodyParser.json());
+		//expressApp.use(require("morgan")("dev"));
 
-	var config = {
-	    routes: routes,
-	    adapter: require("seneca-web-adapter-express"),
-	    context: expressApp,
-	    options: {
-		parseBody: false
-	    }
-	};
+		var config = {
+		    routes: routes,
+		    adapter: require("seneca-web-adapter-express"),
+		    context: expressApp,
+		    options: {
+			parseBody: false
+		    }
+		};
 
-	const seneca = Seneca();
-	
-	seneca.
-	    use("basic").
-	    use("entity").
-	    use(proxy).
-	    use(queryService).
-	    use(commandService).
-	    use(validator).
-	    use(web, config).
-	    ready(() => {
-		const server = seneca.export('web/context')();
-		test(server, () => {
-		    seneca.close();
-		    tdone();
+		const seneca = Seneca({
+		    log: "test"
 		});
+
+		seneca.
+		    use(proxy).
+		    use(queryService, { connectedDb: db }).
+		    use(commandService, { connectedDb: db }).
+		    use(validator).
+		    use(web, config).
+		    ready(() => {
+			const server = seneca.export('web/context')();
+			test(server, () => {
+			    seneca.close();
+			    tdone();
+			});
+		    });
 	    });
+	});
     }
 
     describe("POST value", () => {
