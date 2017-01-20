@@ -17,6 +17,3 @@ build-docker: $(DOCKERS)
 
 dcup:
 	docker-compose up
-
-dcupb:
-	docker-compose up --build

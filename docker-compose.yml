@@ -2,9 +2,9 @@ version: '2'
 
 services:
   web-proxy:
-    build: ./web-proxy/
+    image: sturm/cqrs-grid-demo/web-proxy
     volumes:
-      - ./web-proxy:/usr/src/app
+      - ./web-proxy:/usr/src/app/web-proxy
     ports:
       - "3000:3000"
     links:
@@ -14,18 +14,20 @@ services:
       - testing
       
   query-service:
-    build: ./query-service/
+    image: sturm/cqrs-grid-demo/query-service
     volumes:
-      - ./query-service:/usr/src/app
+      - ./query-service:/usr/src/app/query-service
+      - ./db:/usr/src/app/db
     ports:
       - "3001:3001"
     links:
       - mongo
 
   command-service:
-    build: ./command-service/
+    image: sturm/cqrs-grid-demo/command-service
     volumes:
-      - ./command-service:/usr/src/app
+      - ./command-service:/usr/src/app/command-service
+      - ./db:/usr/src/app/db
     ports:
       - "3002:3002"
     links:
@@ -33,9 +35,9 @@ services:
       - validator
 
   validator:
-    build: ./validator/
+    image: sturm/cqrs-grid-demo/validator
     volumes:
-      - ./validator:/usr/src/app
+      - ./validator:/usr/src/app/validator
     ports:
       - "3003:3003"
 
@@ -45,16 +47,16 @@ services:
       - "27017:27017"
 
   webapp:
-    build: ./webapp/
+    image: sturm/cqrs-grid-demo/webapp
     volumes:
-      - ./webapp:/usr/src/app
+      - ./webapp:/usr/src/app/webapp
     ports:
       - "8080:8080"
 
   testing:
-    build: ./testing/
+    image: sturm/cqrs-grid-demo/testing
     volumes:
-      - ./testing:/usr/src/app
+      - ./testing:/usr/src/app/testing
     ports:
       - "3005:3005"
     links:
