@@ -1,3 +1,6 @@
+const mongodb = require("mongodb");
+const ObjectID = mongodb.ObjectID;
+
 function sendErrorStatus(m, status, msg="") {
     m.response$.status(status).send({
 	message: msg
@@ -91,7 +94,7 @@ module.exports = function(o) {
 	const seneca = this;
 	const id = m.args.params.id;
 
-	if (!(/^[\dA-Za-z]+$/.test(id))) {
+	if (!ObjectID.isValid(id)) {
 	    sendErrorStatus(m, 404, "Invalid ID");
 	    return r();
 	}
@@ -114,14 +117,10 @@ module.exports = function(o) {
 	const seneca = this;
 	const id = m.args.params.id;
 
-	console.log("Checking id", id);
-	
-	if (!(/^[\dA-Za-z]+$/.test(id))) {
+	if (!ObjectID.isValid(id)) {
 	    sendErrorStatus(m, 404, "Invalid ID");
 	    return r();
 	}
-
-	console.log("Id okay, moving on");
 
 	const instance = m.args.body;
 
@@ -132,8 +131,6 @@ module.exports = function(o) {
 	    id: id,
 	    instance: instance
 	}, function(err, res) {
-	    console.log("Back after action, with err and res", err, res);
-	    
 	    if (err) return r(err);
 	    if (checkError(m, res)) return r();
 

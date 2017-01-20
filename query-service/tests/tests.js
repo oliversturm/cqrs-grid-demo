@@ -1,9 +1,13 @@
 const expect = require("chai").expect;
 const Seneca = require("seneca");
-const MongoClient = require("mongodb").MongoClient;
 
 function testQueryValues(tdone, test) {
-    MongoClient.connect("mongodb://localhost:27017/valuedb_test", (err, db) => {
+    const db = require("../../db")({
+	mongoHost: "localhost",
+	mongoDbName: "valuedb_test"
+    });
+
+    db(db => {
 	db.dropDatabase((err, res) => {
 	    const seneca = Seneca({
 		log: "test"
@@ -48,8 +52,6 @@ describe("query-values", function() {
 			domain: "values",
 			cmd: "list"
 		    }, function(err, res) {
-			console.log("Query result: ", res);
-			
 			expect(err, "err").to.be.null;
 			expect(res.totalCount).to.eql(1);
 			

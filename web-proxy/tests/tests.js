@@ -16,8 +16,6 @@ const queryService = require("../../query-service/query-values");
 const commandService = require("../../command-service/command-values");
 const validator = require("../../validator/validator");
 
-const MongoClient = require("../../command-service/node_modules/mongodb").MongoClient;
-
 const BASE = "/data/v1/values";
 
 const val1 = {
@@ -42,7 +40,12 @@ function create(server, val, cont) {
 describe("REST tests", () => {
 
     function testServer(tdone, test) {
-	MongoClient.connect("mongodb://localhost:27017/valuedb_test", (err, db) => {
+	const db = require("../../db")({
+	    mongoHost: "localhost",
+	    mongoDbName: "valuedb_test"
+	});
+
+	db(db => {
 	    db.dropDatabase((err, res) => {
 		const expressApp = express();
 
@@ -258,8 +261,8 @@ describe("REST tests", () => {
 				expect(o).to.be.a("object");
 				expect(o).to.have.property("test");
 				expect(o).to.have.property("val");
-				expect(o).to.have.property("id");
-				expect(o.id).to.eql(id);
+				expect(o).to.have.property("_id");
+				expect(o._id).to.eql(id);
 				
 				ldone();
 			    }).

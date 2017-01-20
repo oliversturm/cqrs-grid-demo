@@ -1,57 +1,8 @@
-const MongoClient = require("mongodb").MongoClient;
-
-function Sem() {
-    return {
-	queue: [],
-	blocked: false,
-	acquire: function(f) {
-	    if (!this.blocked) {
-		this.blocked = true;
-		this.call(f);
-	    }
-	    else this.queue.push(f);
-	},
-	release: function() {
-	    const next = this.queue.shift();
-	    if (next === undefined) this.blocked = false;
-	    else this.call(next);
-	},
-	call: function(f) {
-	    let released = false;
-	    const that = this;
-	    
-	    f(() => {
-		if (!released) {
-		    released = true;
-		    that.release();
-		}
-	    });
-	}
-    };
-}
+const mongodb = require("mongodb");
+const ObjectID = mongodb.ObjectID;
 
 module.exports = function(o) {
-    const db = (function() {
-	let connectedDb = o.connectedDb;
-	const sem = Sem();
-	
-	return function(f) {
-	    sem.acquire(release => {
-		if (connectedDb) {
-		    f(connectedDb);
-		    release();
-		}
-		else {
-		    MongoClient.connect(`mongodb://${o.mongoHost || process.env.MONGO_HOST || "mongo"}:${o.mongoPort || process.env.MONGO_PORT || 27017}/${o.mongoDbName || process.env.MONGO_DBNAME || "valuedb"}`, (err, db) => {
-			if (err) throw err;
-			connectedDb = db;
-			f(connectedDb);
-			release();
-		    });
-		}
-	    });
-	};
-    })();
+    const db = require("../db")(o);
     
     this.add("role:entitiesCommand, domain:values, cmd:create", (m, r) => {
 	const seneca = this;
@@ -88,14 +39,14 @@ module.exports = function(o) {
 	    if (err) r(err);
 	    else if (res.valid) {
 		db(db => db.collection("values").
-			updateOne({ _id: m.id },
-				  { $set: m.instance }, null, (err, res) => {
-				      if (err) r(null, { err: err });
-				      else if (res.modifiedCount == 0) {
-					  r(null, { err: "unknownid" });
-				      }
-				      else r();
-				  }));
+		   updateOne({ _id: new ObjectID(m.id) },
+			     { $set: m.instance }, null, (err, res) => {
+				 if (err) r(null, { err: err });
+				 else if (res.modifiedCount == 0) {
+				     r(null, { err: "unknownid" });
+				 }
+				 else r();
+			     }));
 	    }
 	    else r(null, { err$: "invalid" });
 	});

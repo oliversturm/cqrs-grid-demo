@@ -1,27 +1,17 @@
 const mongodb = require("mongodb");
-const MongoClient = mongodb.MongoClient;
 const ObjectID = mongodb.ObjectID;
 
 module.exports = function(o = {}) {
-    const db = (function() {
-	let connectedDb = o.connectedDb;
-	return function(f) {
-	    let result;
-	    
-	    if (connectedDb) result = f(connectedDb);
-	    else {
-		console.log("Creating new connection");
-		
-		MongoClient.connect(`mongodb://${o.mongoHost || process.env.MONGO_HOST || "mongo"}:${o.mongoPort || process.env.MONGO_PORT || 27017}/${o.mongoDbName || process.env.MONGO_DBNAME || "valuedb"}`, (err, db) => {
-		    if (err) throw err;
-		    connectedDb = db;
-		    result = f(connectedDb);
-		});
-	    }
-	    if (result && result.close)
-		db.close();
-	};
-    })();
+    const db = require("../db")(o);
+
+    // I don't want mongo formatted ids getting out of this service -
+    // that's an implementation detail. However, mongo doesn't seem
+    // to have the ability of simply returning its ids as strings
+    // to begin with. Bit of a pita, but hey...
+    function replaceId(item) {
+	item._id = item._id.toHexString();
+	return item;
+    }
     
     this.add("role:entitiesQuery, domain:values, cmd:list", (m, r) => {
 	db(db => db.collection("values").count((err, totalCount) => {
@@ -39,7 +29,7 @@ module.exports = function(o = {}) {
 		    let result = {
 			params: m.params,
 			totalCount: totalCount,
-			data: res
+			data: res.map(replaceId)
 		    };
 		    
 		    r(null, result);
@@ -52,7 +42,7 @@ module.exports = function(o = {}) {
 	db(db => {
 	    db.collection("values").findOne({ _id: new ObjectID(m.id) }, (err, res) => {
 		if (err) r(null, { err$: err });
-		else if (res) r(null, res);
+		else if (res) r(null, replaceId(res));
 		else r(null, { err$: "unknownid" });
 	    });
 	});

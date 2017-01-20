@@ -1,10 +1,13 @@
 const expect = require("chai").expect;
 const Seneca = require("seneca");
-const MongoClient = require("mongodb").MongoClient;
-
 
 function testCommandValues(tdone, test) {
-    MongoClient.connect("mongodb://localhost:27017/valuedb_test", (err, db) => {
+    const db = require("../../db")({
+	mongoHost: "localhost",
+	mongoDbName: "valuedb_test"
+    });
+
+    db(db => {
 	db.dropDatabase((err, res) => {
 	    const seneca = Seneca({
 		log: "test"
@@ -58,9 +61,6 @@ describe("command-values", function() {
 		    }
 		}, function(err, res) {
 		    if (err) throw err;
-
-		    console.log("res.id " + res.id);
-		    
 
 		    seneca.act({
 			role: "entitiesCommand",
