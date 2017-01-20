@@ -1,7 +1,7 @@
 export SHELL=/bin/bash
-export PATH := ./node_modules/.bin:$(PATH)
 
-PROJECTS = command-service query-service web-proxy validator webapp
+PROJECTS = command-service query-service web-proxy validator webapp testing
+DOCKERS = $(PROJECTS:%=bd-%)
 
 .PHONY: dcup dcupb test
 
@@ -10,10 +10,10 @@ test:
 		pushd $$p && make test; popd ; \
 	done
 
-build-docker:
-	for p in $(PROJECTS); do \
-		pushd $$p && make build-docker; popd; \
-	done
+bd-%:
+	docker build -t sturm/cqrs-grid-demo/$* -f Dockerfile-$* .
+
+build-docker: $(DOCKERS)
 
 dcup:
 	docker-compose up

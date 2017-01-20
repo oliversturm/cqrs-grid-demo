@@ -5,10 +5,7 @@ SRC = index.js
 
 TESTS = $(wildcard tests/*.js)
 
-.PHONY: test build-docker
+.PHONY: test
 
 test:
 	mocha $(TESTS)
-
-build-docker:
-	docker build -t sturm/cqrs-grid-demo/webapp .

@@ -1,12 +1,12 @@
 FROM node:latest
 
-RUN mkdir -p /usr/src/app
-WORKDIR /usr/src/app
+RUN mkdir -p /usr/src/app/testing
 
-COPY . /usr/src/app
+COPY testing /usr/src/app/testing
+WORKDIR /usr/src/app/testing
 RUN npm install
 
-EXPOSE 3001
+EXPOSE 3005
 
 CMD ip address | grep global && node node_modules/nodemon/bin/nodemon index.js
 

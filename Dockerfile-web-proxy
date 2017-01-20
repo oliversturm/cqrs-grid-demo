@@ -1,9 +1,9 @@
 FROM node:latest
 
-RUN mkdir -p /usr/src/app
-WORKDIR /usr/src/app
+RUN mkdir -p /usr/src/app/web-proxy
 
-COPY . /usr/src/app
+COPY web-proxy /usr/src/app/web-proxy
+WORKDIR /usr/src/app/web-proxy
 RUN npm install
 
 EXPOSE 3000

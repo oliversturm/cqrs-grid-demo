@@ -1,0 +1,16 @@
+FROM node:latest
+
+RUN mkdir -p /usr/src/app/command-service
+RUN mkdir -p /usr/src/app/db
+
+COPY command-service /usr/src/app/command-service
+COPY db /usr/src/app/db
+WORKDIR /usr/src/app/db
+RUN npm install
+WORKDIR /usr/src/app/command-service
+RUN npm install
+
+EXPOSE 3002
+
+CMD ip address | grep global && node node_modules/nodemon/bin/nodemon index.js
+
