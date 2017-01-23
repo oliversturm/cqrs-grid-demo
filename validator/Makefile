@@ -8,5 +8,7 @@ TESTS = $(wildcard tests/*.js)
 .PHONY: test
 
 test:
-	mocha $(TESTS)
+	ID=`docker run -p=27017:27017 -d mongo:latest`; \
+	mocha $(TESTS) ; \
+	docker kill $$ID
 
