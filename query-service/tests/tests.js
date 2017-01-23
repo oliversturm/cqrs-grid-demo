@@ -127,5 +127,67 @@ describe("query-values", function() {
 		});
 	    });
 	});
+
+    	it("list should sort ascending", function(tdone) {
+	    testQueryValues(tdone, (seneca, ldone) => {
+		seneca.act({
+		    role: "entitiesQuery",
+		    domain: "values",
+		    cmd: "list",
+		    params: {
+			take: 5,
+			sort: [
+			    {
+				selector: "test",
+				desc: false
+			    }
+			]
+		    }
+		}, function(err, res) {
+		    expect(err, "err").to.be.null;
+
+		    expect(res.data, "res.data").to.be.instanceof(Array);
+		    expect(res.data, "result").to.have.lengthOf(5);
+		    expect(res.data[0].test).to.eql(0);
+		    expect(res.data[1].test).to.eql(0);
+		    expect(res.data[2].test).to.eql(0);
+		    expect(res.data[3].test).to.eql(0);
+		    expect(res.data[4].test).to.eql(0);
+		    
+		    ldone();
+		});
+	    });
+	});
+
+    	it("list should sort descending", function(tdone) {
+	    testQueryValues(tdone, (seneca, ldone) => {
+		seneca.act({
+		    role: "entitiesQuery",
+		    domain: "values",
+		    cmd: "list",
+		    params: {
+			take: 5,
+			sort: [
+			    {
+				selector: "test",
+				desc: true
+			    }
+			]
+		    }
+		}, function(err, res) {
+		    expect(err, "err").to.be.null;
+		    
+		    expect(res.data, "res.data").to.be.instanceof(Array);
+		    expect(res.data, "result").to.have.lengthOf(5);
+		    expect(res.data[0].test).to.eql(9);
+		    expect(res.data[1].test).to.eql(9);
+		    expect(res.data[2].test).to.eql(9);
+		    expect(res.data[3].test).to.eql(9);
+		    expect(res.data[4].test).to.eql(9);
+		    
+		    ldone();
+		});
+	    });
+	});
     });
 });

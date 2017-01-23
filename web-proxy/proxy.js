@@ -1,5 +1,7 @@
 const mongodb = require("mongodb");
 const ObjectID = mongodb.ObjectID;
+const parambulator = require("parambulator");
+
 
 function sendErrorStatus(m, status, msg="") {
     m.response$.status(status).send({
@@ -39,14 +41,40 @@ module.exports = function(o) {
 	}, r);
     });
 
+    const sortOptionsChecker = parambulator({
+	required$: ["desc", "selector"],
+	only$: ["desc", "selector"],
+	desc: {
+	    type$: "boolean"
+	},
+	selector: {
+	    type$: "string"
+	}
+    });
+ 
     this.add("role:web, domain:values, cmd:list", function(m, r) {
 	let p = {};
 
-	const take = parseInt(m.args.query.take);
-	if (take && take >= 0) p.take = take;
+	if (m.args.query.take) {
+	    const take = parseInt(m.args.query.take);
+	    if (take && take >= 0) p.take = take;
+	}
 
-	const skip = parseInt(m.args.query.skip);
-	if (skip && skip >= 0) p.skip = skip;
+	if (m.args.query.skip) {
+	    const skip = parseInt(m.args.query.skip);
+	    if (skip && skip >= 0) p.skip = skip;
+	}
+
+	if (m.args.query.sort) {
+	    const sortOptions = JSON.parse(m.args.query.sort);
+
+	    if (sortOptions instanceof Array && sortOptions.length > 0) {
+		if (sortOptions.reduce((r, v) => r &&
+				       !sortOptionsChecker.validate(v), true)) {
+		    p.sort = sortOptions;
+		}
+	    }
+	}	
 	
 	this.act({
 	    role: "entitiesQuery",

@@ -16,11 +16,21 @@ module.exports = function(o = {}) {
     this.add("role:entitiesQuery, domain:values, cmd:list", (m, r) => {
 	db(db => db.collection("values").count((err, totalCount) => {
 	    if (err) r(null, { err$: err });
+
+	    console.log("Query params: ", m.params);
 	    
 	    let results = db.collection("values").find({});
 	    if (m.params){
+		if (m.params.sort) {
+		    let sorting = {};
+		    for (const sf of m.params.sort) sorting[sf.selector] = sf.desc ? -1 : 1;
+
+		    results = results.sort(sorting);
+		}
+
 		if (m.params.skip) results = results.skip(m.params.skip);
 		if (m.params.take) results = results.limit(m.params.take);
+
 	    }
 	    
 	    results.toArray((err, res) => {

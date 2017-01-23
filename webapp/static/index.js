@@ -5,6 +5,8 @@ var BASEAPI = "http://localhost:3000/api/v1";
 var dataStore = new DevExpress.data.CustomStore({
     key: "id",
     load: function(options) {
+	console.log("Load options: ", options);
+	
 	// from https://www.devexpress.com/Support/Center/Question/Details/KA18955
 	var params = {};
         //Getting filter options
@@ -24,6 +26,7 @@ var dataStore = new DevExpress.data.CustomStore({
         params.take = options.take; //A number of records that should be taken
 
         //If the select expression is specified
+	// Oliver: this is the projection - outstanding question - do our controls use this?
         if (options.select)  {
             params.select= JSON.stringify(options.select);
         }   
@@ -102,7 +105,7 @@ $(function() {
 			grid.refresh();
 		    }
 		}
-	}]
+	    }]
     });
 
     grid = $("#grid").dxDataGrid({
