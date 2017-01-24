@@ -20,6 +20,7 @@ var dataStore = new DevExpress.data.CustomStore({
         //Getting group options
         if (options.group)  {
             params.group = JSON.stringify(options.group);
+	    params.requireGroupCount = options.requireGroupCount;
         }            
         //skip and take are used for paging
         params.skip = options.skip; //A number of records that should be skipped
@@ -40,8 +41,11 @@ var dataStore = new DevExpress.data.CustomStore({
 	
 	var d = $.Deferred();
 	$.getJSON(BASEDATA, params).done(function(res) {
+	    console.log("Load result: ", res);
+	    
 	    d.resolve(res.data, {
-		totalCount: res.totalCount
+		totalCount: res.totalCount,
+		groupCount: res.groupCount
 	    });
 	});
 	return d.promise();
@@ -112,7 +116,15 @@ $(function() {
 	dataSource: {
 	    store: dataStore
 	},
-	remoteOperations: true,
+	//	remoteOperations: true,
+	remoteOperations: {
+	    filtering: true,
+	    grouping: true,
+	    groupPaging: true,
+	    paging: true,
+	    sorting: true,
+	    sumary: true
+	},
 	columns: [{
 	    dataField: "test",
 	    dataType: "number",
@@ -131,6 +143,9 @@ $(function() {
 	},
 	groupPanel: {
 	    visible: true
+	},
+	grouping: {
+	    autoExpandAll: false
 	}
     }).dxDataGrid("instance");
 });

@@ -2,14 +2,13 @@ const mongodb = require("mongodb");
 const ObjectID = mongodb.ObjectID;
 const parambulator = require("parambulator");
 
-
 function sendErrorStatus(m, status, msg="") {
     m.response$.status(status).send({
 	message: msg
     });
-}
+} 
 
-const errors = {
+const errors = { 
     invalid: {
 	status: 400,
 	message: "Invalid data"
@@ -40,7 +39,7 @@ module.exports = function(o) {
 	    count: m.args.query.count
 	}, r);
     });
-
+ 
     const sortOptionsChecker = parambulator({
 	required$: ["desc", "selector"],
 	only$: ["desc", "selector"],
@@ -50,7 +49,7 @@ module.exports = function(o) {
 	selector: {
 	    type$: "string"
 	}
-    });
+    }); 
  
     this.add("role:web, domain:values, cmd:list", function(m, r) {
 	let p = {};
@@ -74,7 +73,11 @@ module.exports = function(o) {
 		    p.sort = sortOptions;
 		}
 	    }
-	}	
+	}
+
+	if (m.args.query.group) {
+	    p.group = JSON.parse(m.args.query.group);
+	}
 	
 	this.act({
 	    role: "entitiesQuery",

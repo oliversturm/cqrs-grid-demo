@@ -189,5 +189,34 @@ describe("query-values", function() {
 		});
 	    });
 	});
+
+	it("list should group", function(tdone) {
+	    testQueryValues(tdone, (seneca, ldone) => {
+		seneca.act({
+		    role: "entitiesQuery",
+		    domain: "values",
+		    cmd: "list",
+		    params: {
+			group: [
+			    {
+				selector: "test",
+				desc: false
+			    }
+			]
+		    }
+		}, function(err, res) {
+		    console.log("Result: ", res);
+		    
+		    expect(err, "err").to.be.null;
+		    expect(res.totalCount).to.eql(TESTRECORD_COUNT);
+		    expect(res.groupCount).to.eql(10);
+		    
+		    expect(res.data, "res.data").to.be.instanceof(Array);
+		    expect(res.data, "group list length").to.have.lengthOf(10);
+		    ldone();
+		});
+	    });
+	});
+
     });
 });
