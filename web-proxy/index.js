@@ -2,11 +2,14 @@ var seneca = require("seneca")();
 var web = require("seneca-web");
 var express = require("express");
 var bodyParser = require("body-parser");
+var cors = require("cors");
 
 var routes = require("./routes");
 var expressApp = express();
 
 expressApp.use(bodyParser.json());
+expressApp.use(cors());
+
 expressApp.use(require("morgan")("dev"));
 
 var config = {

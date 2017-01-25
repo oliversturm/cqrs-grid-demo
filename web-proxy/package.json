@@ -10,6 +10,7 @@
   "license": "SEE LICENSE IN LICENSE",
   "dependencies": {
     "body-parser": "^1.15.2",
+    "cors": "^2.8.1",
     "express": "^4.14.0",
     "mongodb": "^2.2.21",
     "parambulator": "^1.5.2",
