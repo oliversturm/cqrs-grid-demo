@@ -23,10 +23,10 @@ module.exports = function(o = {}) {
 		    _id: "$" + group.selector,
 		    count: {
 			$sum: 1
-		    },
-		    items: {
-		     	$push: "$$CURRENT"
-		    }
+		    }//,
+		    // items: {
+		    //  	$push: "$$CURRENT"
+		    // }
 		}
 	    },
 	    {
@@ -36,12 +36,13 @@ module.exports = function(o = {}) {
 		    count: 1,
 		    items: 1
 		}
-	    }//,
-	    // {
-	    // 	$addFields: {
-	    // 	    items: []
-	    // 	}
-	    // }
+	    },
+	    {
+	    	$addFields: {
+		    // if not returning data for top-level groups, this must be null, not []
+	    	    items: null
+	    	}
+	    }
 	];
 	const countPipeline = pipeline.slice(0);
 	countPipeline.push({
@@ -72,7 +73,7 @@ module.exports = function(o = {}) {
 		    // The items property will need to be either a list of documents
 		    // in the group, or a list of sub-groups
 		}
-		
+
 		cont( {
 		    data: groups,
 		    groupCount: groupCount
