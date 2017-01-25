@@ -113,6 +113,10 @@ module.exports = function(o) {
 	    }
 	    else this.log.info("Invalid group parameter found", m.args.query.group);
 	}
+
+	if (m.args.query.filter) {
+	    p.filter = JSON.parse(m.args.query.filter);
+	}
 	
 	this.act({
 	    role: "entitiesQuery",

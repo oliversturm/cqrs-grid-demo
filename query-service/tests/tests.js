@@ -205,14 +205,78 @@ describe("query-values", function() {
 			]
 		    }
 		}, function(err, res) {
-		    console.log("Result: ", res);
-		    
 		    expect(err, "err").to.be.null;
 		    expect(res.totalCount).to.eql(TESTRECORD_COUNT);
 		    expect(res.groupCount).to.eql(10);
 		    
 		    expect(res.data, "res.data").to.be.instanceof(Array);
 		    expect(res.data, "group list length").to.have.lengthOf(10);
+		    ldone();
+		});
+	    });
+	});
+	
+	it("list should filter with =", function(tdone) {
+	    testQueryValues(tdone, (seneca, ldone) => {
+		seneca.act({
+		    role: "entitiesQuery",
+		    domain: "values",
+		    cmd: "list",
+		    params: {
+			filter: [
+			    "test", "=", 3
+			]
+		    }
+		}, function(err, res) {
+		    expect(err, "err").to.be.null;
+		    expect(res.totalCount).to.eql(TESTRECORD_COUNT);
+		    
+		    expect(res.data, "res.data").to.be.instanceof(Array);
+		    expect(res.data, "list length").to.have.lengthOf(10);
+		    ldone();
+		});
+	    });
+	});
+
+	it("list should filter with =", function(tdone) {
+	    testQueryValues(tdone, (seneca, ldone) => {
+		seneca.act({
+		    role: "entitiesQuery",
+		    domain: "values",
+		    cmd: "list",
+		    params: {
+			filter: [
+			    "test", "<", 5
+			]
+		    }
+		}, function(err, res) {
+		    expect(err, "err").to.be.null;
+		    expect(res.totalCount).to.eql(TESTRECORD_COUNT);
+		    
+		    expect(res.data, "res.data").to.be.instanceof(Array);
+		    expect(res.data, "list length").to.have.lengthOf(50);
+		    ldone();
+		});
+	    });
+	});
+
+	it("list should filter with endswith", function(tdone) {
+	    testQueryValues(tdone, (seneca, ldone) => {
+		seneca.act({
+		    role: "entitiesQuery",
+		    domain: "values",
+		    cmd: "list",
+		    params: {
+			filter: [
+			    "val", "endswith", "23"
+			]
+		    }
+		}, function(err, res) {
+		    expect(err, "err").to.be.null;
+		    expect(res.totalCount).to.eql(TESTRECORD_COUNT);
+		    
+		    expect(res.data, "res.data").to.be.instanceof(Array);
+		    expect(res.data, "list length").to.have.lengthOf(1);
 		    ldone();
 		});
 	    });

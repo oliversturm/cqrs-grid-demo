@@ -33,8 +33,8 @@ module.exports = function(o = {}) {
 		$project: {
 		    _id: 0,
 		    key: "$_id",
-		    count: 1,
-		    items: 1
+		    count: 1//,
+		    //items: 1
 		}
 	    },
 	    {
@@ -81,9 +81,98 @@ module.exports = function(o = {}) {
 	    });
 	});
     }
+
+    function parseQuery(element) {
+	// Element is assumed to be an array with two or three items.
+	// For two items:
+	// 0: unary operator
+	// 1: operand
+	//
+	// For three items:
+	// 0: operand 1 - this is described as the "getter" in the docs - i.e. field name -
+	//    but in the cases of "and" and "or" it could be another nested element
+	// 1: operator
+	// 2: operand 2 - the value for comparison - for "and" and "or" can be a nested element
+
+	function error(msg) {
+	    throw msg + " Element: " + JSON.stringify(element);
+	}
+
+	function construct(fieldName, operator, compValue) {
+	    let result = {};
+	    result[fieldName] = {};
+	    result[fieldName][operator] = compValue;
+	    return result;
+	}
+
+	function constructRegex(fieldName, regex) {
+	    let result = {};
+	    result[fieldName] = {
+		$regex: regex,
+		$options: "" // "i" for case-insensitive?
+	    };
+	    return result;
+	}
+
+	if (element.length === 2) {
+	    // unary operator - only one supported
+	    if (element[0] === "!") {
+		return {
+		    $nor: [
+			parseQuery(element[1])
+		    ]
+		};
+	    }
+	    else return error("Unsupported unary operator");
+	}
+	else if (element.length === 3) {
+	    switch(element[1].toLowerCase()) {
+	    case "and":
+		return {
+		    $and: [
+			parseQuery(element[0]),
+			parseQuery(element[2])
+		    ]
+		};
+	    case "or":
+		return {
+		    $or: [
+			parseQuery(element[0]),
+			parseQuery(element[2])
+		    ]
+		};
+	    case "=":
+		return construct(element[0], "$eq", element[2]);
+	    case "<>":
+		return construct(element[0], "$ne", element[2]);
+	    case ">":
+		return construct(element[0], "$gt", element[2]);
+	    case ">=":
+		return construct(element[0], "$gte", element[2]);
+	    case "<":
+		return construct(element[0], "$lt", element[2]);
+	    case "<=":
+		return construct(element[0], "$lte", element[2]);
+	    case "startswith":
+		return constructRegex(element[0], "^" + element[2]);
+	    case "endswith":
+		return constructRegex(element[0], element[2] + "$");
+	    case "contains":
+		return constructRegex(element[0], element[2]);
+	    case "notcontains":
+		return constructRegex(element[0], "^((?!" + element[2] + ").)*$");
+	    default: return error("Unknown operator");
+	    }
+	}
+	else return error("Element is too long");
+    }
     
     function querySimple(collection, params = {}, cont) {
-	let results = collection.find({});
+	const criteria =
+		  params.filter ? parseQuery(params.filter) : {};
+	
+	
+	let results = collection.find(criteria);
 		    
 	if (params.sort) {
 	    // there is indication that sort may vary in the following ways
