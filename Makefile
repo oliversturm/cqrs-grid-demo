@@ -17,3 +17,6 @@ build-docker: $(DOCKERS)
 
 dcup:
 	docker-compose up
+
+dcup-nomounts:
+	docker-compose -f docker-compose-nomounts.yml up
