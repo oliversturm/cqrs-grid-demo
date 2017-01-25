@@ -20,3 +20,9 @@ dcup:
 
 dcup-nomounts:
 	docker-compose -f docker-compose-nomounts.yml up
+
+modules-install:
+	for p in $(PROJECTS); do \
+		pushd $$p && npm install; popd ; \
+	done
+	pushd webapp/static && ../node_modules/.bin/bower install; popd
