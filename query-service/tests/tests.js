@@ -51,7 +51,8 @@ describe("query-values", function() {
 		    cmd: "list"
 		}, function(err, res) {
 		    expect(err, "err").to.be.null;
-		    expect(res.totalCount).to.eql(TESTRECORD_COUNT);
+		    expect(res.err$, "err$").to.be.undefined;
+		    expect(res.totalCount, "totalCount").to.eql(TESTRECORD_COUNT);
 		    
 		    expect(res.data, "res.data").to.be.instanceof(Array);
 		    expect(res.data, "result").to.have.lengthOf(TESTRECORD_COUNT);
@@ -78,6 +79,7 @@ describe("query-values", function() {
 			id: testObject._id
 		    }, function(err, res) {
 			expect(err, "err").to.be.null;
+			expect(res.err$, "err$").to.be.undefined;
 			expect(res, "result").to.eql(testObject);
 			
 			ldone();
@@ -99,6 +101,7 @@ describe("query-values", function() {
 		    }
 		}, function(err, res) {
 		    expect(err, "err").to.be.null;
+		    expect(res.err$, "err$").to.be.undefined;
 		    expect(res.totalCount).to.eql(TESTRECORD_COUNT);
 		    
 		    expect(res.data, "res.data").to.be.instanceof(Array);
@@ -119,6 +122,7 @@ describe("query-values", function() {
 		    }
 		}, function(err, res) {
 		    expect(err, "err").to.be.null;
+		    expect(res.err$, "err$").to.be.undefined;
 		    expect(res.totalCount).to.eql(TESTRECORD_COUNT);
 		    
 		    expect(res.data, "res.data").to.be.instanceof(Array);
@@ -145,6 +149,7 @@ describe("query-values", function() {
 		    }
 		}, function(err, res) {
 		    expect(err, "err").to.be.null;
+		    expect(res.err$, "err$").to.be.undefined;
 
 		    expect(res.data, "res.data").to.be.instanceof(Array);
 		    expect(res.data, "result").to.have.lengthOf(5);
@@ -176,6 +181,7 @@ describe("query-values", function() {
 		    }
 		}, function(err, res) {
 		    expect(err, "err").to.be.null;
+		    expect(res.err$, "err$").to.be.undefined;
 		    
 		    expect(res.data, "res.data").to.be.instanceof(Array);
 		    expect(res.data, "result").to.have.lengthOf(5);
@@ -205,7 +211,11 @@ describe("query-values", function() {
 			]
 		    }
 		}, function(err, res) {
+		    console.log("Result is", res);
+		    
 		    expect(err, "err").to.be.null;
+		    expect(res.err$, "err$").to.be.undefined;
+
 		    expect(res.totalCount).to.eql(TESTRECORD_COUNT);
 		    expect(res.groupCount).to.eql(10);
 		    
@@ -229,6 +239,7 @@ describe("query-values", function() {
 		    }
 		}, function(err, res) {
 		    expect(err, "err").to.be.null;
+		    expect(res.err$, "err$").to.be.undefined;
 		    expect(res.totalCount).to.eql(TESTRECORD_COUNT);
 		    
 		    expect(res.data, "res.data").to.be.instanceof(Array);
@@ -251,6 +262,7 @@ describe("query-values", function() {
 		    }
 		}, function(err, res) {
 		    expect(err, "err").to.be.null;
+		    expect(res.err$, "err$").to.be.undefined;
 		    expect(res.totalCount).to.eql(TESTRECORD_COUNT);
 		    
 		    expect(res.data, "res.data").to.be.instanceof(Array);
@@ -273,6 +285,7 @@ describe("query-values", function() {
 		    }
 		}, function(err, res) {
 		    expect(err, "err").to.be.null;
+		    expect(res.err$, "err$").to.be.undefined;
 		    expect(res.totalCount).to.eql(TESTRECORD_COUNT);
 		    
 		    expect(res.data, "res.data").to.be.instanceof(Array);

@@ -12,77 +12,123 @@ module.exports = function(o = {}) {
 	if (item._id) item._id = item._id.toHexString();
 	return item;
     }
-
-    function queryGroups(collection, params, cont) {
-	const group = params.group[0];
-	console.log("Using group config: ", group);
-	    
-	const pipeline = [
+    
+    function createGroupingPipeline(selector, desc, includeDataItems) {
+	let pipeline = [
 	    {
-		$group: {
-		    _id: "$" + group.selector,
-		    count: {
-			$sum: 1
-		    }//,
-		    // items: {
-		    //  	$push: "$$CURRENT"
-		    // }
-		}
-	    },
-	    {
-		$project: {
-		    _id: 0,
-		    key: "$_id",
-		    count: 1//,
-		    //items: 1
-		}
-	    },
-	    {
-	    	$addFields: {
-		    // if not returning data for top-level groups, this must be null, not []
-	    	    items: null
-	    	}
-	    }
+    		$group: {
+    		    // must use _id at this point for the group key
+    		    _id: "$" + selector,
+    		    count: {
+    			$sum: 1
+    		    }
+    		}
+    	    },
+    	    {
+    		$project: {
+    		    // rename _id to key
+    		    _id: 0,
+    		    key: "$_id",
+    		    count: 1
+    		}
+    	    }
 	];
-	const countPipeline = pipeline.slice(0);
-	countPipeline.push({
-	    $count: "groupCount"
-	});
+	let sort = {
+	    $sort: {}
+	};
+	sort.$sort[selector] = desc ? -1 : 1;
 	
+    	if (includeDataItems) {
+    	    // include items directly if we're expected to do so, and if this is the
+    	    // most deeply nested group in case there are several
+    	    pipeline[0].$group.items = {
+    		$push: "$$CURRENT"
+    	    };
+    	    pipeline[1].$project.items = 1;
+    	}
+    	else {
+    	    // add null items field otherwise
+    	    pipeline.push({
+    		$addFields: {
+    		    items: null // only null works, not [] or leaving out items altogether
+    		}
+    	    });
+    	}
 
-	if (params.skip) pipeline.push({
-	    $skip: params.skip
-	});
-	if (params.take) pipeline.push({
-	    $limit: params.take
-	});
-	
-	console.log("Using pipeline: ", pipeline);
-	    
-
-	collection.aggregate(countPipeline, (err, res) => {
-	    if (err) throw err;
-	    console.log("Counting returned: ", res);
-	    
-	    const groupCount = res[0].groupCount;
-	    collection.aggregate(pipeline, (err, groups) => {
-		if (err) throw err;
-
-		if (group.isExpanded) {
-		    // in this case, I need to add further details to each group
-		    // The items property will need to be either a list of documents
-		    // in the group, or a list of sub-groups
-		}
-
-		cont( {
-		    data: groups,
-		    groupCount: groupCount
-		} );
-	    });
-	});
+	return pipeline;
     }
 
-    function parseQuery(element) {
+    function createSkipTakePipeline(skip, take) {
+	let pipeline = [];
+	
+	if (skip) pipeline.push({
+    	    $skip: skip
+    	});
+    	if (take) pipeline.push({
+    	    $limit: take
+    	});
+
+	return pipeline;
+    }
+
+    function createCountPipeline() {
+	return [{
+	    $count: "count"
+	}];
+    }
+    
+    function createMatchPipeline(selector, value) {
+	let match = {
+	    $match: {}
+	};
+	match.$match[selector] = value;
+	return [match];
+    }
+    
+    async function queryGroupData(collection, selector, desc, includeDataItems, skip, take, matchPipeline) {
+	const pipeline = matchPipeline.concat(
+	    createGroupingPipeline(selector, desc, includeDataItems),
+	    createSkipTakePipeline(skip, take)
+	);
+	return collection.aggregate(pipeline).toArray();
+    }
+    
+    async function queryGroup(collection, params, groupIndex, matchPipeline=[]) {
+	const group = params.group[groupIndex];
+	const lastGroup = groupIndex === params.group.length - 1;
+	const itemDataRequired = lastGroup && group.isExpanded;
+	const subGroupsRequired = (!lastGroup) && group.isExpanded;
+	
+	const groupData = await queryGroupData(collection, group.selector, group.desc, itemDataRequired, params.skip, params.take, matchPipeline);
+	if (subGroupsRequired) {
+	    for (const groupDataItem of groupData) {
+		groupDataItem.items = await queryGroup(
+		    collection, params, groupIndex + 1,
+		    matchPipeline.concat(createMatchPipeline(group.selector, groupDataItem.key)));
+	    }
+	}
+
+	return groupData;
+    }
+    
+    async function queryGroups(collection, params) {
+	const topLevelGroupData = await queryGroup(collection, params, 0);
+	console.log("Top level group data", topLevelGroupData);
+	
+	const group = params.group[0];
+	const countPipeline = createGroupingPipeline(group.selector, group.desc, false).concat(createCountPipeline());
+	console.log("count pipeline", countPipeline);
+
+	const groupCount = (await collection.aggregate(countPipeline).toArray())[0].count;
+	console.log("Group Count: ", groupCount);
+	
+	return {
+	    data: topLevelGroupData,
+	    groupCount: groupCount
+	};
+    }
+
+    function parseFilter(element) {
 	// Element is assumed to be an array with two or three items.
 	// For two items:
 	// 0: unary operator
@@ -119,7 +165,7 @@ module.exports = function(o = {}) {
 	    if (element[0] === "!") {
 		return {
 		    $nor: [
-			parseQuery(element[1])
+			parseFilter(element[1])
 		    ]
 		};
 	    }
@@ -130,15 +176,15 @@ module.exports = function(o = {}) {
 	    case "and":
 		return {
 		    $and: [
-			parseQuery(element[0]),
-			parseQuery(element[2])
+			parseFilter(element[0]),
+			parseFilter(element[2])
 		    ]
 		};
 	    case "or":
 		return {
 		    $or: [
-			parseQuery(element[0]),
-			parseQuery(element[2])
+			parseFilter(element[0]),
+			parseFilter(element[2])
 		    ]
 		};
 	    case "=":
@@ -167,9 +213,9 @@ module.exports = function(o = {}) {
 	else return error("Element is too long");
     }
     
-    function querySimple(collection, params = {}, cont) {
+    async function querySimple(collection, params = {}) {
 	const criteria =
-		  params.filter ? parseQuery(params.filter) : {};
+		  params.filter ? parseFilter(params.filter) : {};
 	
 	
 	let results = collection.find(criteria);
@@ -190,11 +236,9 @@ module.exports = function(o = {}) {
 	if (params.skip) results = results.skip(params.skip);
 	if (params.take) results = results.limit(params.take);
 
-	results.toArray((err, queryData) => {
-	    cont( {
-		data: queryData.map(replaceId)
-	    } );
-	});
+	return {
+	    data: (await results.toArray()).map(replaceId)
+	};
     }	
 
     function sendResult(totalCount, queryResult, params = {}, r) {
@@ -204,41 +248,40 @@ module.exports = function(o = {}) {
 	    groupCount: queryResult.groupCount,
 	    data: queryResult.data
 	};
-	
+
 	r(null, reply);
     }
 
     this.add("role:entitiesQuery, domain:values, cmd:list", (m, r) => {
-	db(db => {
+	db(async (db) => {
 	    const collection = db.collection("values");
-	    
-	    collection.count((err, totalCount) => {
-		if (err) r(null, { err$: err });
+
+	    try {
+		const totalCount = await collection.count();
+		const queryResult =
+			  m.params && m.params.group && m.params.group.length > 0 ?
+			  await queryGroups(collection, m.params) :
+			  await querySimple(collection, m.params);
 		
-		console.log("Query params: ", m.params);
-		
-		let result;
-		
-		function acceptResult(queryResult) {
-		    sendResult(totalCount, queryResult, m.params, r);
-		}
-		
-		if (m.params && m.params.group && m.params.group.length > 0) {
-		    result = queryGroups(collection, m.params, acceptResult);
-		}
-		else result = querySimple(collection, m.params, acceptResult);
-	    });
+		sendResult(totalCount, queryResult, m.params, r);
+	    }
+	    catch(err) {
+		r(null, { err$: err });
+	    }
 	});
     });
 	
 	
     this.add("role:entitiesQuery, domain:values, cmd:fetch", (m, r) => {
-	db(db => {
-	    db.collection("values").findOne({ _id: new ObjectID(m.id) }, (err, res) => {
-		if (err) r(null, { err$: err });
-		else if (res) r(null, replaceId(res));
+	db(async (db) => {
+	    try {
+		const res = await db.collection("values").findOne({ _id: new ObjectID(m.id) });
+		if (res) r(null, replaceId(res));
 		else r(null, { err$: "unknownid" });
-	    });
+	    }
+	    catch(err) {
+		r(null, { err$: err });
+	    }
 	});
     });
 };
