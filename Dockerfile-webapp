@@ -3,6 +3,7 @@ FROM node:latest
 RUN mkdir -p /usr/src/app/webapp
 
 COPY webapp /usr/src/app/webapp
+COPY message-utils /usr/src/app/message-utils
 WORKDIR /usr/src/app/webapp
 RUN npm install
 RUN cd /usr/src/app/webapp/static && ../node_modules/.bin/bower --allow-root install

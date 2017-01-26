@@ -1,17 +1,36 @@
 
 module.exports = function(o) {
     this.add("role:testing, domain:values, cmd:createTestData", function(m, r) {
-	const seneca = this;
+	console.log("creating test data");
 	
+	const seneca = this;
+
+	function addDays(date, days) {
+	    date.setDate(date.getDate() + days);
+	    return date;
+	}
+
+	const currentYear = new Date().getFullYear();
+	const currentYearStart = () => new Date(currentYear, 0, 1);
+	const nextYearStart = () => new Date(currentYear + 1, 0, 1);
+
+
 	for (var i = 1; i <= m.count; i++) {
+	    const instance = {
+		date1: addDays(currentYearStart(), Math.floor((Math.random() * 364) + 1)),
+		date2: addDays(nextYearStart(),  Math.floor((Math.random() * 364) + 1)),
+		int1: Math.floor((Math.random() * 100) + 1),
+		int2: Math.floor((Math.random() * 100) + 1),
+		string: "Item " + i
+	    };
+
+	    console.log("sending instance", instance);
+	    
 	    seneca.act({
 		role: "entitiesCommand",
 		domain: "values",
 		cmd: "create",
-		instance: {
-		    test: Math.floor((Math.random() * 100) + 1),
-		    val: "Item " + i
-		}
+		instance: instance
 	    }, err => {
 		if (err) r(err);
 	    });

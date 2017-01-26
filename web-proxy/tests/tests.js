@@ -19,12 +19,18 @@ const validator = require("../../validator/validator");
 const BASE = "/data/v1/values";
 
 const val1 = {
-    test: 52,
-    val: "something"
+    date1: new Date(),
+    date2: new Date(),
+    int1: 52,
+    int2: 100,
+    string: "something"
 };
 const val2 = {
-    test: 62,
-    val: "something else"
+    date1: new Date(),
+    date2: new Date(),
+    int1: 62,
+    int2: 100,
+    string: "something else"
 };
 
 function create(server, val, cont) {
@@ -49,7 +55,23 @@ describe("REST tests", () => {
 	    db.dropDatabase((err, res) => {
 		const expressApp = express();
 
-		expressApp.use(bodyParser.json());
+		// date reviving copied from https://github.com/expressjs/body-parser/issues/17
+		var regexIso8601 = /^(\d{4}|\+\d{6})(?:-(\d{2})(?:-(\d{2})(?:T(\d{2}):(\d{2}):(\d{2})\.(\d{1,})(Z|([\-+])(\d{2}):(\d{2}))?)?)?)?$/;
+
+		function reviveDates(key, value){
+		    var match;
+		    if (typeof value === "string" && (match = value.match(regexIso8601))) {
+			var milliseconds = Date.parse(match[0]);
+			if (!isNaN(milliseconds)) {
+			    return new Date(milliseconds);
+			}
+		    }
+		    return value;
+		}
+
+		expressApp.use(bodyParser.json({
+		    reviver: reviveDates
+		}));
 		//expressApp.use(require("morgan")("dev"));
 
 		var config = {
@@ -65,7 +87,7 @@ describe("REST tests", () => {
 		    log: "test"
 		});
 
-		seneca.
+		seneca.test(tdone/* use this for test debugging *//*, "print"*/).
 		    use(proxy).
 		    use(queryService, { connectedDb: db }).
 		    use(commandService, { connectedDb: db }).
@@ -85,14 +107,9 @@ describe("REST tests", () => {
     describe("POST value", () => {
 	it("should POST new value", tdone => {
 	    testServer(tdone, (server, ldone) => {
-		const newVal = {
-		    test: 52,
-		    val: "something"
-		};
-
 		chai.request(server).
 		    post(BASE).
-		    send(newVal).
+		    send(val1).
 		    end((err, res) => {
 			expect(err).to.be.null;
 			expect(res).to.have.status(201);
@@ -105,7 +122,10 @@ describe("REST tests", () => {
     	it("POST should fail on invalid value", tdone => {
 	    testServer(tdone, (server, ldone) => {
 		const newVal = {
-		    test: 52,
+		    date1: new Date(),
+		    date2: new Date(),
+		    int1: 42,
+		    int2: 100,
 		    barg: "something"
 		};
 
@@ -136,8 +156,11 @@ describe("REST tests", () => {
         it("POST should fail on additional fields", tdone => {
 	    testServer(tdone, (server, ldone) => {
 		const newVal = {
-		    test: 52,
-		    val: "something",
+		    date1: new Date(),
+		    date2: new Date(),
+		    int1: 42,
+		    int2: 100,
+		    string: "something",
 		    barg: "something else"
 		};
 
@@ -158,7 +181,7 @@ describe("REST tests", () => {
 	    testServer(tdone, (server, ldone) => {
 		create(server, val1, res => {
 		    const newVal = {
-			test: 52
+			int1: 52
 		    };
 
 		    const location = res.header.location;
@@ -182,7 +205,7 @@ describe("REST tests", () => {
 	    testServer(tdone, (server, ldone) => {
 		create(server, val1, res => {
 		    const newVal = {
-			test: 52,
+			int1: 52,
 			unknown: 10
 		    };
 
@@ -204,7 +227,7 @@ describe("REST tests", () => {
 	    testServer(tdone, (server, ldone) => {
 		create(server, val1, res => {
 		    const newVal = {
-			test: 52
+			int1: 52
 		    };
 
 		    const location = BASE + "/12345";
@@ -259,8 +282,11 @@ describe("REST tests", () => {
 				const id = location.substr(location.lastIndexOf("/") + 1);
 				
 				expect(o).to.be.a("object");
-				expect(o).to.have.property("test");
-				expect(o).to.have.property("val");
+				expect(o).to.have.property("date1");
+				expect(o).to.have.property("date2");
+				expect(o).to.have.property("int1");
+				expect(o).to.have.property("int2");
+				expect(o).to.have.property("string");
 				expect(o).to.have.property("_id");
 				expect(o._id).to.eql(id);
 				

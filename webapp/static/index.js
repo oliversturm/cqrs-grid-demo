@@ -132,12 +132,25 @@ $(function() {
 	    sumary: true
 	},
 	columns: [{
-	    dataField: "test",
+	    dataField: "date1",
+	    dataType: "date"
+	},{
+	    dataField: "date2",
+	    dataType: "date"
+	},{
+	    dataField: "int1",
 	    dataType: "number",
 	    format: {
 		type: "decimal"
 	    }
-	}, "val"],
+	},{
+	    dataField: "int2",
+	    dataType: "number",
+	    format: {
+		type: "decimal"
+	    }
+	},
+		  "string"],
 	editing: {
 	    mode: "batch",
 	    allowAdding: true,

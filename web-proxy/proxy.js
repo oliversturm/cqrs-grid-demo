@@ -3,6 +3,8 @@ const ObjectID = mongodb.ObjectID;
 const parambulator = require("parambulator");
 
 function sendErrorStatus(m, status, msg="") {
+//    console.log("Sending error status '" + status + "': ", msg);
+    
     m.response$.status(status).send({
 	message: msg
     });
@@ -32,6 +34,8 @@ function checkError(m, res) {
 
 module.exports = function(o) {
     this.add("role:web, domain:values, cmd:createTestData", (m, r) => {
+	console.log("proxy creating test data");
+	
 	this.act({
 	    role: "testing",
 	    domain: "values",

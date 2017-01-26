@@ -9,16 +9,26 @@ function testQueryValues(tdone, test) {
 	mongoDbName: "valuedb_test"
     });
 
+    function addDays(date, days) {
+	date.setDate(date.getDate() + days);
+	return date;
+    }
     
     db(db => {
 	db.dropDatabase((err, res) => {
-
 	    const values = db.collection("values");
+	    const currentYear = new Date().getFullYear();
+	    const currentYearStart = () => new Date(currentYear, 0, 1);
+	    const nextYearStart = () => new Date(currentYear + 1, 0, 1);
+	    
 	    Promise.all(
 		Array.from(new Array(TESTRECORD_COUNT), (v, i) => i + 1).map(
 		    n => values.insertOne({
-			test: n % 10,
-			val: "Item " + n
+			date1: addDays(currentYearStart(), n),
+			date2: addDays(nextYearStart(), n),
+			int1: n % 10,
+			int2: n % 5,
+			string: "Item " + n
 		    })
 		)
 	    ).then(() => {
@@ -142,7 +152,7 @@ describe("query-values", function() {
 			take: 5,
 			sort: [
 			    {
-				selector: "test",
+				selector: "int1",
 				desc: false
 			    }
 			]
@@ -153,11 +163,11 @@ describe("query-values", function() {
 
 		    expect(res.data, "res.data").to.be.instanceof(Array);
 		    expect(res.data, "result").to.have.lengthOf(5);
-		    expect(res.data[0].test).to.eql(0);
-		    expect(res.data[1].test).to.eql(0);
-		    expect(res.data[2].test).to.eql(0);
-		    expect(res.data[3].test).to.eql(0);
-		    expect(res.data[4].test).to.eql(0);
+		    expect(res.data[0].int1).to.eql(0);
+		    expect(res.data[1].int1).to.eql(0);
+		    expect(res.data[2].int1).to.eql(0);
+		    expect(res.data[3].int1).to.eql(0);
+		    expect(res.data[4].int1).to.eql(0);
 		    
 		    ldone();
 		});
@@ -174,7 +184,7 @@ describe("query-values", function() {
 			take: 5,
 			sort: [
 			    {
-				selector: "test",
+				selector: "int1",
 				desc: true
 			    }
 			]
@@ -185,11 +195,11 @@ describe("query-values", function() {
 		    
 		    expect(res.data, "res.data").to.be.instanceof(Array);
 		    expect(res.data, "result").to.have.lengthOf(5);
-		    expect(res.data[0].test).to.eql(9);
-		    expect(res.data[1].test).to.eql(9);
-		    expect(res.data[2].test).to.eql(9);
-		    expect(res.data[3].test).to.eql(9);
-		    expect(res.data[4].test).to.eql(9);
+		    expect(res.data[0].int1).to.eql(9);
+		    expect(res.data[1].int1).to.eql(9);
+		    expect(res.data[2].int1).to.eql(9);
+		    expect(res.data[3].int1).to.eql(9);
+		    expect(res.data[4].int1).to.eql(9);
 		    
 		    ldone();
 		});
@@ -205,7 +215,7 @@ describe("query-values", function() {
 		    params: {
 			group: [
 			    {
-				selector: "test",
+				selector: "int1",
 				desc: false
 			    }
 			]
@@ -234,7 +244,7 @@ describe("query-values", function() {
 		    cmd: "list",
 		    params: {
 			filter: [
-			    "test", "=", 3
+			    "int1", "=", 3
 			]
 		    }
 		}, function(err, res) {
@@ -257,7 +267,7 @@ describe("query-values", function() {
 		    cmd: "list",
 		    params: {
 			filter: [
-			    "test", "<", 5
+			    "int1", "<", 5
 			]
 		    }
 		}, function(err, res) {
@@ -280,7 +290,7 @@ describe("query-values", function() {
 		    cmd: "list",
 		    params: {
 			filter: [
-			    "val", "endswith", "23"
+			    "string", "endswith", "23"
 			]
 		    }
 		}, function(err, res) {

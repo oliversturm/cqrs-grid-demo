@@ -5,6 +5,7 @@ RUN mkdir -p /usr/src/app/db
 
 COPY command-service /usr/src/app/command-service
 COPY db /usr/src/app/db
+COPY message-utils /usr/src/app/message-utils
 WORKDIR /usr/src/app/db
 RUN npm install
 WORKDIR /usr/src/app/command-service

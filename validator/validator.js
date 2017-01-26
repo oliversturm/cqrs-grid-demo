@@ -1,10 +1,22 @@
+const fixObject = require("../message-utils").fixObject;
+
 const parambulator = require("parambulator");
 
+
 const valueSpec = {
-    test: {
+    date1: {
+	type$: "date"
+    },
+    date2: {
+	type$: "date"
+    }, 
+    int1: {
 	type$: "integer"
     },
-    val: {
+    int2: {
+	type$: "integer"
+    },
+    string: {
 	type$: "string"
     }
 };
@@ -35,7 +47,14 @@ const valueCheckerStrict = createChecker(includeOnly(valueSpecRequired, props));
 
 
 module.exports = function(o) {
+    function patch(m) {
+	return fixObject(m);
+    }
+
+    
     this.add("role:validation, domain: values, cmd:validateOne", (m, r) => {
+	m = patch(m);
+	
 	let checker = (() => {
 	    if (m.allowExtraFields) {
 		return m.allowIncomplete ? valueChecker : valueCheckerRequired;
@@ -49,7 +68,7 @@ module.exports = function(o) {
 	    if (err) {
 		r(null, {
 		    valid: false,
-		    err: err
+		    err$: err
 		});
 	    }
 	    else {

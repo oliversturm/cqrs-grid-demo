@@ -37,8 +37,11 @@ describe("command-values", function() {
 		    domain: "values",
 		    cmd: "create",
 		    instance: {
-			test: 42,
-			val: "something"
+			date1: new Date(),
+			date2: new Date(),
+			int1: 42,
+			int2: 100,
+			string: "something"
 		    }
 		}, function(err, res) {
 		    expect(err, "err").to.be.null;
@@ -56,8 +59,11 @@ describe("command-values", function() {
 		    domain: "values",
 		    cmd: "create",
 		    instance: {
-			test: 42,
-			val: "something"
+			date1: new Date(),
+			date2: new Date(),
+			int1: 42,
+			int2: 100,
+			string: "something"
 		    }
 		}, function(err, res) {
 		    if (err) throw err;
@@ -68,8 +74,8 @@ describe("command-values", function() {
 			cmd: "update",
 			id: res.id,
 			instance: {
-			    test: 55,
-			    val: "changed value"
+			    int1: 55,
+			    string: "changed value"
 			}
 		    }, function(err, res) {
 			expect(err, "err").to.be.null;
@@ -88,8 +94,11 @@ describe("command-values", function() {
 		    domain: "values",
 		    cmd: "create",
 		    instance: {
-			test: 42,
-			val: "something"
+			date1: new Date(),
+			date2: new Date(),
+			int1: 42,
+			int2: 100,
+			string: "something"
 		    }
 		}, function(err, res) {
 		    if (err) throw err;
@@ -102,7 +111,7 @@ describe("command-values", function() {
 			cmd: "update",
 			id: res.id,
 			instance: {
-			    val: "changed value"
+			    string: "changed value"
 			}
 		    }, function(err, res) {
 			expect(err, "err").to.be.null;

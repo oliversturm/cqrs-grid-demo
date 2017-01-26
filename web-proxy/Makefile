@@ -9,6 +9,6 @@ TESTS = $(wildcard tests/*.js)
 
 test:
 	ID=`docker run -p=27017:27017 -d mongo:latest`; \
-	mocha $(TESTS) ; \
+	mocha --harmony $(TESTS) ; \
 	docker kill $$ID
 

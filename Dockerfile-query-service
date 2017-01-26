@@ -5,6 +5,7 @@ RUN mkdir -p /usr/src/app/db
 
 COPY query-service /usr/src/app/query-service
 COPY db /usr/src/app/db
+COPY message-utils /usr/src/app/message-utils
 WORKDIR /usr/src/app/db
 RUN npm install
 WORKDIR /usr/src/app/query-service
@@ -12,5 +13,5 @@ RUN npm install
 
 EXPOSE 3001
 
-CMD ip address | grep global && node node_modules/nodemon/bin/nodemon index.js
+CMD ip address | grep global && node_modules/.bin/nodemon --harmony index.js
 

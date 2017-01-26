@@ -19,8 +19,11 @@ describe("validator", function() {
 		domain: "values",
 		cmd: "validateOne",
 		instance: {
-		    test: 42,
-		    val: "something"
+		    date1: new Date(),
+		    date2: new Date(),
+		    int1: 42,
+		    int2: 100,
+		    string: "something"
 		}
 	    }, function(err, res) {
 		expect(err, "err").to.be.null;
@@ -40,7 +43,7 @@ describe("validator", function() {
 		cmd: "validateOne",
 		instance: {
 		    argh: 42,
-		    val: "something"
+		    string: "something"
 		}
 	    }, function(err, res) {
 		expect(err, "err").to.be.null;
@@ -59,7 +62,10 @@ describe("validator", function() {
 		domain: "values",
 		cmd: "validateOne",
 		instance: {
-		    val: "something"
+		    date1: new Date(),
+		    int1: 42,
+		    int2: 100,
+		    string: "something"
 		}
 	    }, function(err, res) {
 		expect(err, "err").to.be.null;
@@ -78,9 +84,12 @@ describe("validator", function() {
 		domain: "values",
 		cmd: "validateOne",
 		instance: {
-		    test: 42,
-		    val: "something",
-		    additional: "something else"
+		    date1: new Date(),
+		    date2: new Date(),
+		    int1: 42,
+		    int2: 100,
+		    string: "something",
+		    additional: 10
 		}
 	    }, function(err, res) {
 		expect(err, "err").to.be.null;
@@ -100,9 +109,12 @@ describe("validator", function() {
 		cmd: "validateOne",
 		allowExtraFields: true,
 		instance: {
-		    test: 42,
-		    val: "something",
-		    additional: "something else"
+		    date1: new Date(),
+		    date2: new Date(),
+		    int1: 42,
+		    int2: 100,
+		    string: "something",
+		    additional: 10
 		}
 	    }, function(err, res) {
 		expect(err, "err").to.be.null;
@@ -122,7 +134,9 @@ describe("validator", function() {
 		cmd: "validateOne",
 		allowIncomplete: true,
 		instance: {
-		    test: 42
+		    date1: new Date(),
+		    int2: 100,
+		    string: "something"
 		}
 	    }, function(err, res) {
 		expect(err, "err").to.be.null;
@@ -143,8 +157,10 @@ describe("validator", function() {
 		allowExtraFields: true,
 		allowIncomplete: true,
 		instance: {
-		    test: 42,
-		    barg: "text"
+		    date1: new Date(),
+		    int2: 100,
+		    string: "something",
+		    additional: 10
 		}
 	    }, function(err, res) {
 		expect(err, "err").to.be.null;
