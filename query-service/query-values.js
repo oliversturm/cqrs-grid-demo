@@ -90,7 +90,13 @@ module.exports = function(o = {}) {
 	    createGroupingPipeline(selector, desc, includeDataItems),
 	    createSkipTakePipeline(skip, take)
 	);
-	return collection.aggregate(pipeline).toArray();
+	const groupData = await collection.aggregate(pipeline).toArray();
+	if (includeDataItems) {
+	    for (const groupItem of groupData) {
+		groupItem.items = groupItem.items.map(replaceId);
+	    }
+	}
+	return groupData;
     }
     
     async function queryGroup(collection, params, groupIndex, matchPipeline=[]) {
