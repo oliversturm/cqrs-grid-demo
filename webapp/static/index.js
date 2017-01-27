@@ -42,11 +42,6 @@ var dataStore = new DevExpress.data.CustomStore({
 	
 	var d = $.Deferred();
 	$.getJSON(BASEDATA, params).done(function(res) {
-	    if (options.dataField) {
-		// this seems to be the header filter
-		console.log("header filter query result ", JSON.stringify(res));
-		
-	    }
 	    console.log("Load result: ", res);
 	    
 	    d.resolve(res.data, {

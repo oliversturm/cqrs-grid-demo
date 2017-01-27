@@ -10,8 +10,8 @@ WORKDIR /usr/src/app/db
 RUN npm install
 WORKDIR /usr/src/app/command-service
 RUN npm install
+RUN npm install -g node-inspector@0.7.5
 
-EXPOSE 3002
+EXPOSE 3002 57575
 
-CMD ip address | grep global && node node_modules/nodemon/bin/nodemon index.js
-
+CMD bash start-service.sh

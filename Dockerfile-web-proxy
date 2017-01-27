@@ -6,8 +6,8 @@ COPY web-proxy /usr/src/app/web-proxy
 COPY message-utils /usr/src/app/message-utils
 WORKDIR /usr/src/app/web-proxy
 RUN npm install
+RUN npm install -g node-inspector@0.7.5
 
-EXPOSE 3000
+EXPOSE 3000 57575
 
-CMD ip address | grep global && node node_modules/nodemon/bin/nodemon index.js
-
+CMD bash start-service.sh

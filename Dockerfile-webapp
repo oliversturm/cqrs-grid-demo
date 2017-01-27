@@ -6,9 +6,10 @@ COPY webapp /usr/src/app/webapp
 COPY message-utils /usr/src/app/message-utils
 WORKDIR /usr/src/app/webapp
 RUN npm install
+RUN npm install -g node-inspector@0.7.5
 RUN cd /usr/src/app/webapp/static && ../node_modules/.bin/bower --allow-root install
 
-EXPOSE 8080
+EXPOSE 8080 57575
 
-CMD ip address | grep global && node node_modules/nodemon/bin/nodemon index.js
+CMD bash start-service.sh
 

@@ -252,8 +252,6 @@ module.exports = function(o = {}) {
 		
 		if (["and", "or"].includes(operator)) {
 		    if (element.reduce((r, v) => {
-			console.log("Reducing with r and v", r, v);
-			
 			if (r.previous) return { ok: r.ok, previous: false };
 			else return { ok: r.ok && v.toLowerCase() === operator, previous: true };
 		    }, { ok: true, previous: true }).ok) {
@@ -276,20 +274,6 @@ module.exports = function(o = {}) {
 		else {
 		    if (element.length === 3) {
 			switch(operator) {
-			// case "and":
-			//     return {
-			// 	$and: [
-			// 	    parseFilter(element[0]),
-			// 	    parseFilter(element[2])
-			// 	]
-			//     };
-			// case "or":
-			//     return {
-			// 	$or: [
-			// 	    parseFilter(element[0]),
-			// 	    parseFilter(element[2])
-			// 	]
-			//     };
 			case "=":
 			    return construct(element[0], "$eq", element[2]);
 			case "<>":

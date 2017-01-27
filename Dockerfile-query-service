@@ -7,11 +7,12 @@ COPY query-service /usr/src/app/query-service
 COPY db /usr/src/app/db
 COPY message-utils /usr/src/app/message-utils
 WORKDIR /usr/src/app/db
+RUN npm install -g node-inspector@0.7.5
 RUN npm install
 WORKDIR /usr/src/app/query-service
 RUN npm install
 
-EXPOSE 3001
+EXPOSE 3001 57575
 
-CMD ip address | grep global && node_modules/.bin/nodemon --harmony index.js
+CMD bash start-service.sh
 
