@@ -50,7 +50,7 @@ module.exports = function(o) {
 	required$: ["desc", "selector"],
 	// isExpanded doesn't make any sense with sort, but the grid seems
 	// to include it occasionally - probably a bug
-	only$: ["desc", "selector", "isExpanded"],
+	only$: ["desc", "selector", "isExpanded"], 
 	desc: {
 	    type$: "boolean"
 	},

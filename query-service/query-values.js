@@ -137,6 +137,19 @@ module.exports = function(o = {}) {
 
 	return groupData;
     }
+
+    async function getCount(collection, pipeline) {
+	return tryy(
+	    async () => {
+		const coll = await collection.aggregate(pipeline).toArray();
+		// Strangely, the pipeline returns an empty array when the "match" part
+		// filters out all rows - I would expect to still see the "count" stage
+		// working, but it doesn't. Ask mongo.
+		return coll.length > 0 ? coll[0].count : 0;
+	    },
+	    (err) => console.log("Error counting with pipeline", pipeline, err)
+	);
+    }
     
     async function queryGroups(collection, params) {
 	console.log("Querying groups");
@@ -160,10 +173,7 @@ module.exports = function(o = {}) {
 	    createCountPipeline());
 	console.log("count pipeline", groupCountPipeline);
 
-	const groupCount = await tryy(
-	    async () => (await collection.aggregate(groupCountPipeline).toArray())[0].count,
-	    (err) => console.log("Error counting groups", err)
-	);
+	const groupCount = await getCount(collection, groupCountPipeline);
 	
 	console.log("Group Count: ", groupCount);
 
@@ -171,10 +181,7 @@ module.exports = function(o = {}) {
 	    createCountPipeline()
 	);
 	
-	const totalCount = await tryy(
-	    async () => (await collection.aggregate(totalCountPipeline).toArray())[0].count,
-	    (err) => console.log("Error counting total", err)
-	);
+	const totalCount = await getCount(collection, totalCountPipeline);
 	
 	return {
 	    data: topLevelGroupData,
