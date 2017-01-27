@@ -121,7 +121,15 @@ module.exports = function(o) {
 	}
 
 	if (m.args.query.filter) {
-	    p.filter = JSON.parse(m.args.query.filter);
+	    // keeping validation basic here - the structure is probably
+	    // an array of elements and nested arrays
+	    // the query service uses it if it can and returns errors
+	    // otherwise
+	    const filterOptions = JSON.parse(m.args.query.filter);
+	    if (typeof filterOptions === "string" || filterOptions.length) {
+		p.filter = filterOptions;
+	    }
+	    else this.log.info("Invalid filter parameter found", m.args.query.filter);
 	}
 	
 	this.act({
