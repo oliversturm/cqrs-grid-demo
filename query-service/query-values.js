@@ -152,42 +152,32 @@ module.exports = function(o = {}) {
     }
     
     async function queryGroups(collection, params) {
-	console.log("Querying groups");
-	
 	const filterPipeline = createFilterPipeline(params.filter);
-	console.log("Got filter pipeline", filterPipeline);
-	
 	const skipTakePipeline = createSkipTakePipeline(params.skip, params.take);
-	console.log("Got skip/take pipeline", skipTakePipeline);
 
-	const topLevelGroupData = await tryy(
-	    () => queryGroup(collection, params, 0, filterPipeline, skipTakePipeline),
-	    (err) => console.log("Error querying top level group data", err)
-	);
-	
-	console.log("Top level group data", topLevelGroupData);
-	
-	const group = params.group[0];
-	const groupCountPipeline = filterPipeline.concat(
-	    createGroupingPipeline(group.selector, group.desc, false),
-	    createCountPipeline());
-	console.log("count pipeline", groupCountPipeline);
-
-	const groupCount = await getCount(collection, groupCountPipeline);
-	
-	console.log("Group Count: ", groupCount);
-
-	const totalCountPipeline = filterPipeline.concat(
-	    createCountPipeline()
-	);
-	
-	const totalCount = await getCount(collection, totalCountPipeline);
-	
-	return {
-	    data: topLevelGroupData,
-	    groupCount: groupCount,
-	    totalCount: totalCount
+	let result = {
+	    data: await tryy(
+		() => queryGroup(collection, params, 0, filterPipeline, skipTakePipeline),
+		(err) => console.log("Error querying top level group data", err)
+	    )
 	};
+
+	if (params.requireGroupCount) {
+	    const group = params.group[0];
+	    const groupCountPipeline = filterPipeline.concat(
+		createGroupingPipeline(group.selector, group.desc, false),
+		createCountPipeline());
+	    result.groupCount = await getCount(collection, groupCountPipeline);
+	}
+
+	if (params.requireTotalCount) {
+	    const totalCountPipeline = filterPipeline.concat(
+		createCountPipeline()
+	    );
+	    result.totalCount = await getCount(collection, totalCountPipeline);
+	}
+	
+	return result;
     }
 
     function parseFilter(element) {
@@ -318,13 +308,15 @@ module.exports = function(o = {}) {
 	
 	let results = collection.find(criteria);
 
-	const totalCount = await tryy(
-	    () => results.count(),
-	    (err) => console.log("Counting error: ", err)
-	);
-
-	console.log("Got totalCount", totalCount);
+	let resultObject = {};
 	
+	if (params.requireTotalCount) {
+	    resultObject.totalCount = await tryy(
+		() => results.count(),
+		(err) => console.log("Counting error: ", err)
+	    );
+	}
+
 	if (params.sort) {
 	    // there is indication that sort may vary in the following ways
 	    // that are currently unsupported:
@@ -341,10 +333,9 @@ module.exports = function(o = {}) {
 	if (params.skip) results = results.skip(params.skip);
 	if (params.take) results = results.limit(params.take);
 
-	return {
-	    totalCount: totalCount,
-	    data: (await results.toArray()).map(replaceId)
-	};
+	resultObject.data = (await results.toArray()).map(replaceId);
+
+	return resultObject;
     }	
 
     function sendResult(queryResult, params = {}, r) {

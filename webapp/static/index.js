@@ -27,6 +27,8 @@ var dataStore = new DevExpress.data.CustomStore({
         params.skip = options.skip; //A number of records that should be skipped
         params.take = options.take; //A number of records that should be taken
 
+	params.requireTotalCount = options.requireTotalCount;
+	
         //If the select expression is specified
 	// Oliver: this is the projection - outstanding question - do our controls use this?
         if (options.select)  {
@@ -43,11 +45,12 @@ var dataStore = new DevExpress.data.CustomStore({
 	var d = $.Deferred();
 	$.getJSON(BASEDATA, params).done(function(res) {
 	    console.log("Load result: ", res);
+
+	    var details = {};
+	    if (options.requireTotalCount) details.totalCount = res.totalCount;
+	    if (options.requireGroupCount) details.groupCount = res.groupCount;
 	    
-	    d.resolve(res.data, {
-		totalCount: res.totalCount,
-		groupCount: res.groupCount
-	    });
+	    d.resolve(res.data, details);
 	});
 	return d.promise();
     },

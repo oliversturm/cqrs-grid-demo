@@ -50,7 +50,7 @@ module.exports = function(o) {
 	required$: ["desc", "selector"],
 	// isExpanded doesn't make any sense with sort, but the grid seems
 	// to include it occasionally - probably a bug
-	only$: ["desc", "selector", "isExpanded"], 
+	only$: ["desc", "selector", "isExpanded"],
 	desc: {
 	    type$: "boolean"
 	},
@@ -100,6 +100,9 @@ module.exports = function(o) {
 	    else this.log.info("Invalid skip parameter found", m.args.query.skip);
 	}
 
+	p.requireTotalCount = m.args.query.requireTotalCount;
+	p.requireGroupCount = m.args.query.requireGroupCount;
+	
 	if (m.args.query.sort) {
 	    const sortOptions = JSON.parse(m.args.query.sort);
 
