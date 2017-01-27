@@ -2,6 +2,8 @@ const mongodb = require("mongodb");
 const ObjectID = mongodb.ObjectID;
 const parambulator = require("parambulator");
 
+const fixObject = require("../message-utils").fixObject;
+
 function sendErrorStatus(m, status, msg="") {
 //    console.log("Sending error status '" + status + "': ", msg);
     
@@ -134,6 +136,7 @@ module.exports = function(o) {
 	const seneca = this;
 	const instance = m.args.body;
 
+	// not fixing object - we'll just pass it on
 	seneca.act({
 	    role: "validation",
 	    domain: "values",
@@ -190,6 +193,8 @@ module.exports = function(o) {
     this.add("role:web, domain:values, cmd:update", function(m, r) {
 	const seneca = this;
 	const id = m.args.params.id;
+
+	// not fixing object - we'll just pass it on
 
 	if (!ObjectID.isValid(id)) {
 	    sendErrorStatus(m, 404, "Invalid ID");

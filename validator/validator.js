@@ -47,13 +47,8 @@ const valueCheckerStrict = createChecker(includeOnly(valueSpecRequired, props));
 
 
 module.exports = function(o) {
-    function patch(m) {
-	return fixObject(m);
-    }
-
-    
     this.add("role:validation, domain: values, cmd:validateOne", (m, r) => {
-	m = patch(m);
+	m = fixObject(m);
 	
 	let checker = (() => {
 	    if (m.allowExtraFields) {

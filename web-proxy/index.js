@@ -7,22 +7,16 @@ var cors = require("cors");
 var routes = require("./routes");
 var expressApp = express();
 
-// date reviving copied from https://github.com/expressjs/body-parser/issues/17
-var regexIso8601 = /^(\d{4}|\+\d{6})(?:-(\d{2})(?:-(\d{2})(?:T(\d{2}):(\d{2}):(\d{2})\.(\d{1,})(Z|([\-+])(\d{2}):(\d{2}))?)?)?)?$/;
+var messageUtils = require("../message-utils");
+var fixValue = messageUtils.fixValue;
+var fixDate = messageUtils.fixDate;
 
-function reviveDates(key, value){
-    var match;
-    if (typeof value === "string" && (match = value.match(regexIso8601))) {
-	var milliseconds = Date.parse(match[0]);
-	if (!isNaN(milliseconds)) {
-            return new Date(milliseconds);
-	}
-    }
-    return value;
+function revive(key, value){
+    return fixValue(value, [fixDate]);
 }
 
 expressApp.use(bodyParser.json({
-    reviver: reviveDates
+    reviver: revive
 }));
 expressApp.use(cors());
 

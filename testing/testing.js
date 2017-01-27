@@ -24,8 +24,6 @@ module.exports = function(o) {
 		string: "Item " + i
 	    };
 
-	    console.log("sending instance", instance);
-	    
 	    seneca.act({
 		role: "entitiesCommand",
 		domain: "values",
