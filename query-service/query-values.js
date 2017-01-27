@@ -1,6 +1,8 @@
 const mongodb = require("mongodb");
 const ObjectID = mongodb.ObjectID;
 
+const fixObject = require("../message-utils").fixObject;
+
 module.exports = function(o = {}) {
     const db = require("../db")(o);
 
@@ -135,7 +137,12 @@ module.exports = function(o = {}) {
     }
 
     function parseFilter(element) {
-	// Element is assumed to be an array with two or three items.
+	// Element can be a string denoting a field name - I don't know if that's a case
+	// supported by the widgets in any way, but it seems conceivable that somebody constructs
+	// an expression like [ "!", "boolValueField" ]
+	// In the string case, I return a truth-checking filter.
+	//
+	// Otherwise, element is assumed to be an array with two or three items.
 	// For two items:
 	// 0: unary operator
 	// 1: operand
@@ -166,57 +173,63 @@ module.exports = function(o = {}) {
 	    return result;
 	}
 
-	if (element.length === 2) {
-	    // unary operator - only one supported
-	    if (element[0] === "!") {
-		return {
-		    $nor: [
-			parseFilter(element[1])
-		    ]
-		};
-	    }
-	    else return error("Unsupported unary operator");
+	if (typeof element === "string") {
+	    return construct(element, "$eq", true);
 	}
-	else if (element.length === 3) {
-	    switch(element[1].toLowerCase()) {
-	    case "and":
-		return {
-		    $and: [
-			parseFilter(element[0]),
-			parseFilter(element[2])
-		    ]
-		};
-	    case "or":
-		return {
-		    $or: [
-			parseFilter(element[0]),
-			parseFilter(element[2])
-		    ]
-		};
-	    case "=":
-		return construct(element[0], "$eq", element[2]);
-	    case "<>":
-		return construct(element[0], "$ne", element[2]);
-	    case ">":
-		return construct(element[0], "$gt", element[2]);
-	    case ">=":
-		return construct(element[0], "$gte", element[2]);
-	    case "<":
-		return construct(element[0], "$lt", element[2]);
-	    case "<=":
-		return construct(element[0], "$lte", element[2]);
-	    case "startswith":
-		return constructRegex(element[0], "^" + element[2]);
-	    case "endswith":
-		return constructRegex(element[0], element[2] + "$");
-	    case "contains":
-		return constructRegex(element[0], element[2]);
-	    case "notcontains":
-		return constructRegex(element[0], "^((?!" + element[2] + ").)*$");
-	    default: return error("Unknown operator");
+	else if (element.length) {
+	    if (element.length === 2) {
+		// unary operator - only one supported
+		if (element[0] === "!") {
+		    return {
+			$nor: [
+			    parseFilter(element[1])
+			]
+		    };
+		}
+		else return error("Unsupported unary operator");
 	    }
+	    else if (element.length === 3) {
+		switch(element[1].toLowerCase()) {
+		case "and":
+		    return {
+			$and: [
+			    parseFilter(element[0]),
+			    parseFilter(element[2])
+			]
+		    };
+		case "or":
+		    return {
+			$or: [
+			    parseFilter(element[0]),
+			    parseFilter(element[2])
+			]
+		    };
+		case "=":
+		    return construct(element[0], "$eq", element[2]);
+		case "<>":
+		    return construct(element[0], "$ne", element[2]);
+		case ">":
+		    return construct(element[0], "$gt", element[2]);
+		case ">=":
+		    return construct(element[0], "$gte", element[2]);
+		case "<":
+		    return construct(element[0], "$lt", element[2]);
+		case "<=":
+		    return construct(element[0], "$lte", element[2]);
+		case "startswith":
+		    return constructRegex(element[0], "^" + element[2]);
+		case "endswith":
+		    return constructRegex(element[0], element[2] + "$");
+		case "contains":
+		    return constructRegex(element[0], element[2]);
+		case "notcontains":
+		    return constructRegex(element[0], "^((?!" + element[2] + ").)*$");
+		default: return error("Unknown operator");
+		}
+	    }
+	    else return error("Array element of unsupported length");
 	}
-	else return error("Element is too long");
+	else return error("Element type unknown");
     }
     
     async function querySimple(collection, params = {}) {
@@ -259,6 +272,8 @@ module.exports = function(o = {}) {
     }
 
     this.add("role:entitiesQuery, domain:values, cmd:list", (m, r) => {
+	m = fixObject(m);
+
 	db(async (db) => {
 	    const collection = db.collection("values");
 
