@@ -11,7 +11,8 @@
   "dependencies": {
     "lodash": "^4.17.4",
     "mongodb": "^2.2.21",
-    "seneca": "^3.2.2"
+    "seneca": "^3.2.2",
+    "try-expression": "^1.0.0"
   },
   "devDependencies": {
     "chai": "^3.5.0",

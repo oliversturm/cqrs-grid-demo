@@ -1,5 +1,6 @@
 const mongodb = require("mongodb");
 const ObjectID = mongodb.ObjectID;
+const tryy = require("try-expression");
 
 const fixObject = require("../message-utils").fixObject;
 
@@ -33,12 +34,14 @@ module.exports = function(o = {}) {
     		    key: "$_id",
     		    count: 1
     		}
-    	    }
+    	    },
+	    {
+		$sort: {
+		    key: desc ? -1 : 1
+		}
+	    }
 	];
-	let sort = {
-	    $sort: {}
-	};
-	sort.$sort[selector] = desc ? -1 : 1;
+    
 	
     	if (includeDataItems) {
     	    // include items directly if we're expected to do so, and if this is the
@@ -86,11 +89,24 @@ module.exports = function(o = {}) {
 	match.$match[selector] = value;
 	return [match];
     }
+
+    function createFilterPipeline(filterParam) {
+	console.log("Creating filter pipeline for param", filterParam);
+
+	if (filterParam) {
+	    return [{
+		$match: parseFilter(filterParam) 
+	    }];
+	}
+	else return [];
+    }
     
-    async function queryGroupData(collection, selector, desc, includeDataItems, skip, take, matchPipeline) {
-	const pipeline = matchPipeline.concat(
+    async function queryGroupData(collection, selector, desc, includeDataItems,
+				  filterPipeline, skipTakePipeline, matchPipeline) {
+	const pipeline = filterPipeline.concat(
+	    matchPipeline,
 	    createGroupingPipeline(selector, desc, includeDataItems),
-	    createSkipTakePipeline(skip, take)
+	    skipTakePipeline
 	);
 	const groupData = await collection.aggregate(pipeline).toArray();
 	if (includeDataItems) {
@@ -101,13 +117,16 @@ module.exports = function(o = {}) {
 	return groupData;
     }
     
-    async function queryGroup(collection, params, groupIndex, matchPipeline=[]) {
+    async function queryGroup(collection, params, groupIndex,
+			      filterPipeline = [], skipTakePipeline = [], matchPipeline=[]) {
 	const group = params.group[groupIndex];
 	const lastGroup = groupIndex === params.group.length - 1;
 	const itemDataRequired = lastGroup && group.isExpanded;
 	const subGroupsRequired = (!lastGroup) && group.isExpanded;
 	
-	const groupData = await queryGroupData(collection, group.selector, group.desc, itemDataRequired, params.skip, params.take, matchPipeline);
+	const groupData = await queryGroupData(collection, group.selector, group.desc,
+					       itemDataRequired, filterPipeline,
+					       skipTakePipeline, matchPipeline);
 	if (subGroupsRequired) {
 	    for (const groupDataItem of groupData) {
 		groupDataItem.items = await queryGroup(
@@ -120,19 +139,47 @@ module.exports = function(o = {}) {
     }
     
     async function queryGroups(collection, params) {
-	const topLevelGroupData = await queryGroup(collection, params, 0);
+	console.log("Querying groups");
+	
+	const filterPipeline = createFilterPipeline(params.filter);
+	console.log("Got filter pipeline", filterPipeline);
+	
+	const skipTakePipeline = createSkipTakePipeline(params.skip, params.take);
+	console.log("Got skip/take pipeline", skipTakePipeline);
+
+	const topLevelGroupData = await tryy(
+	    () => queryGroup(collection, params, 0, filterPipeline, skipTakePipeline),
+	    (err) => console.log("Error querying top level group data", err)
+	);
+	
 	console.log("Top level group data", topLevelGroupData);
 	
 	const group = params.group[0];
-	const countPipeline = createGroupingPipeline(group.selector, group.desc, false).concat(createCountPipeline());
-	console.log("count pipeline", countPipeline);
+	const groupCountPipeline = filterPipeline.concat(
+	    createGroupingPipeline(group.selector, group.desc, false),
+	    createCountPipeline());
+	console.log("count pipeline", groupCountPipeline);
 
-	const groupCount = (await collection.aggregate(countPipeline).toArray())[0].count;
+	const groupCount = await tryy(
+	    async () => (await collection.aggregate(groupCountPipeline).toArray())[0].count,
+	    (err) => console.log("Error counting groups", err)
+	);
+	
 	console.log("Group Count: ", groupCount);
+
+	const totalCountPipeline = filterPipeline.concat(
+	    createCountPipeline()
+	);
+	
+	const totalCount = await tryy(
+	    async () => (await collection.aggregate(totalCountPipeline).toArray())[0].count,
+	    (err) => console.log("Error counting total", err)
+	);
 	
 	return {
 	    data: topLevelGroupData,
-	    groupCount: groupCount
+	    groupCount: groupCount,
+	    totalCount: totalCount
 	};
     }
 
@@ -142,16 +189,27 @@ module.exports = function(o = {}) {
 	// an expression like [ "!", "boolValueField" ]
 	// In the string case, I return a truth-checking filter.
 	//
-	// Otherwise, element is assumed to be an array with two or three items.
+	// Otherwise, element can be an array with two items
 	// For two items:
 	// 0: unary operator
 	// 1: operand
 	//
+	// Otherwise, element can be an element with an odd number of items
 	// For three items:
 	// 0: operand 1 - this is described as the "getter" in the docs - i.e. field name -
 	//    but in the cases of "and" and "or" it could be another nested element
 	// 1: operator
 	// 2: operand 2 - the value for comparison - for "and" and "or" can be a nested element
+	//
+	// For more than three items, it's assumed that this is a chain of "or" or "and" -
+	// either one or the other, no combinations
+	// 0: operand 1
+	// 1: "or" or "and"
+	// 2: operand 2
+	// 3: "or" or "and" - must be the same as (1)
+	// 4: operand 3
+	// .... etc
+	//
 
 	function error(msg) {
 	    throw msg + " Element: " + JSON.stringify(element);
@@ -188,43 +246,74 @@ module.exports = function(o = {}) {
 		}
 		else return error("Unsupported unary operator");
 	    }
-	    else if (element.length === 3) {
-		switch(element[1].toLowerCase()) {
-		case "and":
-		    return {
-			$and: [
-			    parseFilter(element[0]),
-			    parseFilter(element[2])
-			]
-		    };
-		case "or":
-		    return {
-			$or: [
-			    parseFilter(element[0]),
-			    parseFilter(element[2])
-			]
-		    };
-		case "=":
-		    return construct(element[0], "$eq", element[2]);
-		case "<>":
-		    return construct(element[0], "$ne", element[2]);
-		case ">":
-		    return construct(element[0], "$gt", element[2]);
-		case ">=":
-		    return construct(element[0], "$gte", element[2]);
-		case "<":
-		    return construct(element[0], "$lt", element[2]);
-		case "<=":
-		    return construct(element[0], "$lte", element[2]);
-		case "startswith":
-		    return constructRegex(element[0], "^" + element[2]);
-		case "endswith":
-		    return constructRegex(element[0], element[2] + "$");
-		case "contains":
-		    return constructRegex(element[0], element[2]);
-		case "notcontains":
-		    return constructRegex(element[0], "^((?!" + element[2] + ").)*$");
-		default: return error("Unknown operator");
+	    else if ((element.length % 2) === 1) {
+		// odd number of elements - let's see what the operator is
+		const operator = element[1].toLowerCase();
+		
+		if (["and", "or"].includes(operator)) {
+		    if (element.reduce((r, v) => {
+			console.log("Reducing with r and v", r, v);
+			
+			if (r.previous) return { ok: r.ok, previous: false };
+			else return { ok: r.ok && v.toLowerCase() === operator, previous: true };
+		    }, { ok: true, previous: true }).ok) {
+			// all operators are the same
+			let result = {};
+			result["$" + operator] =
+			    (element.reduce((r, v) => {
+				if (r.previous) return { list: r.list, previous: false };
+				else {
+				    r.list.push(parseFilter(v));
+				    return { list: r.list, previous: true };
+				}
+			    }, { list: [], previous: false })).list;
+			
+			return result;
+		    }
+		    else return error(
+			"Operator chain had non-matching operators (should be '" + operator + "')");
+		}
+		else {
+		    if (element.length === 3) {
+			switch(operator) {
+			// case "and":
+			//     return {
+			// 	$and: [
+			// 	    parseFilter(element[0]),
+			// 	    parseFilter(element[2])
+			// 	]
+			//     };
+			// case "or":
+			//     return {
+			// 	$or: [
+			// 	    parseFilter(element[0]),
+			// 	    parseFilter(element[2])
+			// 	]
+			//     };
+			case "=":
+			    return construct(element[0], "$eq", element[2]);
+			case "<>":
+			    return construct(element[0], "$ne", element[2]);
+			case ">":
+			    return construct(element[0], "$gt", element[2]);
+			case ">=":
+			    return construct(element[0], "$gte", element[2]);
+			case "<":
+			    return construct(element[0], "$lt", element[2]);
+			case "<=":
+			    return construct(element[0], "$lte", element[2]);
+			case "startswith":
+			    return constructRegex(element[0], "^" + element[2]);
+			case "endswith":
+			    return constructRegex(element[0], element[2] + "$");
+			case "contains":
+			    return constructRegex(element[0], element[2]);
+			case "notcontains":
+			    return constructRegex(element[0], "^((?!" + element[2] + ").)*$");
+			default: return error("Unknown operator");
+			}
+		    }
+		    else return error("Operator filter of unsupported length");
 		}
 	    }
 	    else return error("Array element of unsupported length");
@@ -236,9 +325,15 @@ module.exports = function(o = {}) {
 	const criteria =
 		  params.filter ? parseFilter(params.filter) : {};
 	
-	
 	let results = collection.find(criteria);
-		    
+
+	const totalCount = await tryy(
+	    () => results.count(),
+	    (err) => console.log("Counting error: ", err)
+	);
+
+	console.log("Got totalCount", totalCount);
+	
 	if (params.sort) {
 	    // there is indication that sort may vary in the following ways
 	    // that are currently unsupported:
@@ -256,14 +351,15 @@ module.exports = function(o = {}) {
 	if (params.take) results = results.limit(params.take);
 
 	return {
+	    totalCount: totalCount,
 	    data: (await results.toArray()).map(replaceId)
 	};
     }	
 
-    function sendResult(totalCount, queryResult, params = {}, r) {
+    function sendResult(queryResult, params = {}, r) {
 	let reply = {
 	    params: params,
-	    totalCount: totalCount,
+	    totalCount: queryResult.totalCount,
 	    groupCount: queryResult.groupCount,
 	    data: queryResult.data
 	};
@@ -278,13 +374,12 @@ module.exports = function(o = {}) {
 	    const collection = db.collection("values");
 
 	    try {
-		const totalCount = await collection.count();
 		const queryResult =
 			  m.params && m.params.group && m.params.group.length > 0 ?
 			  await queryGroups(collection, m.params) :
 			  await querySimple(collection, m.params);
 		
-		sendResult(totalCount, queryResult, m.params, r);
+		sendResult(queryResult, m.params, r);
 	    }
 	    catch(err) {
 		r(null, { err$: err });
