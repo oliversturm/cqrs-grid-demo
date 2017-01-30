@@ -16,23 +16,19 @@ module.exports = function(o = {}) {
 	return item;
     }
     
-    function createGroupingPipeline(selector, desc, includeDataItems) {
+    function createGroupingPipeline(selector, desc, includeDataItems, countingSeparately) {
 	let pipeline = [
 	    {
     		$group: {
     		    // must use _id at this point for the group key
-    		    _id: "$" + selector,
-    		    count: {
-    			$sum: 1
-    		    }
+    		    _id: "$" + selector
     		}
     	    },
     	    {
     		$project: {
     		    // rename _id to key
     		    _id: 0,
-    		    key: "$_id",
-    		    count: 1
+    		    key: "$_id"
     		}
     	    },
 	    {
@@ -41,7 +37,15 @@ module.exports = function(o = {}) {
 		}
 	    }
 	];
-    
+
+	if (!countingSeparately) {
+	    // this method of counting results in the number of data items in the group
+	    // if the group has sub-groups, it can't be used
+	    pipeline[0].$group.count = {
+		$sum: 1
+	    };
+	    pipeline[1].$project.count = 1;
+	}
 	
     	if (includeDataItems) {
     	    // include items directly if we're expected to do so, and if this is the
@@ -101,13 +105,15 @@ module.exports = function(o = {}) {
 	else return [];
     }
     
-    async function queryGroupData(collection, selector, desc, includeDataItems,
+    async function queryGroupData(collection, selector, desc, includeDataItems, countSeparately,
 				  filterPipeline, skipTakePipeline, matchPipeline) {
 	const pipeline = filterPipeline.concat(
 	    matchPipeline,
-	    createGroupingPipeline(selector, desc, includeDataItems),
+	    createGroupingPipeline(selector, desc, includeDataItems, countSeparately),
 	    skipTakePipeline
 	);
+	console.log("Using pipeline: ", JSON.stringify(pipeline));
+	
 	const groupData = await collection.aggregate(pipeline).toArray();
 	if (includeDataItems) {
 	    for (const groupItem of groupData) {
@@ -122,17 +128,28 @@ module.exports = function(o = {}) {
 	const group = params.group[groupIndex];
 	const lastGroup = groupIndex === params.group.length - 1;
 	const itemDataRequired = lastGroup && group.isExpanded;
+	const separateCountRequired = !lastGroup;
 	const subGroupsRequired = (!lastGroup) && group.isExpanded;
 	
 	const groupData = await queryGroupData(collection, group.selector, group.desc,
-					       itemDataRequired, filterPipeline,
-					       skipTakePipeline, matchPipeline);
+					       itemDataRequired, separateCountRequired,
+					       filterPipeline, skipTakePipeline, matchPipeline);
 	if (subGroupsRequired) {
 	    for (const groupDataItem of groupData) {
 		groupDataItem.items = await queryGroup(
 		    collection, params, groupIndex + 1,
+		    filterPipeline, // used unchanged in lower levels
+		    [], // skip/take doesn't apply on lower levels - correct?
+		    // matchPipeline modified to filter down into group level
 		    matchPipeline.concat(createMatchPipeline(group.selector, groupDataItem.key)));
+		groupDataItem.count = groupDataItem.items.length;
 	    }
+	}
+	else if (separateCountRequired) {
+	    // We need to count separately because this is not the lowest level group,
+	    // but since we didn't query details about our nested group, we can't just go
+	    // for the length of the result array. An extra query is required in this case.
+	    
 	}
 
 	return groupData;

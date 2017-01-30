@@ -281,7 +281,7 @@ describe("query-values", function() {
 	    });
 	});
 
-	it("list should group", function(tdone) {
+	it("list should group with items", function(tdone) {
 	    testQueryValues(tdone, (seneca, ldone) => {
 		seneca.act({
 		    role: "entitiesQuery",
@@ -291,7 +291,8 @@ describe("query-values", function() {
 			group: [
 			    {
 				selector: "int1",
-				desc: false
+				desc: false,
+				isExpanded: true
 			    }
 			],
 			requireTotalCount: true,
@@ -306,11 +307,366 @@ describe("query-values", function() {
 		    
 		    expect(res.data, "res.data").to.be.instanceof(Array);
 		    expect(res.data, "group list length").to.have.lengthOf(10);
+
+		    for (const group of res.data) {
+			expect(group.key, "group.key").to.not.be.undefined;
+			expect(group.items, `group(${group.key}).items`).to.be.instanceof(Array);
+			expect(group.items, `group(${group.key}) items list`).to.have.lengthOf(10);
+			expect(group.count, `group(${group.key}).count`).to.eql(group.items.length);
+			
+			for (const item of group.items) {
+			    expect(item.int1, "item.int1").to.eql(group.key);
+			}
+		    }
+		    
 		    ldone();
 		});
 	    });
 	});
-	
+
+	it("list should group without items", function(tdone) {
+	    testQueryValues(tdone, (seneca, ldone) => {
+		seneca.act({
+		    role: "entitiesQuery",
+		    domain: "values",
+		    cmd: "list",
+		    params: {
+			group: [
+			    {
+				selector: "int1",
+				desc: false
+				// , isExpanded: false
+			    }
+			],
+			requireTotalCount: true,
+			requireGroupCount: true
+		    }
+		}, function(err, res) {
+		    expect(err, "err").to.be.null;
+		    expect(res.err$, "err$").to.be.undefined;
+
+		    expect(res.totalCount, "totalCount").to.eql(TESTRECORD_COUNT);
+		    expect(res.groupCount, "groupCount").to.eql(10);
+		    
+		    expect(res.data, "res.data").to.be.instanceof(Array);
+		    expect(res.data, "group list length").to.have.lengthOf(10);
+
+		    for (const group of res.data) {
+			expect(group.key, "group.key").to.not.be.undefined;
+			expect(group.items, `group(${group.key}).items`).to.be.null;
+			expect(group.count, `group(${group.key}).count`).to.eql(10);
+		    }
+		    
+		    ldone();
+		});
+	    });
+	});
+
+
+	it("list should group without items, with filter", function(tdone) {
+	    testQueryValues(tdone, (seneca, ldone) => {
+		seneca.act({
+		    role: "entitiesQuery",
+		    domain: "values",
+		    cmd: "list",
+		    params: {
+			filter: [
+			    "int1",
+			    "=",
+			    3
+			],
+			group: [
+			    {
+				selector: "int1",
+				desc: false
+				// , isExpanded: false
+			    }
+			],
+			requireTotalCount: true,
+			requireGroupCount: true
+		    }
+		}, function(err, res) {
+		    expect(err, "err").to.be.null;
+		    expect(res.err$, "err$").to.be.undefined;
+
+		    expect(res.totalCount, "totalCount").to.eql(10);
+		    expect(res.groupCount, "groupCount").to.eql(1);
+		    
+		    expect(res.data, "res.data").to.be.instanceof(Array);
+		    expect(res.data, "group list length").to.have.lengthOf(1);
+
+		    for (const group of res.data) {
+			expect(group.key, "group.key").to.not.be.undefined;
+			expect(group.items, `group(${group.key}).items`).to.be.null;
+			expect(group.count, `group(${group.key}).count`).to.eql(10);
+		    }
+		    
+		    ldone();
+		});
+	    });
+	});
+
+	it("list should group without items, with complex filter", function(tdone) {
+	    testQueryValues(tdone, (seneca, ldone) => {
+		seneca.act({
+		    role: "entitiesQuery",
+		    domain: "values",
+		    cmd: "list",
+		    params: {
+			filter: [
+			    [
+				"int1",
+				"=",
+				3
+			    ],
+			    "or",
+			    [
+				"int1",
+				"=",
+				5
+			    ],
+			    "or",
+			    [
+				"int1",
+				"=",
+				7
+			    ]
+			],
+			group: [
+			    {
+				selector: "int1",
+				desc: false
+				// , isExpanded: false
+			    }
+			],
+			requireTotalCount: true,
+			requireGroupCount: true
+		    }
+		}, function(err, res) {
+		    expect(err, "err").to.be.null;
+		    expect(res.err$, "err$").to.be.undefined;
+
+		    expect(res.totalCount, "totalCount").to.eql(30);
+		    expect(res.groupCount, "groupCount").to.eql(3);
+		    
+		    expect(res.data, "res.data").to.be.instanceof(Array);
+		    expect(res.data, "group list length").to.have.lengthOf(3);
+
+		    for (const group of res.data) {
+			expect(group.key, "group.key").to.not.be.undefined;
+			expect(group.items, `group(${group.key}).items`).to.be.null;
+			expect(group.count, `group(${group.key}).count`).to.eql(10);
+		    }
+		    
+		    ldone();
+		});
+	    });
+	});
+
+	it("list should group with items, with complex filter", function(tdone) {
+	    testQueryValues(tdone, (seneca, ldone) => {
+		seneca.act({
+		    role: "entitiesQuery",
+		    domain: "values",
+		    cmd: "list",
+		    params: {
+			filter: [
+			    [
+				"int1",
+				"=",
+				3
+			    ],
+			    "or",
+			    [
+				"int1",
+				"=",
+				5
+			    ],
+			    "or",
+			    [
+				"int1",
+				"=",
+				7
+			    ]
+			],
+			group: [
+			    {
+				selector: "int1",
+				desc: false,
+				isExpanded: true
+			    }
+			],
+			requireTotalCount: true,
+			requireGroupCount: true
+		    }
+		}, function(err, res) {
+		    expect(err, "err").to.be.null;
+		    expect(res.err$, "err$").to.be.undefined;
+
+		    expect(res.totalCount, "totalCount").to.eql(30);
+		    expect(res.groupCount, "groupCount").to.eql(3);
+		    
+		    expect(res.data, "res.data").to.be.instanceof(Array);
+		    expect(res.data, "group list length").to.have.lengthOf(3);
+
+		    for (const group of res.data) {
+			expect(group.key, "group.key").to.not.be.undefined;
+			expect(group.items, `group(${group.key}).items`).to.be.instanceof(Array);
+
+			expect(group.items, "group items list").to.have.lengthOf(10);
+			expect(group.count, `group(${group.key}).count`).to.eql(group.items.length);
+			
+			for (const item of group.items) {
+			    expect(item.int1, "item.int1").to.eql(group.key);
+			}
+
+		    }
+		    
+		    ldone();
+		});
+	    });
+	});
+
+	it("list should group two levels, both expanded", function(tdone) {
+	    testQueryValues(tdone, (seneca, ldone) => {
+		seneca.act({
+		    role: "entitiesQuery",
+		    domain: "values",
+		    cmd: "list",
+		    params: {
+			filter: [
+			    [
+				[ "int1", "=", 3 ],
+				"or",
+				[ "int1", "=", 6 ]
+			    ],
+			    "and",
+			    [
+				[ "int2", "=", 3 ],
+				"or",
+				[ "int2", "=", 1 ]
+			    ]
+			],
+			group: [
+			    {
+				selector: "int1",
+				desc: false,
+				isExpanded: true
+			    },
+			    {
+				selector: "int2",
+				desc: false,
+				isExpanded: true
+			    }
+			],
+			requireTotalCount: true,
+			requireGroupCount: true
+		    }
+		}, function(err, res) {
+		    console.log("Result is ", JSON.stringify(res, null, 2));
+		    
+		    expect(err, "err").to.be.null;
+		    expect(res.err$, "err$").to.be.undefined;
+
+		    expect(res.totalCount, "totalCount").to.eql(20);
+		    expect(res.groupCount, "groupCount").to.eql(2);
+		    
+		    expect(res.data, "res.data").to.be.instanceof(Array);
+		    expect(res.data, "group list length").to.have.lengthOf(2);
+
+		    for (const group1 of res.data) {
+			expect(group1.key, "group1.key").to.not.be.undefined;
+			expect(group1.items, `group1(${group1.key}).items`).to.be.instanceof(Array);
+
+			expect(group1.items, "group1 items list").to.have.lengthOf(1);
+			expect(group1.count, `group(${group1.key}).count`).to.eql(group1.items.length);
+
+			for (const group2 of group1.items) {
+			    expect(group2.key, "group2.key").to.not.be.undefined;
+			    expect(group2.items, `group2(${group2.key}).items`).to.be.instanceof(Array);
+			    
+			    expect(group2.items, "group2 items list").to.have.lengthOf(10);
+			    expect(group2.count, `group(${group2.key}).count`).to.eql(group2.items.length);
+			    for (const item of group2.items) {
+				expect(item.int1, "item.int1").to.eql(group1.key);
+				expect(item.int2, "item.int2").to.eql(group2.key);
+			    }
+			}
+
+		    }
+		    
+		    ldone();
+		});
+	    });
+	});
+
+	it("list should group two levels, top-level expanded", function(tdone) {
+	    testQueryValues(tdone, (seneca, ldone) => {
+		seneca.act({
+		    role: "entitiesQuery",
+		    domain: "values",
+		    cmd: "list",
+		    params: {
+			filter: [
+			    [
+				[ "int1", "=", 3 ],
+				"or",
+				[ "int1", "=", 6 ]
+			    ],
+			    "and",
+			    [
+				[ "int2", "=", 3 ],
+				"or",
+				[ "int2", "=", 1 ]
+			    ]
+			],
+			group: [
+			    {
+				selector: "int1",
+				desc: false,
+				isExpanded: true
+			    },
+			    {
+				selector: "int2",
+				desc: false,
+				isExpanded: false
+			    }
+			],
+			requireTotalCount: true,
+			requireGroupCount: true
+		    }
+		}, function(err, res) {
+		    console.log("Result is ", JSON.stringify(res, null, 2));
+		    
+		    expect(err, "err").to.be.null;
+		    expect(res.err$, "err$").to.be.undefined;
+
+		    expect(res.totalCount, "totalCount").to.eql(20);
+		    expect(res.groupCount, "groupCount").to.eql(2);
+		    
+		    expect(res.data, "res.data").to.be.instanceof(Array);
+		    expect(res.data, "group list length").to.have.lengthOf(2);
+
+		    for (const group1 of res.data) {
+			expect(group1.key, "group1.key").to.not.be.undefined;
+			expect(group1.items, `group1(${group1.key}).items`).to.be.instanceof(Array);
+
+			expect(group1.items, "group1 items list").to.have.lengthOf(1);
+			expect(group1.count, `group(${group1.key}).count`).to.eql(group1.items.length);
+
+			for (const group2 of group1.items) {
+			    expect(group2.key, "group2.key").to.not.be.undefined;
+			    expect(group2.items, `group2(${group2.key}).items`).to.be.null
+			    
+			    expect(group2.count, `group(${group2.key}).count`).to.eql(10);
+			}
+
+		    }
+		    
+		    ldone();
+		});
+	    });
+	});
 
     });
 });
