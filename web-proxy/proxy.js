@@ -117,10 +117,13 @@ module.exports = function(o) {
 	if (m.args.query.group) {
 	    const groupOptions = JSON.parse(m.args.query.group);
 
-	    if (groupOptions instanceof Array && groupOptions.length > 0) {
-		const vr = validateAll(groupOptions, groupOptionsChecker);
-		if (vr.valid) p.group = groupOptions;
-		else this.log.info("Group parameter validation errors", vr.errors);
+	    if (groupOptions instanceof Array) {
+		if (groupOptions.length > 0) {
+		    const vr = validateAll(groupOptions, groupOptionsChecker);
+		    if (vr.valid) p.group = groupOptions;
+		    else this.log.info("Group parameter validation errors", vr.errors);
+		}
+		// else - ignore empty array
 	    }
 	    else this.log.info("Invalid group parameter found", m.args.query.group);
 	}
