@@ -163,11 +163,15 @@ module.exports = function(o = {}) {
 	};
 
 	if (params.requireGroupCount) {
+	    console.log("Group count is required");
+	    
 	    const group = params.group[0];
 	    const groupCountPipeline = filterPipeline.concat(
 		createGroupingPipeline(group.selector, group.desc, false),
 		createCountPipeline());
 	    result.groupCount = await getCount(collection, groupCountPipeline);
+	    console.log("Returning group count", result.groupCount);
+	    
 	}
 
 	if (params.requireTotalCount) {
@@ -352,6 +356,8 @@ module.exports = function(o = {}) {
     this.add("role:entitiesQuery, domain:values, cmd:list", (m, r) => {
 	m = fixObject(m);
 
+	console.log("Query params: ", m.params);
+	
 	db(async (db) => {
 	    const collection = db.collection("values");
 

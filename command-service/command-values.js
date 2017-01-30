@@ -9,7 +9,7 @@ module.exports = function(o) {
 
     this.add("role:entitiesCommand, domain:values, cmd:create", (m, r) => {
 	const seneca = this;
-
+	
 	m = fixObject(m);
 	    
 	seneca.act({

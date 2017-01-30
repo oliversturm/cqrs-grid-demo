@@ -100,8 +100,8 @@ module.exports = function(o) {
 	    else this.log.info("Invalid skip parameter found", m.args.query.skip);
 	}
 
-	p.requireTotalCount = m.args.query.requireTotalCount;
-	p.requireGroupCount = m.args.query.requireGroupCount;
+	p.requireTotalCount = (m.args.query.requireTotalCount === "true");
+	p.requireGroupCount = (m.args.query.requireGroupCount === "true");
 	
 	if (m.args.query.sort) {
 	    const sortOptions = JSON.parse(m.args.query.sort);

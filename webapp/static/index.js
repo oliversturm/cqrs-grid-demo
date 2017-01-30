@@ -3,11 +3,11 @@ var BASEAPI = "http://localhost:3000/api/v1";
 
 console.log("DevExtreme version: ", DevExpress.VERSION);
 
+var debugId = 0;
+
 var dataStore = new DevExpress.data.CustomStore({
     key: "id",
     load: function(options) {
-	console.log("Load options: ", options);
-	
 	// from https://www.devexpress.com/Support/Center/Question/Details/KA18955
 	var params = {};
         //Getting filter options
@@ -43,8 +43,12 @@ var dataStore = new DevExpress.data.CustomStore({
         }
 	
 	var d = $.Deferred();
+	d.debugId = debugId++;
+	
+	console.log("Load options (" + d.debugId + "): ", options);
+	
 	$.getJSON(BASEDATA, params).done(function(res) {
-	    console.log("Load result: ", res);
+	    console.log("Load result (" + d.debugId + "): ", res);
 
 	    var details = {};
 	    if (options.requireTotalCount) details.totalCount = res.totalCount;
