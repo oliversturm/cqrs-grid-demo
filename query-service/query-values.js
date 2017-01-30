@@ -163,15 +163,11 @@ module.exports = function(o = {}) {
 	};
 
 	if (params.requireGroupCount) {
-	    console.log("Group count is required");
-	    
 	    const group = params.group[0];
 	    const groupCountPipeline = filterPipeline.concat(
 		createGroupingPipeline(group.selector, group.desc, false),
 		createCountPipeline());
 	    result.groupCount = await getCount(collection, groupCountPipeline);
-	    console.log("Returning group count", result.groupCount);
-	    
 	}
 
 	if (params.requireTotalCount) {
@@ -309,7 +305,7 @@ module.exports = function(o = {}) {
     async function querySimple(collection, params = {}) {
 	const criteria =
 		  params.filter ? parseFilter(params.filter) : {};
-	
+
 	let results = collection.find(criteria);
 
 	let resultObject = {};

@@ -58,7 +58,10 @@ describe("query-values", function() {
 		seneca.act({
 		    role: "entitiesQuery",
 		    domain: "values",
-		    cmd: "list"
+		    cmd: "list",
+		    params: {
+			requireTotalCount: true
+		    }
 		}, function(err, res) {
 		    expect(err, "err").to.be.null;
 		    expect(res.err$, "err$").to.be.undefined;
@@ -80,8 +83,6 @@ describe("query-values", function() {
 		}, function(err, res) {
 		    expect(err, "listerr").to.be.null;
 		    const testObject = res.data[0];
-		    console.log("test object", testObject);
-		    
 		    seneca.act({
 			role: "entitiesQuery",
 			domain: "values",
@@ -107,7 +108,8 @@ describe("query-values", function() {
 		    domain: "values",
 		    cmd: "list",
 		    params: {
-			skip: 5
+			skip: 5,
+			requireTotalCount: true
 		    }
 		}, function(err, res) {
 		    expect(err, "err").to.be.null;
@@ -128,7 +130,8 @@ describe("query-values", function() {
 		    domain: "values",
 		    cmd: "list",
 		    params: {
-			take: 5
+			take: 5,
+			requireTotalCount: true
 		    }
 		}, function(err, res) {
 		    expect(err, "err").to.be.null;
@@ -206,36 +209,6 @@ describe("query-values", function() {
 	    });
 	});
 
-	it("list should group", function(tdone) {
-	    testQueryValues(tdone, (seneca, ldone) => {
-		seneca.act({
-		    role: "entitiesQuery",
-		    domain: "values",
-		    cmd: "list",
-		    params: {
-			group: [
-			    {
-				selector: "int1",
-				desc: false
-			    }
-			]
-		    }
-		}, function(err, res) {
-		    console.log("Result is", res);
-		    
-		    expect(err, "err").to.be.null;
-		    expect(res.err$, "err$").to.be.undefined;
-
-		    expect(res.totalCount).to.eql(TESTRECORD_COUNT);
-		    expect(res.groupCount).to.eql(10);
-		    
-		    expect(res.data, "res.data").to.be.instanceof(Array);
-		    expect(res.data, "group list length").to.have.lengthOf(10);
-		    ldone();
-		});
-	    });
-	});
-	
 	it("list should filter with =", function(tdone) {
 	    testQueryValues(tdone, (seneca, ldone) => {
 		seneca.act({
@@ -245,12 +218,13 @@ describe("query-values", function() {
 		    params: {
 			filter: [
 			    "int1", "=", 3
-			]
+			],
+			requireTotalCount: true
 		    }
 		}, function(err, res) {
 		    expect(err, "err").to.be.null;
 		    expect(res.err$, "err$").to.be.undefined;
-		    expect(res.totalCount).to.eql(TESTRECORD_COUNT);
+		    expect(res.totalCount, "totalCount").to.eql(10);
 		    
 		    expect(res.data, "res.data").to.be.instanceof(Array);
 		    expect(res.data, "list length").to.have.lengthOf(10);
@@ -259,7 +233,7 @@ describe("query-values", function() {
 	    });
 	});
 
-	it("list should filter with =", function(tdone) {
+	it("list should filter with <", function(tdone) {
 	    testQueryValues(tdone, (seneca, ldone) => {
 		seneca.act({
 		    role: "entitiesQuery",
@@ -268,12 +242,13 @@ describe("query-values", function() {
 		    params: {
 			filter: [
 			    "int1", "<", 5
-			]
+			],
+			requireTotalCount: true
 		    }
 		}, function(err, res) {
 		    expect(err, "err").to.be.null;
 		    expect(res.err$, "err$").to.be.undefined;
-		    expect(res.totalCount).to.eql(TESTRECORD_COUNT);
+		    expect(res.totalCount, "totalCount").to.eql(50);
 		    
 		    expect(res.data, "res.data").to.be.instanceof(Array);
 		    expect(res.data, "list length").to.have.lengthOf(50);
@@ -291,12 +266,13 @@ describe("query-values", function() {
 		    params: {
 			filter: [
 			    "string", "endswith", "23"
-			]
+			],
+			requireTotalCount: true
 		    }
 		}, function(err, res) {
 		    expect(err, "err").to.be.null;
 		    expect(res.err$, "err$").to.be.undefined;
-		    expect(res.totalCount).to.eql(TESTRECORD_COUNT);
+		    expect(res.totalCount, "totalCount").to.eql(1);
 		    
 		    expect(res.data, "res.data").to.be.instanceof(Array);
 		    expect(res.data, "list length").to.have.lengthOf(1);
@@ -304,6 +280,37 @@ describe("query-values", function() {
 		});
 	    });
 	});
+
+	it("list should group", function(tdone) {
+	    testQueryValues(tdone, (seneca, ldone) => {
+		seneca.act({
+		    role: "entitiesQuery",
+		    domain: "values",
+		    cmd: "list",
+		    params: {
+			group: [
+			    {
+				selector: "int1",
+				desc: false
+			    }
+			],
+			requireTotalCount: true,
+			requireGroupCount: true
+		    }
+		}, function(err, res) {
+		    expect(err, "err").to.be.null;
+		    expect(res.err$, "err$").to.be.undefined;
+
+		    expect(res.totalCount, "totalCount").to.eql(TESTRECORD_COUNT);
+		    expect(res.groupCount, "groupCount").to.eql(10);
+		    
+		    expect(res.data, "res.data").to.be.instanceof(Array);
+		    expect(res.data, "group list length").to.have.lengthOf(10);
+		    ldone();
+		});
+	    });
+	});
+	
 
     });
 });
