@@ -54,23 +54,23 @@ seneca.
 	type: "tcp",
 	// expecting "validator" to be available
 	// as a docker link
-	host: process.env.CMDSRVC_HOST || "validator",
-	port: process.env.CMDSRVC_PORT || 3003,
+	host: process.env.VALSRVC_HOST || "validator",
+	port: process.env.VALSRVC_PORT || 3003,
 	pin: "role:validation"
     }).
     client({
 	type: "tcp",
 	// expecting "testing" to be available
 	// as a docker link
-	host: process.env.CMDSRVC_HOST || "testing",
-	port: process.env.CMDSRVC_PORT || 3005,
+	host: process.env.TESTSRVC_HOST || "testing",
+	port: process.env.TESTSRVC_PORT || 3005,
 	pin: "role:testing"
     }).
     use(web, config).
     ready(() => {
 	var server = seneca.export('web/context')();
 	
-	var port = process.env.PROXY_PORT || 3000;
+	var port = process.env.WEBPROXY_PORT || 3000;
 	
 	server.listen(port, () => {
 	    console.log("Web Proxy running on port " + port);

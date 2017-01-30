@@ -1,4 +1,6 @@
-const seneca = require("seneca")();
+const seneca = require("seneca")({
+    //log: "all"
+});
 
 seneca.
     client({
@@ -10,6 +12,6 @@ seneca.
     use("command-values").
     listen({
 	type: "tcp",
-	port: process.env.QRYSRVC_PORT || 3002,
+	port: process.env.CMDSRVC_PORT || 3002,
 	pin: "role:entitiesCommand"
     });

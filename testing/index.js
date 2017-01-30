@@ -1,4 +1,8 @@
-const seneca = require("seneca")();
+const seneca = require("seneca")({
+    //log: "all"
+});
+
+console.log("Using connection: ", process.env.CMDSRVC_HOST);
 
 seneca.
     client({
@@ -12,6 +16,6 @@ seneca.
     use("testing").
     listen({
 	type: "tcp",
-	port: process.env.TESTINGSRVC_PORT || 3005,
+	port: process.env.TESTSRVC_PORT || 3005,
 	pin: "role:testing"
     });
