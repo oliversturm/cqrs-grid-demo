@@ -73,6 +73,17 @@ module.exports = function(o) {
 	}
     });
 
+    const summaryOptionsChecker = parambulator({
+	required$: ["summaryType"],
+	only$: ["summaryType", "selector"],
+	summaryType: {
+	    enum$: [ "sum", "avg", "min", "max", "count" ]
+	},
+	selector: {
+	    type$: "string"
+	}
+    });
+
     function validateAll(list, checker, short = true) {
 	return list.reduce((r, v) => {
 	    if (short && !r.valid) return r; // short circuiting
@@ -126,6 +137,20 @@ module.exports = function(o) {
 		// else - ignore empty array
 	    }
 	    else this.log.info("Invalid group parameter found", m.args.query.group);
+	}
+
+	if (m.args.query.totalSummary) {
+	    const tsOptions = JSON.parse(m.args.query.totalSummary);
+
+	    if (tsOptions instanceof Array) {
+		if (tsOptions.length > 0) {
+		    const vr = validateAll(tsOptions, summaryOptionsChecker);
+		    if (vr.valid) p.totalSummary = tsOptions;
+		    else this.log.info("totalSummary parameter validation errors", vr.errors);
+		}
+		// else - ignore empty array
+	    }
+	    else this.log.info("Invalid totalSummary parameter found", m.args.query.totalSummary);
 	}
 
 	if (m.args.query.filter) {

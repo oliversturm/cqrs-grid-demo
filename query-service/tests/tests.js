@@ -281,6 +281,43 @@ describe("query-values", function() {
 	    });
 	});
 
+	it("list should calculate total summaries for simple queries", function(tdone) {
+	    testQueryValues(tdone, (seneca, ldone) => {
+		seneca.act({
+		    role: "entitiesQuery",
+		    domain: "values",
+		    cmd: "list",
+		    params: {
+			filter: [
+			    "int1", "<", 5
+			],
+			totalSummary: [
+			    {
+				selector: "int1",
+				summaryType: "sum"
+			    },
+			    {
+				selector: "int2",
+				summaryType: "max"
+			    }
+			],
+			requireTotalCount: true
+		    }
+		}, function(err, res) {
+		    expect(err, "err").to.be.null;
+		    expect(res.err$, "err$").to.be.undefined;
+		    expect(res.totalCount, "totalCount").to.eql(50);
+
+		    expect(res.summary, "res.summary").to.be.instanceof(Array);
+		    expect(res.summary, "res.summary").to.have.lengthOf(2);
+		    expect(res.summary[0], "sum(int1)").to.eql(100);
+		    expect(res.summary[1], "max(int2)").to.eql(4);
+		    
+		    ldone();
+		});
+	    });
+	});
+
 	it("list should group with items", function(tdone) {
 	    testQueryValues(tdone, (seneca, ldone) => {
 		seneca.act({

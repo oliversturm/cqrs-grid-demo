@@ -94,12 +94,12 @@ module.exports = function(o = {}) {
 	return [match];
     }
 
-    function createFilterPipeline(filterParam) {
-	console.log("Creating filter pipeline for param", filterParam);
+    function createFilterPipeline(filter) {
+	console.log("Creating filter pipeline for param", filter);
 
-	if (filterParam) {
+	if (filter) {
 	    return [{
-		$match: parseFilter(filterParam) 
+		$match: parseFilter(filter) 
 	    }];
 	}
 	else return [];
@@ -333,40 +333,99 @@ module.exports = function(o = {}) {
 	}
 	else return error("Element type unknown");
     }
+
+    function createSortPipeline(sort) {
+	if (sort) {
+	    let sorting = {};
+	    for (const sf of sort) sorting[sf.selector] = sf.desc ? -1 : 1;
+	    return [{
+		$sort: sorting
+	    }];
+	}
+	else return [];
+    }
+
+    function createSummaryPipeline(summary) {
+	if (summary) {
+	    let gc = { _id: null };
+	    for (const s of summary) {
+		switch(s.summaryType) {
+		case "sum":
+		    gc["_sum_" + s.selector] = { $sum: "$" + s.selector };
+		    break;
+		case "avg":
+		    gc["_avg_" + s.selector] = { $avg: "$" + s.selector };
+		    break;
+		case "min":
+		    gc["_min_" + s.selector] = { $min: "$" + s.selector };
+		    break;
+		case "max":
+		    gc["_max_" + s.selector] = { $max: "$" + s.selector };
+		    break;
+		case "count":
+		    gc._count = { $sum: 1 };
+		    break;
+		}
+	    }
+	    return [{
+		$group: gc
+	    }];
+	}
+	else return [];
+    }
+
+    function populateSummaryResults(target, summary, summaryResults) {
+	if (summary) {
+	    target.summary = [];
+	    
+	    for (const s of summary) {
+		switch(s.summaryType) {
+		case "sum":
+		    target.summary.push(summaryResults["_sum_" + s.selector]);
+		    break;
+		case "avg":
+		    target.summary.push(summaryResults["_avg_" + s.selector]);
+		    break;
+		case "min":
+		    target.summary.push(summaryResults["_min_" + s.selector]);
+		    break;
+		case "max":
+		    target.summary.push(summaryResults["_max_" + s.selector]);
+		    break;
+		case "count":
+		    target.summary.push(summaryResults._count);
+		    break;
+		}
+	    }
+	}
+    }
     
     async function querySimple(collection, params = {}) {
-	const criteria =
-		  params.filter ? parseFilter(params.filter) : {};
+	const filterPipeline = createFilterPipeline(params.filter);
+	const sortPipeline = createSortPipeline(params.sort);
+	const skipTakePipeline = createSkipTakePipeline(params.skip, params.take);
 
-	let results = collection.find(criteria);
+	const dataPipeline = filterPipeline.concat(sortPipeline, skipTakePipeline);
 
-	let resultObject = {};
+	console.log("Data pipeline", JSON.stringify(dataPipeline));
 	
+	let resultObject = {
+	    data: (await collection.aggregate(dataPipeline).toArray()).map(replaceId)
+	};
+
 	if (params.requireTotalCount) {
-	    resultObject.totalCount = await tryy(
-		() => results.count(),
-		(err) => console.log("Counting error: ", err)
-	    );
+	    const countPipeline = filterPipeline.concat(createCountPipeline());
+	    resultObject.totalCount = await getCount(collection, countPipeline);
 	}
 
-	if (params.sort) {
-	    // there is indication that sort may vary in the following ways
-	    // that are currently unsupported:
-	    // * sort may be a single instance instead of an array
-	    // * sort instance may be a string
-	    // * sort instance may be a function (but then it wouldn't get into
-	    //   this function in the first place)
-	    let sorting = {};
-	    for (const sf of params.sort) sorting[sf.selector] = sf.desc ? -1 : 1;
+	if (params.totalSummary) {
+	    const summaryPipeline = filterPipeline.concat(createSummaryPipeline(params.totalSummary));
+	    console.log("total summary pipeline", JSON.stringify(summaryPipeline));
 	    
-	    results = results.sort(sorting);
+	    populateSummaryResults(resultObject, params.totalSummary,
+				   (await collection.aggregate(summaryPipeline).toArray())[0]);
 	}
 	
-	if (params.skip) results = results.skip(params.skip);
-	if (params.take) results = results.limit(params.take);
-
-	resultObject.data = (await results.toArray()).map(replaceId);
-
 	return resultObject;
     }	
 
@@ -375,7 +434,8 @@ module.exports = function(o = {}) {
 	    params: params,
 	    totalCount: queryResult.totalCount,
 	    groupCount: queryResult.groupCount,
-	    data: queryResult.data
+	    data: queryResult.data,
+	    summary: queryResult.summary
 	};
 
 	r(null, reply);

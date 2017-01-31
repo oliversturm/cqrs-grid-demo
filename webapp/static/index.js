@@ -170,6 +170,42 @@ $(function() {
 	},
 	grouping: {
 	    autoExpandAll: false
+	},
+	summary: {
+	    totalItems: [
+		{
+		    column: "date1",
+		    summaryType: "max"
+		},
+		{
+		    column: "int1",
+		    summaryType: "avg"
+		},
+		{
+		    column: "int1",
+		    summaryType: "sum"
+		},
+		{
+		    summaryType: "count"
+		}
+	    ],
+	    groupItems: [
+		{
+		    column: "date1",
+		    summaryType: "min"
+		},
+		{
+		    column: "int1",
+		    summaryType: "avg"
+		},
+		{
+		    column: "int1",
+		    summaryType: "sum"
+		},
+		{
+		    summaryType: "count"
+		}
+	    ]
 	}
     }).dxDataGrid("instance");
 });
