@@ -563,7 +563,7 @@ describe("query-values", function() {
 			requireGroupCount: true
 		    }
 		}, function(err, res) {
-		    console.log("Result is ", JSON.stringify(res, null, 2));
+		    //console.log("Result is ", JSON.stringify(res, null, 2));
 		    
 		    expect(err, "err").to.be.null;
 		    expect(res.err$, "err$").to.be.undefined;
@@ -636,7 +636,7 @@ describe("query-values", function() {
 			requireGroupCount: true
 		    }
 		}, function(err, res) {
-		    console.log("Result is ", JSON.stringify(res, null, 2));
+		    //console.log("Result is ", JSON.stringify(res, null, 2));
 		    
 		    expect(err, "err").to.be.null;
 		    expect(res.err$, "err$").to.be.undefined;
@@ -661,6 +661,65 @@ describe("query-values", function() {
 			    expect(group2.count, `group(${group2.key}).count`).to.eql(10);
 			}
 
+		    }
+		    
+		    ldone();
+		});
+	    });
+	});
+
+	it("list should group two levels, none expanded", function(tdone) {
+	    testQueryValues(tdone, (seneca, ldone) => {
+		seneca.act({
+		    role: "entitiesQuery",
+		    domain: "values",
+		    cmd: "list",
+		    params: {
+			filter: [
+			    [
+				[ "int1", "=", 3 ],
+				"or",
+				[ "int1", "=", 6 ]
+			    ],
+			    "and",
+			    [
+				[ "int2", "=", 3 ],
+				"or",
+				[ "int2", "=", 1 ]
+			    ]
+			],
+			group: [
+			    {
+				selector: "int1",
+				desc: false,
+				isExpanded: false
+			    },
+			    {
+				selector: "int2",
+				desc: false,
+				isExpanded: false
+			    }
+			],
+			requireTotalCount: true,
+			requireGroupCount: true
+		    }
+		}, function(err, res) {
+		    //console.log("Result is ", JSON.stringify(res, null, 2));
+		    
+		    expect(err, "err").to.be.null;
+		    expect(res.err$, "err$").to.be.undefined;
+
+		    expect(res.totalCount, "totalCount").to.eql(20);
+		    expect(res.groupCount, "groupCount").to.eql(2);
+		    
+		    expect(res.data, "res.data").to.be.instanceof(Array);
+		    expect(res.data, "group list length").to.have.lengthOf(2);
+
+		    for (const group1 of res.data) {
+			expect(group1.key, "group1.key").to.not.be.undefined;
+			expect(group1.items, `group1(${group1.key}).items`).to.be.null;
+			
+			expect(group1.count, `group(${group1.key}).count`).to.eql(1);
 		    }
 		    
 		    ldone();

@@ -149,7 +149,22 @@ module.exports = function(o = {}) {
 	    // We need to count separately because this is not the lowest level group,
 	    // but since we didn't query details about our nested group, we can't just go
 	    // for the length of the result array. An extra query is required in this case.
-	    
+	    // Even though the count is a type of summary for the group, it is special - different
+	    // from other group level summaries. The difference is that for each group, a summary
+	    // is usually calculated with its data, even if that data isn't actually visible in the
+	    // UI at the time. The count on the other hand is meant to represent the number of
+	    // elements in the group, and in case these elements are sub-groups instead of data
+	    // items, count represents a value that must not be calculated using the data items.
+
+	    const nextGroup = params.group[groupIndex + 1];
+	    for (const groupDataItem of groupData) {
+		const pipeline = filterPipeline.concat(
+		    matchPipeline.concat(createMatchPipeline(group.selector, groupDataItem.key)),
+		    createGroupingPipeline(nextGroup.selector, nextGroup.desc, false, true),
+		    createCountPipeline()
+		);
+		groupDataItem.count = await getCount(collection, pipeline);
+	    }
 	}
 
 	return groupData;
