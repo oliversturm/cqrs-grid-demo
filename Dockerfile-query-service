@@ -14,5 +14,6 @@ RUN npm install
 
 EXPOSE 3001 57575
 
-CMD bash start-service.sh
+RUN chmod 755 start-service.sh
+CMD [ "./start-service.sh" ]
 

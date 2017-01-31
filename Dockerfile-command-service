@@ -14,4 +14,6 @@ RUN npm install -g node-inspector@0.7.5
 
 EXPOSE 3002 57575
 
-CMD bash start-service.sh
+RUN chmod 755 start-service.sh
+CMD [ "./start-service.sh" ]
+
