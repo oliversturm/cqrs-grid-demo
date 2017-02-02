@@ -112,7 +112,6 @@ module.exports = function(o) {
 	}
 
 	p.requireTotalCount = (m.args.query.requireTotalCount === "true");
-	p.requireGroupCount = (m.args.query.requireGroupCount === "true");
 	
 	if (m.args.query.sort) {
 	    const sortOptions = JSON.parse(m.args.query.sort);
@@ -131,7 +130,25 @@ module.exports = function(o) {
 	    if (groupOptions instanceof Array) {
 		if (groupOptions.length > 0) {
 		    const vr = validateAll(groupOptions, groupOptionsChecker);
-		    if (vr.valid) p.group = groupOptions;
+		    if (vr.valid) {
+			p.group = groupOptions;
+
+		    	p.requireGroupCount = (m.args.query.requireGroupCount === "true");
+
+			if (m.args.query.groupSummary) {
+			    const gsOptions = JSON.parse(m.args.query.groupSummary);
+			    
+			    if (gsOptions instanceof Array) {
+				if (gsOptions.length > 0) {
+				    const vr = validateAll(gsOptions, summaryOptionsChecker);
+				    if (vr.valid) p.totalSummary = gsOptions;
+				    else this.log.info("groupSummary parameter validation errors", vr.errors);
+				}
+				// else - ignore empty array
+			    }
+			    else this.log.info("Invalid groupSummary parameter found", m.args.query.groupSummary);
+			}
+		    }
 		    else this.log.info("Group parameter validation errors", vr.errors);
 		}
 		// else - ignore empty array
