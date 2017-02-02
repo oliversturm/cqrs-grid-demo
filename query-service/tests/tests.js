@@ -763,6 +763,70 @@ describe("query-values", function() {
 		});
 	    });
 	});
+	
+	it("list should calculate total summaries group query", function(tdone) {
+	    testQueryValues(tdone, (seneca, ldone) => {
+		seneca.act({
+		    role: "entitiesQuery",
+		    domain: "values",
+		    cmd: "list",
+		    params: {
+			filter: [
+			    [
+				[ "int1", "=", 3 ],
+				"or",
+				[ "int1", "=", 6 ]
+			    ],
+			    "and",
+			    [
+				[ "int2", "=", 3 ],
+				"or",
+				[ "int2", "=", 1 ]
+			    ]
+			],
+			group: [
+			    {
+				selector: "int1",
+				desc: false,
+				isExpanded: false
+			    },
+			    {
+				selector: "int2",
+				desc: false,
+				isExpanded: false
+			    }
+			],
+			totalSummary: [
+			    {
+				selector: "int1",
+				summaryType: "sum"
+			    },
+			    {
+				selector: "int2",
+				summaryType: "max"
+			    }
+			],
+			requireTotalCount: true,
+			requireGroupCount: true
+		    }
+		}, function(err, res) {
+		    //console.log("Result is ", JSON.stringify(res, null, 2));
+		    
+		    expect(err, "err").to.be.null;
+		    expect(res.err$, "err$").to.be.undefined;
+
+		    expect(res.totalCount, "totalCount").to.eql(20);
+		    expect(res.groupCount, "groupCount").to.eql(2);
+
+		    expect(res.summary, "res.summary").to.be.instanceof(Array);
+		    expect(res.summary, "res.summary").to.have.lengthOf(2);
+		    expect(res.summary[0], "sum(int1)").to.eql(90);
+		    expect(res.summary[1], "max(int2)").to.eql(3);
+		    
+		    ldone();
+		});
+	    });
+	});
 
     });
 });

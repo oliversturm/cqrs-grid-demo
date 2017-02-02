@@ -187,7 +187,7 @@ module.exports = function(o = {}) {
 	const filterPipeline = createFilterPipeline(params.filter);
 	const skipTakePipeline = createSkipTakePipeline(params.skip, params.take);
 
-	let result = {
+	let resultObject = {
 	    data: await tryy(
 		() => queryGroup(collection, params, 0, filterPipeline, skipTakePipeline),
 		(err) => console.log("Error querying top level group data", err)
@@ -199,17 +199,25 @@ module.exports = function(o = {}) {
 	    const groupCountPipeline = filterPipeline.concat(
 		createGroupingPipeline(group.selector, group.desc, false),
 		createCountPipeline());
-	    result.groupCount = await getCount(collection, groupCountPipeline);
+	    resultObject.groupCount = await getCount(collection, groupCountPipeline);
 	}
 
 	if (params.requireTotalCount) {
 	    const totalCountPipeline = filterPipeline.concat(
 		createCountPipeline()
 	    );
-	    result.totalCount = await getCount(collection, totalCountPipeline);
+	    resultObject.totalCount = await getCount(collection, totalCountPipeline);
 	}
-	
-	return result;
+
+	if (params.totalSummary) {
+	    const summaryPipeline = filterPipeline.concat(createSummaryPipeline(params.totalSummary));
+	    console.log("total summary pipeline", JSON.stringify(summaryPipeline));
+	    
+	    populateSummaryResults(resultObject, params.totalSummary,
+				   (await collection.aggregate(summaryPipeline).toArray())[0]);
+	}
+
+	return resultObject;
     }
 
     function parseFilter(element) {
