@@ -141,7 +141,7 @@ module.exports = function(o) {
 			    if (gsOptions instanceof Array) {
 				if (gsOptions.length > 0) {
 				    const vr = validateAll(gsOptions, summaryOptionsChecker);
-				    if (vr.valid) p.totalSummary = gsOptions;
+				    if (vr.valid) p.groupSummary = gsOptions;
 				    else this.log.info("groupSummary parameter validation errors", vr.errors);
 				}
 				// else - ignore empty array
