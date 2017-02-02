@@ -10,36 +10,31 @@ var dataStore = new DevExpress.data.CustomStore({
     load: function(options) {
 	// from https://www.devexpress.com/Support/Center/Question/Details/KA18955
 	var params = {};
-        //Getting filter options
-        if (options.filter)  {
-            params.filter = JSON.stringify(options.filter);
-        }
-        //Getting sort options
-        if (options.sort)  {
-            params.sort = JSON.stringify(options.sort);
-        }            
-        //Getting group options
-        if (options.group)  {
-            params.group = JSON.stringify(options.group);
-	    params.requireGroupCount = options.requireGroupCount;
-        }            
-        //skip and take are used for paging
-        params.skip = options.skip; //A number of records that should be skipped
-        params.take = options.take; //A number of records that should be taken
 
+        if (options.filter) params.filter = JSON.stringify(options.filter);
+	if (options.sort) params.sort = JSON.stringify(options.sort);            
+        
+        params.skip = options.skip;
+        params.take = options.take;
 	params.requireTotalCount = options.requireTotalCount;
-	
-        //If the select expression is specified
-	// Oliver: this is the projection - outstanding question - do our controls use this?
-        if (options.select)  {
-            params.select= JSON.stringify(options.select);
-        }   
 
-        //If a user typed something in dxAutocomplete, dxSelectBox or dxLookup
+	if (options.totalSummary) params.totalSummary = JSON.stringify(options.totalSummary);
+
+	// Oliver: this is the projection - outstanding question - do our controls use this?
+	// I haven't seen it so far...
+        if (options.select) params.select= JSON.stringify(options.select);   
+
+        // If a user typed something in dxAutocomplete, dxSelectBox or dxLookup
         if (options.searchValue)  {
             params.searchValue= options.searchValue;
             params.searchOperation= options.searchOperation;
             params.searchExpr= options.searchExpr;
+        }
+
+	if (options.group)  {
+            params.group = JSON.stringify(options.group);
+	    params.requireGroupCount = options.requireGroupCount;
+	    if (options.groupSummary) params.groupSummary = JSON.stringify(options.groupSummary);
         }
 	
 	var d = $.Deferred();
@@ -53,6 +48,8 @@ var dataStore = new DevExpress.data.CustomStore({
 	    var details = {};
 	    if (options.requireTotalCount) details.totalCount = res.totalCount;
 	    if (options.requireGroupCount) details.groupCount = res.groupCount;
+	    if (options.totalSummary) details.summary = res.summary;
+	    
 	    
 	    d.resolve(res.data, details);
 	});
@@ -184,9 +181,6 @@ $(function() {
 		{
 		    column: "int1",
 		    summaryType: "sum"
-		},
-		{
-		    summaryType: "count"
 		}
 	    ],
 	    groupItems: [
