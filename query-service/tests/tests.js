@@ -828,5 +828,64 @@ describe("query-values", function() {
 	    });
 	});
 
+	it("list should calculate group summaries", function(tdone) {
+	    testQueryValues(tdone, (seneca, ldone) => {
+		seneca.act({
+		    role: "entitiesQuery",
+		    domain: "values",
+		    cmd: "list",
+		    params: {
+			filter: [
+			    [ "int1", "=", 3 ],
+			    "or",
+			    [ "int1", "=", 6 ]
+			],
+			group: [
+			    {
+				selector: "int1",
+				desc: false,
+				isExpanded: false
+			    }
+			],
+			groupSummary: [
+			    {
+				selector: "int1",
+				summaryType: "sum"
+			    },
+			    {
+				selector: "int2",
+				summaryType: "max"
+			    }
+			],
+			requireTotalCount: true,
+			requireGroupCount: true
+		    }
+		}, function(err, res) {
+		    console.log("Result is ", JSON.stringify(res, null, 2));
+		    
+		    expect(err, "err").to.be.null;
+		    expect(res.err$, "err$").to.be.undefined;
+
+		    expect(res.totalCount, "totalCount").to.eql(20);
+		    expect(res.groupCount, "groupCount").to.eql(2);
+
+		    expect(res.data, "res.data").to.be.instanceof(Array);
+		    expect(res.data, "group list length").to.have.lengthOf(2);
+
+		    expect(res.data[0].summary, "group1.summary").to.be.instanceof(Array);
+		    expect(res.data[0].summary, "group1.summary").to.have.lengthOf(2);
+		    expect(res.data[0].summary[0], "group1.sum(int1)").to.eql(30);
+		    expect(res.data[0].summary[1], "group1.max(int2)").to.eql(3);
+
+		    expect(res.data[1].summary, "group2.summary").to.be.instanceof(Array);
+		    expect(res.data[1].summary, "group2.summary").to.have.lengthOf(2);
+		    expect(res.data[1].summary[0], "group2.sum(int1)").to.eql(60);
+		    expect(res.data[1].summary[1], "group2.max(int2)").to.eql(1);
+		    
+		    ldone();
+		});
+	    });
+	});
+
     });
 });

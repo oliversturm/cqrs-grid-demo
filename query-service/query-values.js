@@ -124,12 +124,13 @@ module.exports = function(o = {}) {
     }
     
     async function queryGroup(collection, params, groupIndex,
-			      filterPipeline = [], skipTakePipeline = [], matchPipeline=[]) {
+			      filterPipeline = [], skipTakePipeline = [], summaryPipeline=[], matchPipeline=[]) {
 	const group = params.group[groupIndex];
 	const lastGroup = groupIndex === params.group.length - 1;
 	const itemDataRequired = lastGroup && group.isExpanded;
 	const separateCountRequired = !lastGroup;
 	const subGroupsRequired = (!lastGroup) && group.isExpanded;
+	const summariesRequired = params.groupSummary && params.groupSummary.length > 0;
 	
 	const groupData = await queryGroupData(collection, group.selector, group.desc,
 					       itemDataRequired, separateCountRequired,
@@ -140,6 +141,7 @@ module.exports = function(o = {}) {
 		    collection, params, groupIndex + 1,
 		    filterPipeline, // used unchanged in lower levels
 		    [], // skip/take doesn't apply on lower levels - correct?
+		    summaryPipeline, // unmodified
 		    // matchPipeline modified to filter down into group level
 		    matchPipeline.concat(createMatchPipeline(group.selector, groupDataItem.key)));
 		groupDataItem.count = groupDataItem.items.length;
@@ -167,6 +169,18 @@ module.exports = function(o = {}) {
 	    }
 	}
 
+	if (summariesRequired) {
+	    for (const groupDataItem of groupData) {
+		const summaryQueryPipeline = filterPipeline.concat(
+		    matchPipeline.concat(createMatchPipeline(group.selector, groupDataItem.key)),
+		    summaryPipeline);
+		console.log("group summary pipeline", JSON.stringify(summaryQueryPipeline));
+	    
+		populateSummaryResults(groupDataItem, params.groupSummary,
+				       (await collection.aggregate(summaryQueryPipeline).toArray())[0]);
+	    }
+	}
+
 	return groupData;
     }
 
@@ -185,11 +199,12 @@ module.exports = function(o = {}) {
     
     async function queryGroups(collection, params) {
 	const filterPipeline = createFilterPipeline(params.filter);
+	const summaryPipeline = createSummaryPipeline(params.groupSummary);
 	const skipTakePipeline = createSkipTakePipeline(params.skip, params.take);
 
 	let resultObject = {
 	    data: await tryy(
-		() => queryGroup(collection, params, 0, filterPipeline, skipTakePipeline),
+		() => queryGroup(collection, params, 0, filterPipeline, skipTakePipeline, summaryPipeline),
 		(err) => console.log("Error querying top level group data", err)
 	    )
 	};
