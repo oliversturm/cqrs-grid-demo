@@ -219,14 +219,15 @@ module.exports = function(o = {}) {
 	    resultObject.groupCount = await getCount(collection, groupCountPipeline);
 	}
 
-	if (params.requireTotalCount) {
+	if (params.requireTotalCount || params.totalSummary) {
 	    const totalCountPipeline = filterPipeline.concat(
 		createCountPipeline()
 	    );
 	    resultObject.totalCount = await getCount(collection, totalCountPipeline);
 	}
 
-	if (params.totalSummary) {
+	// see comment in querySimple
+	if (resultObject.totalCount > 0 && params.totalSummary) {
 	    const summaryPipeline = filterPipeline.concat(createSummaryPipeline(params.totalSummary));
 	    //console.log("total summary pipeline", JSON.stringify(summaryPipeline));
 	    
@@ -438,12 +439,15 @@ module.exports = function(o = {}) {
 	    data: (await collection.aggregate(dataPipeline).toArray()).map(replaceId)
 	};
 
-	if (params.requireTotalCount) {
+	if (params.requireTotalCount || params.totalSummary) {
 	    const countPipeline = filterPipeline.concat(createCountPipeline());
 	    resultObject.totalCount = await getCount(collection, countPipeline);
 	}
 
-	if (params.totalSummary) {
+	// I need to check the totalCount for this, because theoretically it is possible
+	// to have an empty dataset if params.take is zero, but still values to calculate
+	// summaries against.
+	if (resultObject.totalCount > 0 && params.totalSummary) {
 	    const summaryPipeline = filterPipeline.concat(createSummaryPipeline(params.totalSummary));
 	    //console.log("total summary pipeline", JSON.stringify(summaryPipeline));
 	    

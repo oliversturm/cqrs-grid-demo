@@ -281,6 +281,63 @@ describe("query-values", function() {
 	    });
 	});
 
+	it("list should filter with endswith, no results", function(tdone) {
+	    testQueryValues(tdone, (seneca, ldone) => {
+		seneca.act({
+		    role: "entitiesQuery",
+		    domain: "values",
+		    cmd: "list",
+		    params: {
+			filter: [
+			    "string", "endswith", "something that doesn't exist"
+			],
+			requireTotalCount: true
+		    }
+		}, function(err, res) {
+		    expect(err, "err").to.be.null;
+		    expect(res.err$, "err$").to.be.undefined;
+		    expect(res.totalCount, "totalCount").to.eql(0);
+		    
+		    expect(res.data, "res.data").to.be.instanceof(Array);
+		    expect(res.data, "list length").to.have.lengthOf(0);
+		    ldone();
+		});
+	    });
+	});
+
+	it("list should filter with endswith, no results, total summary defined", function(tdone) {
+	    testQueryValues(tdone, (seneca, ldone) => {
+		seneca.act({
+		    role: "entitiesQuery",
+		    domain: "values",
+		    cmd: "list",
+		    params: {
+			filter: [
+			    "string", "endswith", "something that doesn't exist"
+			],
+			totalSummary: [
+			    {
+				selector: "int1",
+				summaryType: "sum"
+			    }
+			],
+			requireTotalCount: true
+		    }
+		}, function(err, res) {
+		    expect(err, "err").to.be.null;
+		    expect(res.err$, "err$").to.be.undefined;
+		    expect(res.totalCount, "totalCount").to.eql(0);
+		    
+		    expect(res.data, "res.data").to.be.instanceof(Array);
+		    expect(res.data, "list length").to.have.lengthOf(0);
+
+		    expect(res.summary, "res.summary").to.be.undefined;
+		    
+		    ldone();
+		});
+	    });
+	});
+
 	it("list should calculate total summaries for simple queries", function(tdone) {
 	    testQueryValues(tdone, (seneca, ldone) => {
 		seneca.act({
