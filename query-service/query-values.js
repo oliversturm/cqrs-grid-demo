@@ -95,7 +95,7 @@ module.exports = function(o = {}) {
     }
 
     function createFilterPipeline(filter) {
-	console.log("Creating filter pipeline for param", filter);
+	//console.log("Creating filter pipeline for param", filter);
 
 	if (filter) {
 	    return [{
@@ -106,13 +106,14 @@ module.exports = function(o = {}) {
     }
     
     async function queryGroupData(collection, selector, desc, includeDataItems, countSeparately,
-				  filterPipeline, skipTakePipeline, matchPipeline) {
-	const pipeline = filterPipeline.concat(
+				  sortPipeline, filterPipeline, skipTakePipeline, matchPipeline) {
+	const pipeline = sortPipeline.concat( // sort pipeline first, apparently that enables it to use indexes
+	    filterPipeline,
 	    matchPipeline,
 	    createGroupingPipeline(selector, desc, includeDataItems, countSeparately),
 	    skipTakePipeline
 	);
-	console.log("Using pipeline: ", JSON.stringify(pipeline));
+	//console.log("Using pipeline: ", JSON.stringify(pipeline));
 	
 	const groupData = await collection.aggregate(pipeline).toArray();
 	if (includeDataItems) {
@@ -134,6 +135,7 @@ module.exports = function(o = {}) {
 	
 	const groupData = await queryGroupData(collection, group.selector, group.desc,
 					       itemDataRequired, separateCountRequired,
+					       itemDataRequired ? createSortPipeline(params.sort) : [],
 					       filterPipeline, skipTakePipeline, matchPipeline);
 	if (subGroupsRequired) {
 	    for (const groupDataItem of groupData) {
@@ -174,7 +176,7 @@ module.exports = function(o = {}) {
 		const summaryQueryPipeline = filterPipeline.concat(
 		    matchPipeline.concat(createMatchPipeline(group.selector, groupDataItem.key)),
 		    summaryPipeline);
-		console.log("group summary pipeline", JSON.stringify(summaryQueryPipeline));
+		//console.log("group summary pipeline", JSON.stringify(summaryQueryPipeline));
 	    
 		populateSummaryResults(groupDataItem, params.groupSummary,
 				       (await collection.aggregate(summaryQueryPipeline).toArray())[0]);
@@ -226,7 +228,7 @@ module.exports = function(o = {}) {
 
 	if (params.totalSummary) {
 	    const summaryPipeline = filterPipeline.concat(createSummaryPipeline(params.totalSummary));
-	    console.log("total summary pipeline", JSON.stringify(summaryPipeline));
+	    //console.log("total summary pipeline", JSON.stringify(summaryPipeline));
 	    
 	    populateSummaryResults(resultObject, params.totalSummary,
 				   (await collection.aggregate(summaryPipeline).toArray())[0]);
@@ -430,7 +432,7 @@ module.exports = function(o = {}) {
 
 	const dataPipeline = filterPipeline.concat(sortPipeline, skipTakePipeline);
 
-	console.log("Data pipeline", JSON.stringify(dataPipeline));
+	//console.log("Data pipeline", JSON.stringify(dataPipeline));
 	
 	let resultObject = {
 	    data: (await collection.aggregate(dataPipeline).toArray()).map(replaceId)
@@ -443,7 +445,7 @@ module.exports = function(o = {}) {
 
 	if (params.totalSummary) {
 	    const summaryPipeline = filterPipeline.concat(createSummaryPipeline(params.totalSummary));
-	    console.log("total summary pipeline", JSON.stringify(summaryPipeline));
+	    //console.log("total summary pipeline", JSON.stringify(summaryPipeline));
 	    
 	    populateSummaryResults(resultObject, params.totalSummary,
 				   (await collection.aggregate(summaryPipeline).toArray())[0]);
@@ -467,7 +469,7 @@ module.exports = function(o = {}) {
     this.add("role:entitiesQuery, domain:values, cmd:list", (m, r) => {
 	m = fixObject(m);
 
-	console.log("Query params: ", m.params);
+	//console.log("Query params: ", m.params);
 	
 	db(async (db) => {
 	    const collection = db.collection("values");

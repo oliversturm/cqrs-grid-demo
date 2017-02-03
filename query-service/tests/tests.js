@@ -361,6 +361,64 @@ describe("query-values", function() {
 	    });
 	});
 
+	it("list should group with items and secondary sort", function(tdone) {
+	    testQueryValues(tdone, (seneca, ldone) => {
+		seneca.act({
+		    role: "entitiesQuery",
+		    domain: "values",
+		    cmd: "list",
+		    params: {
+			filter: [
+			    "int2",
+			    "=",
+			    3
+			],
+			group: [
+			    {
+				selector: "int2",
+				desc: false,
+				isExpanded: true
+			    }
+			],
+			sort: [
+			    {
+				selector: "int1",
+				desc: true
+			    }
+			],
+			requireTotalCount: true,
+			requireGroupCount: true
+		    }
+		}, function(err, res) {
+		    expect(err, "err").to.be.null;
+		    expect(res.err$, "err$").to.be.undefined;
+
+		    expect(res.totalCount, "totalCount").to.eql(20);
+		    expect(res.groupCount, "groupCount").to.eql(1);
+		    
+		    expect(res.data, "res.data").to.be.instanceof(Array);
+		    expect(res.data, "group list length").to.have.lengthOf(1);
+
+		    for (const group of res.data) {
+			//console.log("Checking group", JSON.stringify(group, null, 2));
+			
+			expect(group.key, "group.key").to.not.be.undefined;
+			expect(group.items, `group(${group.key}).items`).to.be.instanceof(Array);
+			expect(group.items, `group(${group.key}) items list`).to.have.lengthOf(20);
+
+			for (let i = 0; i <= 9; i++) {
+			    expect(group.items[i].int1, `groupitem ${i}`).to.eql(8);
+			}
+			for (let i = 10; i <= 19; i++) {
+			    expect(group.items[i].int1, `groupitem ${i}`).to.eql(3);
+			}
+		    }
+		    
+		    ldone();
+		});
+	    });
+	});
+
 	it("list should group without items", function(tdone) {
 	    testQueryValues(tdone, (seneca, ldone) => {
 		seneca.act({
@@ -861,7 +919,7 @@ describe("query-values", function() {
 			requireGroupCount: true
 		    }
 		}, function(err, res) {
-		    console.log("Result is ", JSON.stringify(res, null, 2));
+		    //console.log("Result is ", JSON.stringify(res, null, 2));
 		    
 		    expect(err, "err").to.be.null;
 		    expect(res.err$, "err$").to.be.undefined;
