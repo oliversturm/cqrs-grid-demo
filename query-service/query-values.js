@@ -123,14 +123,31 @@ module.exports = function(o = {}) {
 	}
 	return groupData;
     }
+
+    // This is an arbitrary limit for summaries calculated per group query. The realistic problem
+    // is that if a programmer makes the grid use server-side grouping as well as summaries,
+    // but *not* groupPaging, there may be enormous numbers of summary queries to run, and because
+    // this happens across levels, it can't easily be checked elsewhere and the server will just
+    // keep working on that query as long as it takes.
+    const summaryQueryLimit = 100;    
+    function createSummaryQueryExecutor() {
+	let queriesExecuted = 0;
+	
+	return function(fn) {
+	    if (++queriesExecuted <= summaryQueryLimit) fn();
+	};
+    }
     
-    async function queryGroup(collection, params, groupIndex,
+    async function queryGroup(collection, params, groupIndex, runSummaryQuery,
 			      filterPipeline = [], skipTakePipeline = [], summaryPipeline=[], matchPipeline=[]) {
 	const group = params.group[groupIndex];
 	const lastGroup = groupIndex === params.group.length - 1;
 	const itemDataRequired = lastGroup && group.isExpanded;
 	const separateCountRequired = !lastGroup;
-	const subGroupsRequired = (!lastGroup) && group.isExpanded;
+
+	// The current implementation of the dxDataGrid, at least, assumes that sub-group details are
+	// always included in the result, whether or not the group is marked isExpanded. 
+	const subGroupsRequired = (!lastGroup); // && group.isExpanded;
 	const summariesRequired = params.groupSummary && params.groupSummary.length > 0;
 	
 	const groupData = await queryGroupData(collection, group.selector, group.desc,
@@ -140,7 +157,7 @@ module.exports = function(o = {}) {
 	if (subGroupsRequired) {
 	    for (const groupDataItem of groupData) {
 		groupDataItem.items = await queryGroup(
-		    collection, params, groupIndex + 1,
+		    collection, params, groupIndex + 1, runSummaryQuery,
 		    filterPipeline, // used unchanged in lower levels
 		    [], // skip/take doesn't apply on lower levels - correct?
 		    summaryPipeline, // unmodified
@@ -173,13 +190,17 @@ module.exports = function(o = {}) {
 
 	if (summariesRequired) {
 	    for (const groupDataItem of groupData) {
-		const summaryQueryPipeline = filterPipeline.concat(
-		    matchPipeline.concat(createMatchPipeline(group.selector, groupDataItem.key)),
-		    summaryPipeline);
-		//console.log("group summary pipeline", JSON.stringify(summaryQueryPipeline));
-	    
-		populateSummaryResults(groupDataItem, params.groupSummary,
-				       (await collection.aggregate(summaryQueryPipeline).toArray())[0]);
+		//console.log("Calculating a summary for " + groupDataItem.key);
+
+		runSummaryQuery(async () => {
+		    const summaryQueryPipeline = filterPipeline.concat(
+			matchPipeline.concat(createMatchPipeline(group.selector, groupDataItem.key)),
+			summaryPipeline);
+		    //console.log("group summary pipeline", JSON.stringify(summaryQueryPipeline));
+		    
+		    populateSummaryResults(groupDataItem, params.groupSummary,
+					   (await collection.aggregate(summaryQueryPipeline).toArray())[0]);
+		});
 	    }
 	}
 
@@ -206,7 +227,8 @@ module.exports = function(o = {}) {
 
 	let resultObject = {
 	    data: await tryy(
-		() => queryGroup(collection, params, 0, filterPipeline, skipTakePipeline, summaryPipeline),
+		() => queryGroup(collection, params, 0, createSummaryQueryExecutor(),
+				 filterPipeline, skipTakePipeline, summaryPipeline),
 		(err) => console.log("Error querying top level group data", err)
 	    )
 	};

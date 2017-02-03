@@ -679,7 +679,7 @@ describe("query-values", function() {
 	    });
 	});
 
-	it("list should group two levels, both expanded", function(tdone) {
+	it("list should group two levels with bottom-level items", function(tdone) {
 	    testQueryValues(tdone, (seneca, ldone) => {
 		seneca.act({
 		    role: "entitiesQuery",
@@ -703,7 +703,7 @@ describe("query-values", function() {
 			    {
 				selector: "int1",
 				desc: false,
-				isExpanded: true
+				isExpanded: false
 			    },
 			    {
 				selector: "int2",
@@ -752,7 +752,7 @@ describe("query-values", function() {
 	    });
 	});
 
-	it("list should group two levels, top-level expanded", function(tdone) {
+	it("list should group two levels without bottom-level items", function(tdone) {
 	    testQueryValues(tdone, (seneca, ldone) => {
 		seneca.act({
 		    role: "entitiesQuery",
@@ -776,7 +776,7 @@ describe("query-values", function() {
 			    {
 				selector: "int1",
 				desc: false,
-				isExpanded: true
+				isExpanded: false
 			    },
 			    {
 				selector: "int2",
@@ -808,8 +808,7 @@ describe("query-values", function() {
 
 			for (const group2 of group1.items) {
 			    expect(group2.key, "group2.key").to.not.be.undefined;
-			    expect(group2.items, `group2(${group2.key}).items`).to.be.null
-			    
+			    expect(group2.items, "group2 items list").to.be.null;
 			    expect(group2.count, `group(${group2.key}).count`).to.eql(10);
 			}
 
@@ -820,64 +819,6 @@ describe("query-values", function() {
 	    });
 	});
 
-	it("list should group two levels, none expanded", function(tdone) {
-	    testQueryValues(tdone, (seneca, ldone) => {
-		seneca.act({
-		    role: "entitiesQuery",
-		    domain: "values",
-		    cmd: "list",
-		    params: {
-			filter: [
-			    [
-				[ "int1", "=", 3 ],
-				"or",
-				[ "int1", "=", 6 ]
-			    ],
-			    "and",
-			    [
-				[ "int2", "=", 3 ],
-				"or",
-				[ "int2", "=", 1 ]
-			    ]
-			],
-			group: [
-			    {
-				selector: "int1",
-				desc: false,
-				isExpanded: false
-			    },
-			    {
-				selector: "int2",
-				desc: false,
-				isExpanded: false
-			    }
-			],
-			requireTotalCount: true,
-			requireGroupCount: true
-		    }
-		}, function(err, res) {
-		    //console.log("Result is ", JSON.stringify(res, null, 2));
-		    
-		    expect(err, "err").to.be.null;
-		    expect(res.err$, "err$").to.be.undefined;
-
-		    expect(res.totalCount, "totalCount").to.eql(20);
-		    expect(res.groupCount, "groupCount").to.eql(2);
-		    
-		    expect(res.data, "res.data").to.be.instanceof(Array);
-		    expect(res.data, "group list length").to.have.lengthOf(2);
-
-		    for (const group1 of res.data) {
-			expect(group1.key, "group1.key").to.not.be.undefined;
-			expect(group1.items, `group1(${group1.key}).items`).to.be.null;
-			
-			expect(group1.count, `group(${group1.key}).count`).to.eql(1);
-		    }
-		    
-		    ldone();
-		});
-	    });
-	});
 	
 	it("list should calculate total summaries group query", function(tdone) {
 	    testQueryValues(tdone, (seneca, ldone) => {

@@ -31,7 +31,6 @@ var config = {
     }
 };
 
-
 seneca.
     use("proxy").
     client({

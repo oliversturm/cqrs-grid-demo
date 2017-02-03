@@ -128,7 +128,7 @@ $(function() {
 	    groupPaging: true,
 	    paging: true,
 	    sorting: true,
-	    sumary: true
+	    summary: true
 	},
 	columns: [{
 	    dataField: "date1",
