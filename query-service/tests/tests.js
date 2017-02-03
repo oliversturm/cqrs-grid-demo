@@ -233,6 +233,82 @@ describe("query-values", function() {
 	    });
 	});
 
+	it("list should filter with multiple criteria", function(tdone) {
+	    testQueryValues(tdone, (seneca, ldone) => {
+		seneca.act({
+		    role: "entitiesQuery",
+		    domain: "values",
+		    cmd: "list",
+		    params: {
+			filter: [
+			    ["int1", "=", 3],
+			    "or",
+			    ["int1", "=", 5]
+			],
+			requireTotalCount: true
+		    }
+		}, function(err, res) {
+		    expect(err, "err").to.be.null;
+		    expect(res.err$, "err$").to.be.undefined;
+		    expect(res.totalCount, "totalCount").to.eql(20);
+		    
+		    expect(res.data, "res.data").to.be.instanceof(Array);
+		    expect(res.data, "list length").to.have.lengthOf(20);
+		    ldone();
+		});
+	    });
+	});
+
+	it("list should search with =", function(tdone) {
+	    testQueryValues(tdone, (seneca, ldone) => {
+		seneca.act({
+		    role: "entitiesQuery",
+		    domain: "values",
+		    cmd: "list",
+		    params: {
+			searchExpr: "int1",
+			searchOperation: "=",
+			searchValue: 3,
+			requireTotalCount: true
+		    }
+		}, function(err, res) {
+		    expect(err, "err").to.be.null;
+		    expect(res.err$, "err$").to.be.undefined;
+		    expect(res.totalCount, "totalCount").to.eql(10);
+		    
+		    expect(res.data, "res.data").to.be.instanceof(Array);
+		    expect(res.data, "list length").to.have.lengthOf(10);
+		    ldone();
+		});
+	    });
+	});
+
+	it("list should search with multiple fields", function(tdone) {
+	    testQueryValues(tdone, (seneca, ldone) => {
+		seneca.act({
+		    role: "entitiesQuery",
+		    domain: "values",
+		    cmd: "list",
+		    params: {
+			searchExpr: ["int1", "int2"],
+			searchOperation: "=",
+			searchValue: 3,
+			requireTotalCount: true
+		    }
+		}, function(err, res) {
+		    //console.log("Result: ", JSON.stringify(res, null, 2));
+		    
+		    expect(err, "err").to.be.null;
+		    expect(res.err$, "err$").to.be.undefined;
+		    expect(res.totalCount, "totalCount").to.eql(20);
+		    
+		    expect(res.data, "res.data").to.be.instanceof(Array);
+		    expect(res.data, "list length").to.have.lengthOf(20);
+		    ldone();
+		});
+	    });
+	});
+
 	it("list should filter with <", function(tdone) {
 	    testQueryValues(tdone, (seneca, ldone) => {
 		seneca.act({

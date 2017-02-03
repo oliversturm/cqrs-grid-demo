@@ -221,7 +221,9 @@ module.exports = function(o = {}) {
     }
     
     async function queryGroups(collection, params) {
-	const filterPipeline = createFilterPipeline(params.filter);
+	const filterPipeline =
+		  createSearchPipeline(params.searchExpr, params.searchOperation, params.searchValue).concat(
+		      createFilterPipeline(params.filter));
 	const summaryPipeline = createSummaryPipeline(params.groupSummary);
 	const skipTakePipeline = createSkipTakePipeline(params.skip, params.take);
 
@@ -447,9 +449,29 @@ module.exports = function(o = {}) {
 	    }
 	}
     }
+
+    function createSearchPipeline(expr, op, val) {
+	if (!expr || !op || !val) return [];
+	
+	let criteria;
+	if (typeof expr === "string")
+	    criteria = [ expr, op, val ];
+	else if (expr.length > 0) {
+	    criteria = [];
+	    for (const exprItem of expr) {
+		if (criteria.length) criteria.push("or");
+		criteria.push([exprItem, op, val]);
+	    }
+	}
+	else return [];
+
+	return createFilterPipeline(criteria);
+    }
     
     async function querySimple(collection, params = {}) {
-	const filterPipeline = createFilterPipeline(params.filter);
+	const filterPipeline =
+		  createSearchPipeline(params.searchExpr, params.searchOperation, params.searchValue).concat(
+		      createFilterPipeline(params.filter));
 	const sortPipeline = createSortPipeline(params.sort);
 	const skipTakePipeline = createSkipTakePipeline(params.skip, params.take);
 

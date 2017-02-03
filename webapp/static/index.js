@@ -24,7 +24,11 @@ var dataStore = new DevExpress.data.CustomStore({
 	// I haven't seen it so far...
         if (options.select) params.select= JSON.stringify(options.select);   
 
-        // If a user typed something in dxAutocomplete, dxSelectBox or dxLookup
+        // If a user typed something in dxAutocomplete, dxSelectBox or dxLookup (original comment)
+	// The dxDataGrid doesn't use this parameter, it uses "filter" instead...
+	// actually, these options reflect the functionality of "filter" exactly, with the one
+	// exception that searchExpr can be an array of field names, or just one.
+	// I decided to transfer the parameters to the server anyway - could transpose them right here.
         if (options.searchValue)  {
             params.searchValue= options.searchValue;
             params.searchOperation= options.searchOperation;

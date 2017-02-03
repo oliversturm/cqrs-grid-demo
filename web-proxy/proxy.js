@@ -181,6 +181,19 @@ module.exports = function(o) {
 	    }
 	    else this.log.info("Invalid filter parameter found", m.args.query.filter);
 	}
+
+	if (m.args.query.searchExpr && m.args.query.searchOperation && m.args.query.searchValue) {
+	    const searchValue = JSON.parse(m.args.query.searchValue);
+	    const searchOperation = JSON.parse(m.args.query.searchOperation);
+	    const searchExpr = JSON.parse(m.args.query.searchExpr);
+	    if (typeof searchValue === "string" &&
+		typeof searchValue === "string" && 
+		(typeof searchExpr === "string" || searchExpr.length)) {
+		p.searchValue = searchValue;
+		p.searchOperation = searchOperation;
+		p.searchExpr = searchExpr;
+	    }
+	}
 	
 	this.act({
 	    role: "entitiesQuery",
