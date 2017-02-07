@@ -290,6 +290,36 @@ describe("query-values", function() {
 	    });
 	});
 
+	it("list should project with select", function(tdone) {
+	    testQueryValues(tdone, (seneca, ldone) => {
+		seneca.act({
+		    role: "entitiesQuery",
+		    domain: "values",
+		    cmd: "list",
+		    params: {
+			filter: [ "int1", "=", 3 ],
+			requireTotalCount: false,
+			select: ["int2", "date1"]
+		    }
+		}, function(err, res) {
+		    console.log("Result: ", JSON.stringify(res, null, 2));
+
+		    expect(err, "err").to.be.null;
+		    expect(res.err$, "err$").to.be.undefined;
+
+		    expect(res.data[0]).to.have.ownProperty("_id");
+		    expect(res.data[0]).to.have.ownProperty("int2");
+		    expect(res.data[0]).to.have.ownProperty("date1");
+
+		    expect(res.data[0]).to.not.have.ownProperty("int1");
+		    expect(res.data[0]).to.not.have.ownProperty("date2");
+		    expect(res.data[0]).to.not.have.ownProperty("string");
+
+		    ldone();
+		});
+	    });
+	});
+
 	it("list should search with multiple fields", function(tdone) {
 	    testQueryValues(tdone, (seneca, ldone) => {
 		seneca.act({

@@ -468,6 +468,17 @@ module.exports = function(o = {}) {
 
 	return createFilterPipeline(criteria);
     }
+
+    function createSelectPipeline(fields) {
+	if (fields && fields.length > 0) {
+	    let project = {};
+	    for (const field of fields) project[field] = "$" + field;
+	    return [{
+		$project: project
+	    }];
+	}
+	else return [];
+    }
     
     async function querySimple(collection, params = {}) {
 	const filterPipeline =
@@ -475,8 +486,9 @@ module.exports = function(o = {}) {
 		      createFilterPipeline(params.filter));
 	const sortPipeline = createSortPipeline(params.sort);
 	const skipTakePipeline = createSkipTakePipeline(params.skip, params.take);
+	const selectPipeline = createSelectPipeline(params.select);
 
-	const dataPipeline = filterPipeline.concat(sortPipeline, skipTakePipeline);
+	const dataPipeline = filterPipeline.concat(sortPipeline, skipTakePipeline, selectPipeline);
 
 	//console.log("Data pipeline", JSON.stringify(dataPipeline));
 	
