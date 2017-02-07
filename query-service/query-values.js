@@ -133,8 +133,8 @@ module.exports = function(o = {}) {
     function createSummaryQueryExecutor() {
 	let queriesExecuted = 0;
 	
-	return function(fn) {
-	    if (++queriesExecuted <= summaryQueryLimit) fn();
+	return async function(fn) {
+	    if (++queriesExecuted <= summaryQueryLimit) await fn();
 	};
     }
     
@@ -192,11 +192,10 @@ module.exports = function(o = {}) {
 	    for (const groupDataItem of groupData) {
 		//console.log("Calculating a summary for " + groupDataItem.key);
 
-		runSummaryQuery(async () => {
+		await runSummaryQuery(async () => {
 		    const summaryQueryPipeline = filterPipeline.concat(
 			matchPipeline.concat(createMatchPipeline(group.selector, groupDataItem.key)),
 			summaryPipeline);
-		    //console.log("group summary pipeline", JSON.stringify(summaryQueryPipeline));
 		    
 		    populateSummaryResults(groupDataItem, params.groupSummary,
 					   (await collection.aggregate(summaryQueryPipeline).toArray())[0]);
@@ -425,6 +424,8 @@ module.exports = function(o = {}) {
     }
 
     function populateSummaryResults(target, summary, summaryResults) {
+	//console.log("populateSummaryResult for " + target.key + ", results: " + JSON.stringify(summaryResults));
+	
 	if (summary) {
 	    target.summary = [];
 	    
@@ -510,6 +511,8 @@ module.exports = function(o = {}) {
 	    data: queryResult.data,
 	    summary: queryResult.summary
 	};
+
+	//console.log("Sending result: " + JSON.stringify(reply));
 
 	r(null, reply);
     }

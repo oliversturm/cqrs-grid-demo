@@ -47,6 +47,7 @@ var dataStore = new DevExpress.data.CustomStore({
 	console.log("Load options (" + d.debugId + "): ", options);
 	
 	$.getJSON(BASEDATA, params).done(function(res) {
+	    //console.log("Static load result (" + d.debugId + "): " + JSON.stringify(res));
 	    console.log("Load result (" + d.debugId + "): ", res);
 
 	    var details = {};

@@ -3,10 +3,10 @@ const Seneca = require("seneca");
 
 const TESTRECORD_COUNT = 100;
 
-function testQueryValues(tdone, test) {
+function testQueryValues(tdone, test, dropAndGenerate=true, dbname="valuedb_test") {
     const db = require("../../db")({
 	mongoHost: "localhost",
-	mongoDbName: "valuedb_test"
+	mongoDbName: dbname
     });
 
     function addDays(date, days) {
@@ -15,39 +15,46 @@ function testQueryValues(tdone, test) {
     }
     
     db(db => {
-	db.dropDatabase((err, res) => {
-	    const values = db.collection("values");
-	    const currentYear = new Date().getFullYear();
-	    const currentYearStart = () => new Date(currentYear, 0, 1);
-	    const nextYearStart = () => new Date(currentYear + 1, 0, 1);
-	    
-	    Promise.all(
-		Array.from(new Array(TESTRECORD_COUNT), (v, i) => i + 1).map(
-		    n => values.insertOne({
-			date1: addDays(currentYearStart(), n),
-			date2: addDays(nextYearStart(), n),
-			int1: n % 10,
-			int2: n % 5,
-			string: "Item " + n
-		    })
-		)
-	    ).then(() => {
-		const seneca = Seneca({
-		    log: "test"
-		});
-		
-		seneca.test(tdone/* use this for test debugging *//*, "print"*/).
-		    use(require("../query-values"), {
-			connectedDb: db
-		    }).ready(() => {
-			test(seneca, () => {
-			    seneca.close();
-			    db.close();
-			    tdone();
-			});
-		    });	
+	function runTest() {
+	    const seneca = Seneca({
+		log: "test"
 	    });
-	});	
+	    
+	    seneca.test(tdone/* use this for test debugging *//*, "print"*/).
+		use(require("../query-values"), {
+		    connectedDb: db
+		}).ready(() => {
+		    test(seneca, () => {
+			seneca.close();
+			db.close();
+			tdone();
+		    });
+		});	
+	}
+
+	if (dropAndGenerate) {
+	    db.dropDatabase((err, res) => {
+		const values = db.collection("values");
+		const currentYear = new Date().getFullYear();
+		const currentYearStart = () => new Date(currentYear, 0, 1);
+		const nextYearStart = () => new Date(currentYear + 1, 0, 1);
+		
+		Promise.all(
+		    Array.from(new Array(TESTRECORD_COUNT), (v, i) => i + 1).map(
+			n => values.insertOne({
+			    date1: addDays(currentYearStart(), n),
+			    date2: addDays(nextYearStart(), n),
+			    int1: n % 10,
+			    int2: n % 5,
+			    string: "Item " + n
+			})
+		    )
+		).then(runTest);
+	    });
+	}
+	else {
+	    runTest();
+	}
     });
 }
 
