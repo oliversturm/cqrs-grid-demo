@@ -302,7 +302,7 @@ describe("query-values", function() {
 			select: ["int2", "date1"]
 		    }
 		}, function(err, res) {
-		    console.log("Result: ", JSON.stringify(res, null, 2));
+		    //console.log("Result: ", JSON.stringify(res, null, 2));
 
 		    expect(err, "err").to.be.null;
 		    expect(res.err$, "err$").to.be.undefined;
@@ -526,6 +526,43 @@ describe("query-values", function() {
 			}
 		    }
 		    
+		    ldone();
+		});
+	    });
+	});
+
+	it("list should group with items and select", function(tdone) {
+	    testQueryValues(tdone, (seneca, ldone) => {
+		seneca.act({
+		    role: "entitiesQuery",
+		    domain: "values",
+		    cmd: "list",
+		    params: {
+			group: [
+			    {
+				selector: "int1",
+				desc: false,
+				isExpanded: true
+			    }
+			],
+			select: ["int2", "date1"]
+		    }
+		}, function(err, res) {
+		    //console.log("Result: ", JSON.stringify(res, null, 2));
+
+		    expect(err, "err").to.be.null;
+		    expect(res.err$, "err$").to.be.undefined;
+
+		    const x = res.data[0].items[0];
+		    
+		    expect(x).to.have.ownProperty("_id");
+		    expect(x).to.have.ownProperty("int2");
+		    expect(x).to.have.ownProperty("date1");
+
+		    expect(x).to.not.have.ownProperty("int1");
+		    expect(x).to.not.have.ownProperty("date2");
+		    expect(x).to.not.have.ownProperty("string");
+
 		    ldone();
 		});
 	    });

@@ -16,7 +16,7 @@ module.exports = function(o = {}) {
 	return item;
     }
     
-    function createGroupingPipeline(selector, desc, includeDataItems, countingSeparately) {
+    function createGroupingPipeline(selector, desc, includeDataItems, countingSeparately, itemProjection="$$CURRENT") {
 	let pipeline = [
 	    {
     		$group: {
@@ -51,7 +51,7 @@ module.exports = function(o = {}) {
     	    // include items directly if we're expected to do so, and if this is the
     	    // most deeply nested group in case there are several
     	    pipeline[0].$group.items = {
-    		$push: "$$CURRENT"
+    		$push: itemProjection
     	    };
     	    pipeline[1].$project.items = 1;
     	}
@@ -105,12 +105,12 @@ module.exports = function(o = {}) {
 	else return [];
     }
     
-    async function queryGroupData(collection, selector, desc, includeDataItems, countSeparately,
+    async function queryGroupData(collection, selector, desc, includeDataItems, countSeparately, itemProjection,
 				  sortPipeline, filterPipeline, skipTakePipeline, matchPipeline) {
 	const pipeline = sortPipeline.concat( // sort pipeline first, apparently that enables it to use indexes
 	    filterPipeline,
 	    matchPipeline,
-	    createGroupingPipeline(selector, desc, includeDataItems, countSeparately),
+	    createGroupingPipeline(selector, desc, includeDataItems, countSeparately, itemProjection),
 	    skipTakePipeline
 	);
 	//console.log("Using pipeline: ", JSON.stringify(pipeline));
@@ -152,6 +152,7 @@ module.exports = function(o = {}) {
 	
 	const groupData = await queryGroupData(collection, group.selector, group.desc,
 					       itemDataRequired, separateCountRequired,
+					       createSelectProjectExpression(params.select, true),
 					       itemDataRequired ? createSortPipeline(params.sort) : [],
 					       filterPipeline, skipTakePipeline, matchPipeline);
 	if (subGroupsRequired) {
@@ -469,12 +470,20 @@ module.exports = function(o = {}) {
 	return createFilterPipeline(criteria);
     }
 
-    function createSelectPipeline(fields) {
+    function createSelectProjectExpression(fields, explicitId=false) {
 	if (fields && fields.length > 0) {
 	    let project = {};
+	    if (explicitId) project._id = "$_id";
 	    for (const field of fields) project[field] = "$" + field;
+	    return project;
+	}
+	else return undefined;
+    }
+    
+    function createSelectPipeline(fields) {
+	if (fields && fields.length > 0) {
 	    return [{
-		$project: project
+		$project: createSelectProjectExpression(fields)
 	    }];
 	}
 	else return [];
