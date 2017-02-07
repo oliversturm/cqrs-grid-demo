@@ -194,6 +194,16 @@ module.exports = function(o) {
 		p.searchExpr = searchExpr;
 	    }
 	}
+
+	if (m.args.query.select) {
+	    const selectOptions = JSON.parse(m.args.query.select);
+	    if (typeof selectOptions === "string") p.select = [selectOptions];
+	    else if (selectOptions.length > 0) {
+		if (selectOptions.reduce((r, v) => r && typeof v === "string", true)) p.select = selectOptions;
+		else this.log.info("Array-like select parameter found with invalid content");
+	    }
+	    else this.log.info("Unknown type for select parameter");
+	}
 	
 	this.act({
 	    role: "entitiesQuery",
