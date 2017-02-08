@@ -9,6 +9,7 @@
   "author": "Oliver Sturm",
   "license": "SEE LICENSE IN LICENSE",
   "dependencies": {
+    "devextreme-query-mongodb": "^1.0.1",
     "lodash": "^4.17.4",
     "mongodb": "^2.2.21",
     "seneca": "^3.2.2",
