@@ -9,10 +9,10 @@
   "author": "Oliver Sturm",
   "license": "SEE LICENSE IN LICENSE",
   "dependencies": {
-    "devextreme-query-mongodb": "^1.0.1",
+    "devextreme-query-mongodb": "^1.0.2",
     "lodash": "^4.17.4",
-    "mongodb": "^2.2.21",
-    "seneca": "^3.2.2",
+    "mongodb": "^2.2.22",
+    "seneca": "^3.3.0",
     "try-expression": "^1.0.0"
   },
   "devDependencies": {

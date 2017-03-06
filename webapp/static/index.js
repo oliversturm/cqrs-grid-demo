@@ -156,7 +156,7 @@ $(function() {
 	},
 		  "string"],
 	editing: {
-	    mode: "batch",
+	    mode: "cell",
 	    allowAdding: true,
 	    allowDeleting: true,
 	    allowUpdating: true
