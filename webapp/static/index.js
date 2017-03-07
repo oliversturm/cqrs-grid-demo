@@ -6,7 +6,7 @@ console.log("DevExtreme version: ", DevExpress.VERSION);
 var debugId = 0;
 
 var dataStore = new DevExpress.data.CustomStore({
-    key: "id",
+    key: "_id",
     load: function(options) {
 	// from https://www.devexpress.com/Support/Center/Question/Details/KA18955
 	var params = {};
