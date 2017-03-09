@@ -61,7 +61,7 @@ module.exports = function(o) {
 
     const groupOptionsChecker = parambulator({
 	required$: ["selector"],
-	only$: ["desc", "selector", "isExpanded"],
+	only$: ["desc", "selector", "isExpanded", "groupInterval"],
 	desc: {
 	    type$: "boolean"
 	},
@@ -70,6 +70,11 @@ module.exports = function(o) {
 	},
 	selector: {
 	    type$: "string"
+	},
+	groupInterval: {
+	    type$: [ "string", "integer" ]
+	    // unclear whether parambulator supports a spec that says "can be enum but also number"
+	    //enum$: [ "year", "quarter", "month", "day", "dayOfWeek", "hour", "minute", "second" ] // and numbers?
 	}
     });
 
