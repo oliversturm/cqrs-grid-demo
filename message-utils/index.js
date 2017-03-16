@@ -37,6 +37,22 @@ function fixObject(o, fixers = defaultFixers) {
     return o;
 }
 
+// make sure exceptions can be serialized with JSON.stringify
+if (!('toJSON' in Error.prototype))
+Object.defineProperty(Error.prototype, 'toJSON', {
+    value: function () {
+        var alt = {};
+
+        Object.getOwnPropertyNames(this).forEach(function (key) {
+            alt[key] = this[key];
+        }, this);
+
+        return alt;
+    },
+    configurable: true,
+    writable: true
+});
+
 module.exports = {
     fixDate,
     fixRecursive,

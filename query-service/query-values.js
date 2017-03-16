@@ -23,8 +23,6 @@ module.exports = function(o = {}) {
 		r(null, await query(db.collection("values"), m.params));
 	    }
 	    catch(err) {
-		console.log("Returning error: ", JSON.stringify(err));
-		
 		r(null, { err$: err });
 	    }
 	});
