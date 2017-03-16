@@ -9,7 +9,7 @@ $(function() {
 		locateInMenu: "auto",
 		options: {
 		    type: "danger",
-		    text: "Create 10000 Test Objects",
+		    text: "Create 1000 Test Objects",
 		    onClick: function(e) {
 			e.component.option("disabled", true);
 			dataStore.createTestData(function() {

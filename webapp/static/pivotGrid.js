@@ -32,13 +32,31 @@ $(function() {
 		    allowFiltering: false,
 		    allowSorting: true,
 		    allowSortingBySummary: true,
-		    area: "column"/*,
-		    groupInterval: "dayOfWeek"*/
+		    area: "column"
+		},
+		{
+		    dataField: "date1",
+		    caption: "date1 DOW",
+		    dataType: "date",
+		    allowFiltering: false,
+		    allowSorting: true,
+		    allowSortingBySummary: true,
+		    area: "filter",
+		    groupInterval: "dayOfWeek"
+		},
+		{
+		    dataField: "date1",
+		    caption: "date1 Month",
+		    dataType: "date",
+		    allowFiltering: false,
+		    allowSorting: true,
+		    allowSortingBySummary: true,
+		    area: "filter",
+		    groupInterval: "month"
 		},
 		{
 		    dataField: "date2",
 		    dataType: "date",
-		    format: "shortDate",
 		    allowFiltering: true,
 		    allowSorting: true,
 		    allowSortingBySummary: true,
@@ -51,10 +69,21 @@ $(function() {
 		    allowFiltering: true,
 		    allowSorting: true,
 		    allowSortingBySummary: true,
-		    area: "data"
+		    area: "data",
+		    summaryType: "sum"
 		},
 		{
 		    dataField: "int2",
+		    dataType: "number",
+		    allowFiltering: true,
+		    allowSorting: true,
+		    allowSortingBySummary: true,
+		    area: "filter",
+		    summaryType: "sum"
+		},
+		{
+		    dataField: "int2",
+		    caption: "int2 groupInt 10",
 		    dataType: "number",
 		    allowFiltering: true,
 		    allowSorting: true,

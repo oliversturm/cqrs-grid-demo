@@ -85,7 +85,7 @@ var dataStore = new DevExpress.data.CustomStore({
 dataStore.createTestData = function(cont) {
     setTimeout(function() {
 	$.ajax({
-	    url: BASEAPI + "/createTestData?count=" + encodeURIComponent(10000),
+	    url: BASEAPI + "/createTestData?count=" + encodeURIComponent(1000),
 	    method: "GET",
 	    contentType: "application/json"
 	}).then(function() {
