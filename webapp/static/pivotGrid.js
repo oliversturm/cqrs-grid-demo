@@ -32,7 +32,7 @@ $(function() {
 		    allowFiltering: false,
 		    allowSorting: true,
 		    allowSortingBySummary: true,
-		    area: "column"
+		    area: "filter"
 		},
 		{
 		    dataField: "date1",
@@ -41,7 +41,8 @@ $(function() {
 		    allowFiltering: false,
 		    allowSorting: true,
 		    allowSortingBySummary: true,
-		    area: "filter",
+		    area: "column",
+		    areaIndex: 1,
 		    groupInterval: "dayOfWeek"
 		},
 		{
@@ -51,7 +52,8 @@ $(function() {
 		    allowFiltering: false,
 		    allowSorting: true,
 		    allowSortingBySummary: true,
-		    area: "filter",
+		    area: "column",
+		    areaIndex: 0,
 		    groupInterval: "month"
 		},
 		{
@@ -88,7 +90,7 @@ $(function() {
 		    allowFiltering: true,
 		    allowSorting: true,
 		    allowSortingBySummary: true,
-		    area: "filter",
+		    area: "row",
 		    groupInterval: 10
 		},
 		{
@@ -97,7 +99,7 @@ $(function() {
 		    allowFiltering: true,
 		    allowSorting: true,
 		    allowSortingBySummary: true,
-		    area: "row"
+		    area: "filter"
 		}
 	    ]
 	}
