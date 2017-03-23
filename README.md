@@ -1,8 +1,8 @@
 # Running
 
-The standard configuration of the project uses docker and docker-compose to set up containers, each of which runs an individual service. Assuming the docker tools are available, the minimum steps to run the project are these:
+The standard configuration of the project uses docker and docker-compose to set up containers, each of which runs an individual service. Docker is available for various platforms and [you can find installation links here](https://store.docker.com/search?offering=community&q=&type=edition). Assuming the docker tools are available, the minimum steps to run the project are these:
 
-* `make modules-install` - goes through all the sub-folders and runs `npm install` and `bower install`
+* `make modules-install` - walks through all the sub-folders and runs `npm install` and `bower install`
 
 * `make build-docker` - builds all docker images
 
