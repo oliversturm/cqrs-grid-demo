@@ -2,6 +2,7 @@
 <html>
   <head>
     <title>DevExtreme Data Grid with CQRS REST data service</title>
+    <script type="text/javascript" src="/bower_components/knockout/dist/knockout.js"></script>
     <script type="text/javascript" src="/bower_components/jquery/dist/jquery.min.js"></script>
     
     <script type="text/javascript" src="/bower_components/devextreme/js/dx.all.debug.js"></script>
@@ -13,7 +14,7 @@
     <script src="dataGrid.js"></script>
   </head>
   <body>
-    <div id="toolbar"></div>
-    <div id="grid"></div>
+    <div data-bind="dxToolbar: toolbarOptions"></div>
+    <div data-bind="dxDataGrid: gridOptions"></div>
   </body>
 </html>

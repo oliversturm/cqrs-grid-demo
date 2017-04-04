@@ -2,8 +2,8 @@
 <html>
   <head>
     <title>DevExtreme Data Grid with CQRS REST data service</title>
+    <script type="text/javascript" src="/bower_components/knockout/dist/knockout.js"></script>
     <script type="text/javascript" src="/bower_components/jquery/dist/jquery.min.js"></script>
-    
     <script type="text/javascript" src="/bower_components/devextreme/js/dx.all.debug.js"></script>
     <link rel="stylesheet" type="text/css" href="/bower_components/devextreme/css/dx.common.css" />
     <link rel="stylesheet" type="text/css" href="/bower_components/devextreme/css/dx.light.css" />
@@ -13,7 +13,7 @@
     <script src="index.js"></script>
   </head>
   <body>
-    <div id="toolbar"></div>
+    <div data-bind="dxToolbar: toolbarOptions"></div>
     <iframe id="frame" name="frame"></iframe>
   </body>
 </html>
