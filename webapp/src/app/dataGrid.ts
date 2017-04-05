@@ -10,13 +10,7 @@ import dataStore from "./dataStore.js";
 export class DataGridComponent {
     @ViewChild(DxDataGridComponent) grid: DxDataGridComponent;
 
-    public dataSource: any;
-
-    constructor() {
-	this.dataSource = {
-	    store: dataStore
-	};
-    }
+    dataSource = { store: dataStore };
     
     refresh() {
 	this.grid.instance.refresh();
