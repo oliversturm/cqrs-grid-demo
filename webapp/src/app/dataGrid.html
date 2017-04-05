@@ -1,0 +1,40 @@
+<dx-toolbar>
+  <dxi-item location="before" locateInMenu="auto">
+    <dx-button text="Reload Grid" (onClick)="refresh()"></dx-button>
+  </dxi-item>  
+</dx-toolbar>
+
+<dx-data-grid [dataSource]="dataSource">
+  <dxi-column dataField="date1" dataType="date"></dxi-column>
+  <dxi-column dataField="date2" dataType="date"></dxi-column>
+  <dxi-column dataField="int1" dataType="number" format="{type: 'decimal'}"></dxi-column>
+  <dxi-column dataField="int2" dataType="number" format="{type: 'decimal'}"></dxi-column>
+  <dxi-column dataField="string"></dxi-column>
+
+  <dxo-remote-operations
+     filtering="true"
+     grouping="true"
+     groupPaging="true"
+     paging="true"
+     sorting="true"
+     summary="true"></dxo-remote-operations>
+  <dxo-editing
+     mode="batch"
+     allowAdding="true"
+     allowDeleting="true"
+     allowUpdating="true"></dxo-editing>
+  <dxo-filter-row visible="true"></dxo-filter-row>
+  <dxo-header-filter visible="true"></dxo-header-filter>
+  <dxo-group-panel visible="true"></dxo-group-panel>
+  <dxo-grouping autoExpandAll="true"></dxo-grouping>
+  
+  <dxo-summary>
+    <dxi-total-item column="date1" summaryType="max"></dxi-total-item>
+    <dxi-total-item column="int1" summaryType="avg"></dxi-total-item>
+    <dxi-total-item column="int1" summaryType="sum"></dxi-total-item>
+
+    <dxi-group-item column="date1" summaryType="min"></dxi-group-item>
+    <dxi-group-item column="int1" summaryType="avg"></dxi-group-item>
+    <dxi-group-item column="int1" summaryType="sum"></dxi-group-item>
+  </dxo-summary>
+</dx-data-grid>

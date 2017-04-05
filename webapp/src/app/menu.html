@@ -1,0 +1,12 @@
+<dx-toolbar>
+  <dxi-item location="before" locateInMenu="auto">
+    <dx-button type="danger" text="Create 1000 Test Objects"></dx-button>
+  </dxi-item>
+  <dxi-item location="before" locateInMenu="auto">
+    <dx-button type="success" text="Show Data Grid" [routerLink]="['/dataGrid']"></dx-button>
+  </dxi-item>
+  <dxi-item location="before" locateInMenu="auto">
+    <dx-button type="success" text="Show Pivot Grid" [routerLink]="['/pivotGrid']"></dx-button>
+  </dxi-item>
+</dx-toolbar>
+<router-outlet></router-outlet>
