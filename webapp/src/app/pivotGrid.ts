@@ -1,12 +1,18 @@
-import {Component} from "@angular/core";
+import { Component, ViewChild } from "@angular/core";
+
+import { DxPivotGridComponent } from "devextreme-angular";
+
+import dataStore from "./dataStore.js";
 
 @Component({
     template: require("./pivotGrid.html")
 })
 export class PivotGridComponent {
-    public message: string;
+    @ViewChild(DxPivotGridComponent) grid: DxPivotGridComponent;
 
-    constructor() {
-	this.message = "Hi from the pivot grid";
+    dataStore = dataStore;
+    
+    refresh() {
+	this.grid.instance.getDataSource().reload();
     }
 }

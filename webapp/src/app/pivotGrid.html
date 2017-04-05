@@ -1,1 +1,43 @@
-<h1>{{ message }}</h1>
+<dx-toolbar>
+  <dxi-item location="before" locateInMenu="auto">
+    <dx-button text="Reload Grid" (onClick)="refresh()"></dx-button>
+  </dxi-item>  
+</dx-toolbar>
+
+<dx-pivot-grid>
+  <dxo-field-panel visible="true"></dxo-field-panel>
+
+  <dxo-data-source [store]="dataStore"
+     remoteOperations="true" retrieveFields="false">
+    <dxi-field dataField="date1" dataType="date" format="shortDate"
+	       allowFiltering="false" allowSorting="true"
+	       allowSortingBySummary="true" area="filter"></dxi-field>
+    <dxi-field dataField="date1" caption="date1 DOW" dataType="date" 
+	       allowFiltering="false" allowSorting="true"
+	       allowSortingBySummary="true" area="column"
+	       areaIndex="1" groupInterval="dayOfWeek"></dxi-field>
+    <dxi-field dataField="date1" caption="date1 Month" dataType="date" 
+	       allowFiltering="false" allowSorting="true"
+	       allowSortingBySummary="true" area="column"
+	       areaIndex="0" groupInterval="month"></dxi-field>
+    <dxi-field dataField="date2" dataType="date" 
+	       allowFiltering="true" allowSorting="true"
+	       allowSortingBySummary="true" area="filter"
+	       groupInterval="quarter"></dxi-field>
+    <dxi-field dataField="int1" dataType="number" 
+	       allowFiltering="true" allowSorting="true"
+	       allowSortingBySummary="true" area="data"
+	       summaryType="sum"></dxi-field>
+    <dxi-field dataField="int2" dataType="number" 
+	       allowFiltering="true" allowSorting="true"
+	       allowSortingBySummary="true" area="filter"
+	       summaryType="sum"></dxi-field>
+    <dxi-field dataField="int2" caption="int2 groupInt 10" dataType="number" 
+	       allowFiltering="true" allowSorting="true"
+	       allowSortingBySummary="true" area="row"
+	       groupInterval="10"></dxi-field>
+    <dxi-field dataField="string" dataType="string" 
+	       allowFiltering="true" allowSorting="true"
+	       allowSortingBySummary="true" area="filter"></dxi-field>
+  </dxo-data-source>
+</dx-pivot-grid>
