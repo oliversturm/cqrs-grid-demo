@@ -9,7 +9,8 @@
   "author": "Oliver Sturm",
   "license": "SEE LICENSE IN LICENSE",
   "dependencies": {
-    "seneca": "^3.2.2"
+    "seneca": "^3.2.2",
+    "seneca-amqp-transport": "^2.1.0"
   },
   "devDependencies": {
     "nodemon": "^1.11.0"

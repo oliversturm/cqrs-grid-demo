@@ -5,17 +5,17 @@ const seneca = require("seneca")({
 console.log("Using connection: ", process.env.CMDSRVC_HOST);
 
 seneca.
+    use("seneca-amqp-transport").
     client({
-	type: "tcp",
-	// expecting "command-service" to be available
-	// as a docker link
-	host: process.env.CMDSRVC_HOST || "command-service",
-	port: process.env.CMDSRVC_PORT || 3002,
+	type: "amqp",
+	hostname: process.env.RABBITMQ_HOST || "rabbitmq",
+	port: parseInt(process.env.RABBITMQ_PORT) || 5672,
 	pin: "role:entitiesCommand"
     }).
     use("testing").
     listen({
-	type: "tcp",
-	port: process.env.TESTSRVC_PORT || 3005,
+	type: "amqp",
+	hostname: process.env.RABBITMQ_HOST || "rabbitmq",
+	port: parseInt(process.env.RABBITMQ_PORT) || 5672,
 	pin: "role:testing"
     });

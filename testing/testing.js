@@ -24,13 +24,16 @@ module.exports = function(o) {
 		string: "Item " + i
 	    };
 
+	    // Sending message asynchronously (no delegate),
+	    // because depending on the count we're going for the process
+	    // could take a long time and some of the messages could
+	    // time out.
+	    // Alternatively could add timeout$: 120000 or longer.
 	    seneca.act({
 		role: "entitiesCommand",
 		domain: "values",
 		cmd: "create",
 		instance: instance
-	    }, err => {
-		if (err) r(err);
 	    });
 	}
 	

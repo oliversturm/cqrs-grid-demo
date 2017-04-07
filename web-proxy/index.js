@@ -32,38 +32,18 @@ var config = {
 };
 
 seneca.
+    use("seneca-amqp-transport").
     use("proxy").
     client({
-	type: "tcp",
-	// expecting "query-service" to be available
-	// as a docker link
-	host: process.env.QRYSRVC_HOST || "query-service",
-	port: process.env.QRYSRVC_PORT || 3001,
-	pin: "role:entitiesQuery"
-    }).
-    client({
-	type: "tcp",
-	// expecting "command-service" to be available
-	// as a docker link
-	host: process.env.CMDSRVC_HOST || "command-service",
-	port: process.env.CMDSRVC_PORT || 3002,
-	pin: "role:entitiesCommand"
-    }).
-    client({
-	type: "tcp",
-	// expecting "validator" to be available
-	// as a docker link
-	host: process.env.VALSRVC_HOST || "validator",
-	port: process.env.VALSRVC_PORT || 3003,
-	pin: "role:validation"
-    }).
-    client({
-	type: "tcp",
-	// expecting "testing" to be available
-	// as a docker link
-	host: process.env.TESTSRVC_HOST || "testing",
-	port: process.env.TESTSRVC_PORT || 3005,
-	pin: "role:testing"
+	type: "amqp",
+	hostname: process.env.RABBITMQ_HOST || "rabbitmq",
+	port: parseInt(process.env.RABBITMQ_PORT) || 5672,
+	pin: [
+	    "role:entitiesQuery",
+	    "role:entitiesCommand",
+	    "role:validation",
+	    "role:testing"
+	]
     }).
     use(web, config).
     ready(() => {

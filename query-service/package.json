@@ -13,6 +13,7 @@
     "lodash": "^4.17.4",
     "mongodb": "^2.2.22",
     "seneca": "^3.3.0",
+    "seneca-amqp-transport": "^2.1.0",
     "try-expression": "^1.0.0"
   },
   "devDependencies": {

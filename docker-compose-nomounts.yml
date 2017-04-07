@@ -6,6 +6,7 @@ services:
     ports:
       - "3000:3000"
     links:
+      - rabbitmq
       - query-service
       - command-service
       - validator
@@ -13,28 +14,31 @@ services:
       
   query-service:
     image: sturm/cqrs-grid-demo/query-service
-    ports:
-      - "3001:3001"
     links:
+      - rabbitmq
       - mongo
 
   command-service:
     image: sturm/cqrs-grid-demo/command-service
-    ports:
-      - "3002:3002"
     links:
+      - rabbitmq
       - mongo
       - validator
 
   validator:
     image: sturm/cqrs-grid-demo/validator
-    ports:
-      - "3003:3003"
+    links:
+      - rabbitmq
 
   mongo:
     image: mongo:latest
     ports:
       - "27017:27017"
+
+  rabbitmq:
+    image: rabbitmq:latest
+    ports:
+      - "5672:5672"
 
   webapp:
     image: sturm/cqrs-grid-demo/webapp
@@ -43,7 +47,6 @@ services:
 
   testing:
     image: sturm/cqrs-grid-demo/testing
-    ports:
-      - "3005:3005"
     links:
+      - rabbitmq
       - command-service

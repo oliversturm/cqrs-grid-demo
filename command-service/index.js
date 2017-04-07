@@ -3,15 +3,17 @@ const seneca = require("seneca")({
 });
 
 seneca.
+    use("seneca-amqp-transport").
     client({
-	type: "tcp",
-	host: process.env.VALSRVC_HOST || "validator",
-	port: process.env.VALSRVC_PORT || 3003,
+	type: "amqp",
+	hostname: process.env.RABBITMQ_HOST || "rabbitmq",
+	port: parseInt(process.env.RABBITMQ_PORT) || 5672,
 	pin: "role:validation"
     }).
     use("command-values").
     listen({
-	type: "tcp",
-	port: process.env.CMDSRVC_PORT || 3002,
+	type: "amqp",
+	hostname: process.env.RABBITMQ_HOST || "rabbitmq",
+	port: parseInt(process.env.RABBITMQ_PORT) || 5672,
 	pin: "role:entitiesCommand"
     });

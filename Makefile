@@ -28,11 +28,10 @@ modules-install:
 	pushd webapp/static && ../node_modules/.bin/bower install; popd
 
 run-without-docker:
-	@echo "Make sure you have mongodb running locally on port 27017"
-	cd validator; node index.js & # port 3003
-	cd query-service; MONGO_HOST=localhost node --harmony index.js & # port 3001
-	cd command-service; MONGO_HOST=localhost VALSRVC_HOST=localhost node index.js & # port 3002
-	cd testing; CMDSRVC_HOST=localhost node index.js & # port 3005
-	cd web-proxy; QRYSRVC_HOST=localhost CMDSRVC_HOST=localhost VALSRVC_HOST=localhost \
-		TESTSRVC_HOST=localhost node index.js & # port 3000
+	@echo "Make sure you have mongodb running locally on port 27017, and rabbitmq on port 5672"
+	cd validator; RABBITMQ_HOST=localhost node index.js &
+	cd query-service; MONGO_HOST=localhost RABBITMQ_HOST=localhost node --harmony index.js &
+	cd command-service; MONGO_HOST=localhost RABBITMQ_HOST=localhost node index.js &
+	cd testing; RABBITMQ_HOST=localhost node index.js &
+	cd web-proxy; RABBITMQ_HOST=localhost node index.js &
 	cd webapp; node index.js & # port 8080

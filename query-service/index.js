@@ -1,9 +1,11 @@
 const seneca = require("seneca")();
 
 seneca.
+    use("seneca-amqp-transport").
     use("query-values").
     listen({
-	type: "tcp",
-	port: process.env.QRYSRVC_PORT || 3001,
+	type: "amqp",
+	hostname: process.env.RABBITMQ_HOST || "rabbitmq",
+	port: parseInt(process.env.RABBITMQ_PORT) || 5672,
 	pin: "role:entitiesQuery"
     });
