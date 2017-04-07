@@ -8,12 +8,18 @@ seneca.
 	type: "amqp",
 	hostname: process.env.RABBITMQ_HOST || "rabbitmq",
 	port: parseInt(process.env.RABBITMQ_PORT) || 5672,
-	pin: "role:validation"
+	pin: "role:validation",
+	socketOptions: {
+	    noDelay: true
+	}
     }).
     use("command-values").
     listen({
 	type: "amqp",
 	hostname: process.env.RABBITMQ_HOST || "rabbitmq",
 	port: parseInt(process.env.RABBITMQ_PORT) || 5672,
-	pin: "role:entitiesCommand"
+	pin: "role:entitiesCommand",
+	socketOptions: {
+	    noDelay: true
+	}
     });

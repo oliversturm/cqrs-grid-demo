@@ -43,7 +43,10 @@ seneca.
 	    "role:entitiesCommand",
 	    "role:validation",
 	    "role:testing"
-	]
+	],
+	socketOptions: {
+	    noDelay: true
+	}
     }).
     use(web, config).
     ready(() => {

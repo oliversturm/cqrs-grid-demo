@@ -7,5 +7,8 @@ seneca.
 	type: "amqp",
 	hostname: process.env.RABBITMQ_HOST || "rabbitmq",
 	port: parseInt(process.env.RABBITMQ_PORT) || 5672,
-	pin: "role:validation"
+	pin: "role:validation",
+	socketOptions: {
+	    noDelay: true
+	}
     });
