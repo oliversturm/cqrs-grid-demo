@@ -1,3 +1,5 @@
+> **Note: This branch is in development and might be unstable until this notice is removed.**
+
 # Running
 
 The standard configuration of the project uses docker and docker-compose to set up containers, each of which runs an individual service. Docker is available for various platforms and [you can find installation links here](https://store.docker.com/search?offering=community&q=&type=edition). Assuming the docker tools are available, the minimum steps to run the project are these:
