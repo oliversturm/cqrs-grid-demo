@@ -1,18 +1,17 @@
 FROM node:latest
 
-RUN mkdir -p /usr/src/app/command-service
-RUN mkdir -p /usr/src/app/db
+RUN mkdir -p /usr/src/app
 
 COPY command-service /usr/src/app/command-service
-COPY db /usr/src/app/db
 COPY message-utils /usr/src/app/message-utils
-WORKDIR /usr/src/app/db
+COPY eventex-fork /usr/src/app/eventex-fork
+WORKDIR /usr/src/app/eventex-fork
 RUN npm install
 WORKDIR /usr/src/app/command-service
 RUN npm install
 RUN npm install -g node-inspector@0.7.5
 
-EXPOSE 3002 57575
+EXPOSE 57575
 
 RUN chmod 755 start-service.sh
 CMD [ "./start-service.sh" ]

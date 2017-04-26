@@ -2,9 +2,12 @@ FROM node:latest
 
 RUN mkdir -p /usr/src/app
 
-COPY validator /usr/src/app/validator
+COPY readmodel /usr/src/app/readmodel
+COPY db /usr/src/app/db
 COPY message-utils /usr/src/app/message-utils
-WORKDIR /usr/src/app/validator
+WORKDIR /usr/src/app/db
+RUN npm install
+WORKDIR /usr/src/app/readmodel
 RUN npm install
 RUN npm install -g node-inspector@0.7.5
 
@@ -12,3 +15,4 @@ EXPOSE 57575
 
 RUN chmod 755 start-service.sh
 CMD [ "./start-service.sh" ]
+

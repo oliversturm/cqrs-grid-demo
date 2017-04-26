@@ -1,6 +1,6 @@
 FROM node:latest
 
-RUN mkdir -p /usr/src/app/web-proxy
+RUN mkdir -p /usr/src/app
 
 COPY web-proxy /usr/src/app/web-proxy
 COPY message-utils /usr/src/app/message-utils

@@ -1,6 +1,6 @@
 FROM node:latest
 
-RUN mkdir -p /usr/src/app/webapp
+RUN mkdir -p /usr/src/app
 
 COPY webapp /usr/src/app/webapp
 COPY message-utils /usr/src/app/message-utils

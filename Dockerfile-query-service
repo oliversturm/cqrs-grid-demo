@@ -1,7 +1,6 @@
 FROM node:latest
 
-RUN mkdir -p /usr/src/app/query-service
-RUN mkdir -p /usr/src/app/db
+RUN mkdir -p /usr/src/app
 
 COPY query-service /usr/src/app/query-service
 COPY db /usr/src/app/db
@@ -12,7 +11,7 @@ RUN npm install
 WORKDIR /usr/src/app/query-service
 RUN npm install
 
-EXPOSE 3001 57575
+EXPOSE 57575
 
 RUN chmod 755 start-service.sh
 CMD [ "./start-service.sh" ]

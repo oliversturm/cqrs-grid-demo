@@ -7,10 +7,6 @@ services:
       - "3000:3000"
     links:
       - rabbitmq
-      - query-service
-      - command-service
-      - validator
-      - testing
       
   query-service:
     image: sturm/cqrs-grid-demo/query-service
@@ -22,8 +18,12 @@ services:
     image: sturm/cqrs-grid-demo/command-service
     links:
       - rabbitmq
+
+  readmodel:
+    image: sturm/cqrs-grid-demo/readmodel
+    links:
+      - rabbitmq
       - mongo
-      - validator
 
   validator:
     image: sturm/cqrs-grid-demo/validator
@@ -49,4 +49,3 @@ services:
     image: sturm/cqrs-grid-demo/testing
     links:
       - rabbitmq
-      - command-service

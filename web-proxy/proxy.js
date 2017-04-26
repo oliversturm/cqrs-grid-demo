@@ -1,11 +1,13 @@
-const mongodb = require("mongodb");
+const mongodb = require('mongodb');
+const uuid = require('uuid/v4');
+
 const ObjectID = mongodb.ObjectID;
-const parambulator = require("parambulator");
+const parambulator = require('parambulator');
 
-const fixObject = require("../message-utils").fixObject;
+const fixObject = require('../message-utils').fixObject;
 
-function sendErrorStatus(m, status, msg="") {
-//    console.log("Sending error status '" + status + "': ", msg);
+function sendErrorStatus(m, status, msg='') {
+//    console.log('Sending error status '' + status + '': ', msg);
     
     m.response$.status(status).send({
 	message: msg
@@ -15,11 +17,11 @@ function sendErrorStatus(m, status, msg="") {
 const errors = { 
     invalid: {
 	status: 400,
-	message: "Invalid data"
+	message: 'Invalid data'
     },
     unknownid: {
 	status: 404,
-	message: "Invalid ID"
+	message: 'Invalid ID'
     }
 };
 
@@ -35,57 +37,57 @@ function checkError(m, res) {
 }
 
 module.exports = function(o) {
-    this.add("role:web, domain:values, cmd:createTestData", (m, r) => {
-	console.log("proxy creating test data");
+    this.add('role:web, domain:values, cmd:createTestData', (m, r) => {
+	console.log('proxy creating test data');
 	
 	this.act({
-	    role: "testing",
-	    domain: "values",
-	    cmd: "createTestData",
+	    role: 'testing',
+	    domain: 'values',
+	    cmd: 'createTestData',
 	    count: m.args.query.count
 	}, r);
     });
  
     const sortOptionsChecker = parambulator({
-	required$: ["desc", "selector"],
+	required$: ['desc', 'selector'],
 	// isExpanded doesn't make any sense with sort, but the grid seems
 	// to include it occasionally - probably a bug
-	only$: ["desc", "selector", "isExpanded"],
+	only$: ['desc', 'selector', 'isExpanded'],
 	desc: {
-	    type$: "boolean"
+	    type$: 'boolean'
 	},
 	selector: {
-	    type$: "string"
+	    type$: 'string'
 	}
     }); 
 
     const groupOptionsChecker = parambulator({
-	required$: ["selector"],
-	only$: ["desc", "selector", "isExpanded", "groupInterval"],
+	required$: ['selector'],
+	only$: ['desc', 'selector', 'isExpanded', 'groupInterval'],
 	desc: {
-	    type$: "boolean"
+	    type$: 'boolean'
 	},
 	isExpanded: {
-	    type$: "boolean"
+	    type$: 'boolean'
 	},
 	selector: {
-	    type$: "string"
+	    type$: 'string'
 	},
 	groupInterval: {
-	    type$: [ "string", "integer" ]
-	    // unclear whether parambulator supports a spec that says "can be enum but also number"
-	    //enum$: [ "year", "quarter", "month", "day", "dayOfWeek", "hour", "minute", "second" ] // and numbers?
+	    type$: [ 'string', 'integer' ]
+	    // unclear whether parambulator supports a spec that says 'can be enum but also number'
+	    //enum$: [ 'year', 'quarter', 'month', 'day', 'dayOfWeek', 'hour', 'minute', 'second' ] // and numbers?
 	}
     });
 
     const summaryOptionsChecker = parambulator({
-	required$: ["summaryType"],
-	only$: ["summaryType", "selector"],
+	required$: ['summaryType'],
+	only$: ['summaryType', 'selector'],
 	summaryType: {
-	    enum$: [ "sum", "avg", "min", "max", "count" ]
+	    enum$: [ 'sum', 'avg', 'min', 'max', 'count' ]
 	},
 	selector: {
-	    type$: "string"
+	    type$: 'string'
 	}
     });
 
@@ -101,22 +103,22 @@ module.exports = function(o) {
 	}, { valid: true, errors: [] });
     }
 
-    this.add("role:web, domain:values, cmd:list", function(m, r) {
+    this.add('role:web, domain:values, cmd:list', function(m, r) {
 	let p = {};
 
 	if (m.args.query.take) {
 	    const take = parseInt(m.args.query.take);
 	    if (take > 0) p.take = take;
-	    else this.log.info("Invalid take parameter found", m.args.query.take);
+	    else this.log.info('Invalid take parameter found', m.args.query.take);
 	}
 
 	if (m.args.query.skip) {
 	    const skip = parseInt(m.args.query.skip);
 	    if (skip >= 0) p.skip = skip;
-	    else this.log.info("Invalid skip parameter found", m.args.query.skip);
+	    else this.log.info('Invalid skip parameter found', m.args.query.skip);
 	}
 
-	p.requireTotalCount = (m.args.query.requireTotalCount === "true");
+	p.requireTotalCount = (m.args.query.requireTotalCount === 'true');
 	
 	if (m.args.query.sort) {
 	    const sortOptions = JSON.parse(m.args.query.sort);
@@ -124,9 +126,9 @@ module.exports = function(o) {
 	    if (sortOptions instanceof Array && sortOptions.length > 0) {
 		const vr = validateAll(sortOptions, sortOptionsChecker);
 		if (vr.valid) p.sort = sortOptions;
-		else this.log.info("Sort parameter validation errors", vr.errors);
+		else this.log.info('Sort parameter validation errors', vr.errors);
 	    }
-	    else this.log.info("Invalid sort parameter found", m.args.query.sort);
+	    else this.log.info('Invalid sort parameter found', m.args.query.sort);
 	}
 
 	if (m.args.query.group) {
@@ -138,7 +140,7 @@ module.exports = function(o) {
 		    if (vr.valid) {
 			p.group = groupOptions;
 
-		    	p.requireGroupCount = (m.args.query.requireGroupCount === "true");
+		    	p.requireGroupCount = (m.args.query.requireGroupCount === 'true');
 
 			if (m.args.query.groupSummary) {
 			    const gsOptions = JSON.parse(m.args.query.groupSummary);
@@ -147,18 +149,18 @@ module.exports = function(o) {
 				if (gsOptions.length > 0) {
 				    const vr = validateAll(gsOptions, summaryOptionsChecker);
 				    if (vr.valid) p.groupSummary = gsOptions;
-				    else this.log.info("groupSummary parameter validation errors", vr.errors);
+				    else this.log.info('groupSummary parameter validation errors', vr.errors);
 				}
 				// else - ignore empty array
 			    }
-			    else this.log.info("Invalid groupSummary parameter found", m.args.query.groupSummary);
+			    else this.log.info('Invalid groupSummary parameter found', m.args.query.groupSummary);
 			}
 		    }
-		    else this.log.info("Group parameter validation errors", vr.errors);
+		    else this.log.info('Group parameter validation errors', vr.errors);
 		}
 		// else - ignore empty array
 	    }
-	    else this.log.info("Invalid group parameter found", m.args.query.group);
+	    else this.log.info('Invalid group parameter found', m.args.query.group);
 	}
 
 	if (m.args.query.totalSummary) {
@@ -168,11 +170,11 @@ module.exports = function(o) {
 		if (tsOptions.length > 0) {
 		    const vr = validateAll(tsOptions, summaryOptionsChecker);
 		    if (vr.valid) p.totalSummary = tsOptions;
-		    else this.log.info("totalSummary parameter validation errors", vr.errors);
+		    else this.log.info('totalSummary parameter validation errors', vr.errors);
 		}
 		// else - ignore empty array
 	    }
-	    else this.log.info("Invalid totalSummary parameter found", m.args.query.totalSummary);
+	    else this.log.info('Invalid totalSummary parameter found', m.args.query.totalSummary);
 	}
 
 	if (m.args.query.filter) {
@@ -181,19 +183,19 @@ module.exports = function(o) {
 	    // the query service uses it if it can and returns errors
 	    // otherwise
 	    const filterOptions = JSON.parse(m.args.query.filter);
-	    if (typeof filterOptions === "string" || filterOptions.length) {
+	    if (typeof filterOptions === 'string' || filterOptions.length) {
 		p.filter = filterOptions;
 	    }
-	    else this.log.info("Invalid filter parameter found", m.args.query.filter);
+	    else this.log.info('Invalid filter parameter found', m.args.query.filter);
 	}
 
 	if (m.args.query.searchExpr && m.args.query.searchOperation && m.args.query.searchValue) {
 	    const searchValue = JSON.parse(m.args.query.searchValue);
 	    const searchOperation = JSON.parse(m.args.query.searchOperation);
 	    const searchExpr = JSON.parse(m.args.query.searchExpr);
-	    if (typeof searchValue === "string" &&
-		typeof searchValue === "string" && 
-		(typeof searchExpr === "string" || searchExpr.length)) {
+	    if (typeof searchValue === 'string' &&
+		typeof searchValue === 'string' && 
+		(typeof searchExpr === 'string' || searchExpr.length)) {
 		p.searchValue = searchValue;
 		p.searchOperation = searchOperation;
 		p.searchExpr = searchExpr;
@@ -202,70 +204,71 @@ module.exports = function(o) {
 
 	if (m.args.query.select) {
 	    const selectOptions = JSON.parse(m.args.query.select);
-	    if (typeof selectOptions === "string") p.select = [selectOptions];
+	    if (typeof selectOptions === 'string') p.select = [selectOptions];
 	    else if (selectOptions.length > 0) {
-		if (selectOptions.reduce((r, v) => r && typeof v === "string", true)) p.select = selectOptions;
-		else this.log.info("Array-like select parameter found with invalid content");
+		if (selectOptions.reduce((r, v) => r && typeof v === 'string', true)) p.select = selectOptions;
+		else this.log.info('Array-like select parameter found with invalid content');
 	    }
-	    else this.log.info("Unknown type for select parameter");
+	    else this.log.info('Unknown type for select parameter');
 	}
 	
 	this.act({
-	    role: "entitiesQuery",
-	    domain: "values",
-	    cmd: "list",
+	    role: 'entitiesQuery',
+	    domain: 'values',
+	    cmd: 'list',
 	    params: p
 	}, r);
     });
 
-    this.add("role:web, domain:values, cmd:create", function(m, r) {
+    this.add('role:web, domain:values, cmd:create', function(m, r) {
 	const seneca = this;
 	const instance = m.args.body;
 
 	// not fixing object - we'll just pass it on
 	seneca.act({
-	    role: "validation",
-	    domain: "values",
-	    cmd: "validateOne",
+	    role: 'validation',
+	    domain: 'values',
+	    cmd: 'validateOne',
 	    instance: instance
 	}, (err, res) => {
 	    if (err) r(err);
 	    
 	    if (!res.valid) {
 		sendErrorStatus(m, 400, res.err$);
-		return r();
+		r();
 	    }
-	    
-	    return seneca.act({
-		role: "entitiesCommand",
-		domain: "values",
-		cmd: "create",
-		instance: instance
-	    }, function(err, res) {
-		if (err) return r(err);
-		if (checkError(m, res)) return r();
-		
-		m.response$.location("/data/v1/values/" + res.id);
-		m.response$.sendStatus(201);
-		
-		return r();
-	    });
+            else {
+	        instance.id = uuid();
+                console.log('Creating object with id: ' + instance.id);
+                
+	        seneca.act({
+		    role: 'eventex',
+                    type: 'command',
+		    domain: 'entity',
+		    cmd: 'create',
+		    data: instance
+	        });
+
+                m.response$.location('/data/v1/values/' + instance.id);
+	        m.response$.sendStatus(201);
+	        r();
+            }
 	});
     });
 
-    this.add("role:web, domain:values, cmd:fetch", function(m, r) {
+    this.add('role:web, domain:values, cmd:fetch', function(m, r) {
 	const seneca = this;
 	const id = m.args.params.id;
 
 	if (!ObjectID.isValid(id)) {
-	    sendErrorStatus(m, 404, "Invalid ID");
+	    sendErrorStatus(m, 404, 'Invalid ID');
 	    return r();
 	}
 
 	return seneca.act({
-	    role: "entitiesQuery",
-	    domain: "values",
-	    cmd: "fetch",
+	    role: 'entitiesQuery',
+	    domain: 'values',
+	    cmd: 'fetch',
 	    id: id
 	}, function(err, res) {
 	    if (err) return r(err);
@@ -276,32 +279,29 @@ module.exports = function(o) {
 	});
     });
 
-    this.add("role:web, domain:values, cmd:update", function(m, r) {
+    this.add('role:web, domain:values, cmd:update', function(m, r) {
 	const seneca = this;
 	const id = m.args.params.id;
 
 	// not fixing object - we'll just pass it on
 
 	if (!ObjectID.isValid(id)) {
-	    sendErrorStatus(m, 404, "Invalid ID");
-	    return r();
+	    sendErrorStatus(m, 404, 'Invalid ID');
+	    r();
 	}
+        else {
+            const instance = m.args.body;
+            instance.id = id;
+            seneca.act({
+	        role: 'eventex',
+                type: 'command',
+	        domain: 'entity',
+	        cmd: 'update',
+	        data: instance
+	    });
 
-	const instance = m.args.body;
-
-	return seneca.act({
-	    role: "entitiesCommand",
-	    domain: "values",
-	    cmd: "update",
-	    id: id,
-	    instance: instance
-	}, function(err, res) {
-	    if (err) return r(err);
-	    if (checkError(m, res)) return r();
-
-	    m.response$.sendStatus(204);
-	    return r();
-	    
-	});
+            m.response$.sendStatus(204);
+	    r();
+	};
     });
 };

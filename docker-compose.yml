@@ -10,10 +10,6 @@ services:
       - "3000:3000"
     links:
       - rabbitmq
-      - query-service
-      - command-service
-      - validator
-      - testing
       
   query-service:
     image: sturm/cqrs-grid-demo/query-service
@@ -29,12 +25,20 @@ services:
     image: sturm/cqrs-grid-demo/command-service
     volumes:
       - ./command-service:/usr/src/app/command-service
+      - ./eventex-fork:/usr/src/app/eventex-fork
+      - ./message-utils:/usr/src/app/message-utils
+    links:
+      - rabbitmq
+
+  readmodel:
+    image: sturm/cqrs-grid-demo/readmodel
+    volumes:
+      - ./readmodel:/usr/src/app/readmodel
       - ./db:/usr/src/app/db
       - ./message-utils:/usr/src/app/message-utils
     links:
       - rabbitmq
       - mongo
-      - validator
 
   validator:
     image: sturm/cqrs-grid-demo/validator
@@ -69,4 +73,3 @@ services:
       - ./message-utils:/usr/src/app/message-utils
     links:
       - rabbitmq
-      - command-service

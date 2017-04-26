@@ -9,7 +9,6 @@
   "author": "Oliver Sturm",
   "license": "SEE LICENSE IN LICENSE",
   "dependencies": {
-    "mongodb": "^2.2.21",
     "seneca": "^3.2.2",
     "seneca-amqp-transport": "^2.1.0"
   },

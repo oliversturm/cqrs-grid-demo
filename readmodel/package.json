@@ -1,5 +1,5 @@
 {
-  "name": "web-proxy",
+  "name": "readmodel",
   "version": "1.0.0",
   "description": "",
   "main": "index.js",
@@ -9,22 +9,12 @@
   "author": "Oliver Sturm",
   "license": "SEE LICENSE IN LICENSE",
   "dependencies": {
-    "body-parser": "^1.15.2",
-    "cors": "^2.8.1",
-    "express": "^4.14.0",
-    "mongodb": "^2.2.21",
-    "parambulator": "^1.5.2",
-    "seneca": "^3.2.2",
+    "mongodb": "^2.2.26",
+    "seneca": "^3.3.0",
     "seneca-amqp-transport": "^2.1.0",
-    "seneca-web": "^2.0.0",
-    "seneca-web-adapter-express": "^1.0.2",
     "uuid": "^3.0.1"
   },
   "devDependencies": {
-    "chai": "^3.5.0",
-    "chai-http": "^3.0.0",
-    "mocha": "^3.2.0",
-    "morgan": "^1.7.0",
     "nodemon": "^1.11.0"
   }
 }
