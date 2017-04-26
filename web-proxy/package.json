@@ -18,7 +18,8 @@
     "seneca-amqp-transport": "^2.1.0",
     "seneca-web": "^2.0.0",
     "seneca-web-adapter-express": "^1.0.2",
-    "uuid": "^3.0.1"
+    "uuid": "^3.0.1",
+    "uuid-validate": "0.0.2"
   },
   "devDependencies": {
     "chai": "^3.5.0",

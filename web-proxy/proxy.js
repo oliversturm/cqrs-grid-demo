@@ -1,5 +1,6 @@
 const mongodb = require('mongodb');
 const uuid = require('uuid/v4');
+const validateUuid = require('uuid-validate');
 
 const ObjectID = mongodb.ObjectID;
 const parambulator = require('parambulator');
@@ -260,7 +261,7 @@ module.exports = function(o) {
 	const seneca = this;
 	const id = m.args.params.id;
 
-	if (!ObjectID.isValid(id)) {
+	if (!validateUuid(id, 4)) {
 	    sendErrorStatus(m, 404, 'Invalid ID');
 	    return r();
 	}
@@ -285,7 +286,7 @@ module.exports = function(o) {
 
 	// not fixing object - we'll just pass it on
 
-	if (!ObjectID.isValid(id)) {
+	if (!validateUuid(id, 4)) {
 	    sendErrorStatus(m, 404, 'Invalid ID');
 	    r();
 	}
