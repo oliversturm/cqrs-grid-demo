@@ -5,11 +5,6 @@ const fixObject = require("../message-utils").fixObject;
 
 const query = require("devextreme-query-mongodb");
 
-function replaceId(item) {
-    if (item._id) item._id = item._id.toHexString();
-    return item;
-}
-
 module.exports = function(o = {}) {
     const db = require("../db")(o);
 
@@ -20,7 +15,9 @@ module.exports = function(o = {}) {
 	
 	db(async (db) => {
 	    try {
-		r(null, await query(db.collection("values"), m.params));
+		r(null, await query(db.collection("values"),
+                                    m.params,
+                                    { replaceIds: false }));
 	    }
 	    catch(err) {
 		r(null, { err$: err });
@@ -33,7 +30,7 @@ module.exports = function(o = {}) {
 	db(async (db) => {
 	    try {
 		const res = await db.collection("values").findOne({ _id: new ObjectID(m.id) });
-		if (res) r(null, replaceId(res));
+		if (res) r(null, res);
 		else r(null, { err$: "unknownid" });
 	    }
 	    catch(err) {
