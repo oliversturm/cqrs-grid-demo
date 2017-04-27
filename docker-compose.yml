@@ -29,6 +29,7 @@ services:
       - ./message-utils:/usr/src/app/message-utils
     links:
       - rabbitmq
+      - mongo
 
   readmodel:
     image: sturm/cqrs-grid-demo/readmodel

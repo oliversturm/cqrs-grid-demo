@@ -22,6 +22,14 @@ eventex.setMessageBus({
     publisher: new Publisher(messageBusConfig)
 });
 
+eventex.setEventStore({
+    type: 'mongoDB',
+    host: process.env.MONGO_HOST || 'mongo',
+    port: process.env.MONGO_PORT || 27017,
+    name: 'cqrs_demo_events',
+    collectionName: 'events'
+});
+
 const context = eventex.defineContext('entities');
 
 const aggregate = context.defineAggregate('entity', {
@@ -32,8 +40,41 @@ const aggregate = context.defineAggregate('entity', {
     string: ''
 });
 
-aggregate.defineCommand('create').emitDomainEvent('entityCreated');
-aggregate.defineCommand('update').emitDomainEvent('entityUpdated');
+aggregate.
+    defineCommand('create').
+    emitDomainEvent('entityCreated').
+    addValidation({
+        date1: {
+            type: 'object',
+            required: true
+        },
+        date2: {
+            type: 'object',
+            required: true
+        },
+        int1: {
+            type: 'number',
+            required: true
+        },
+        int2: {
+            type: 'number',
+            required: true
+        },
+        string: {
+            type: 'string',
+            required: true
+        }
+    });
+
+aggregate.
+    defineCommand('update').
+    emitDomainEvent('entityUpdated').
+    preCondition((data, aggregate) => {
+        if (!aggregate.$isExists()){
+            console.error('Update error, entity doesn\'t exist');
+            throw new Error('Update error, entity doesn\'t exist');
+        }
+    });
 
 eventex.init(new Launcher(process.env.RABBITMQ_HOST || 'rabbitmq')).then(() => {
     console.info('Command Service started');

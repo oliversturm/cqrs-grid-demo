@@ -1,21 +1,20 @@
-const mongodb = require("mongodb");
-const ObjectID = mongodb.ObjectID;
+const mongodb = require('mongodb');
 
-const fixObject = require("../message-utils").fixObject;
+const fixObject = require('../message-utils').fixObject;
 
-const query = require("devextreme-query-mongodb");
+const query = require('devextreme-query-mongodb');
 
 module.exports = function(o = {}) {
-    const db = require("../db")(o);
+    const db = require('../db')(o);
 
-    this.add("role:entitiesQuery, domain:values, cmd:list", (m, r) => {
+    this.add('role:entitiesQuery, domain:values, cmd:list', (m, r) => {
 	m = fixObject(m);
 
-	//console.log("Query params: ", m.params);
+	//console.log('Query params: ', m.params);
 	
 	db(async (db) => {
 	    try {
-		r(null, await query(db.collection("values"),
+		r(null, await query(db.collection('values'),
                                     m.params,
                                     { replaceIds: false }));
 	    }
@@ -26,12 +25,12 @@ module.exports = function(o = {}) {
     });
 	
 	
-    this.add("role:entitiesQuery, domain:values, cmd:fetch", (m, r) => {
+    this.add('role:entitiesQuery, domain:values, cmd:fetch', (m, r) => {
 	db(async (db) => {
 	    try {
-		const res = await db.collection("values").findOne({ _id: new ObjectID(m.id) });
+		const res = await db.collection('values').findOne({ _id: new ObjectID(m.id) });
 		if (res) r(null, res);
-		else r(null, { err$: "unknownid" });
+		else r(null, { err$: 'unknownid' });
 	    }
 	    catch(err) {
 		r(null, { err$: err });

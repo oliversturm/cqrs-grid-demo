@@ -233,8 +233,7 @@ module.exports = function(o) {
 	    instance: instance
 	}, (err, res) => {
 	    if (err) r(err);
-	    
-	    if (!res.valid) {
+            else if (!res.valid) {
 		sendErrorStatus(m, 400, res.err$);
 		r();
 	    }
@@ -284,25 +283,36 @@ module.exports = function(o) {
 	const seneca = this;
 	const id = m.args.params.id;
 
-	// not fixing object - we'll just pass it on
-
 	if (!validateUuid(id, 4)) {
 	    sendErrorStatus(m, 404, 'Invalid ID');
 	    r();
 	}
         else {
-            const instance = m.args.body;
-            instance.id = id;
-            seneca.act({
-	        role: 'eventex',
-                type: 'command',
-	        domain: 'entity',
-	        cmd: 'update',
-	        data: instance
-	    });
+            const instance = fixObject(m.args.body);
+	
+	    seneca.act({
+	        role: "validation",
+	        domain: "values",
+	        cmd: "validateOne",
+	        instance,
+	        allowIncomplete: true
+	    }, (err, res) => {
+	        if (err) r(err);
+	        else if (res.valid) {
+                    instance.id = id;
+                    seneca.act({
+	                role: 'eventex',
+                        type: 'command',
+	                domain: 'entity',
+	                cmd: 'update',
+	                data: instance
+	            });
+                    m.response$.sendStatus(204);
+	            r();
+                }
+                else r(null, { err$: "invalid" });
 
-            m.response$.sendStatus(204);
-	    r();
-	};
+	    });
+        }
     });
 };

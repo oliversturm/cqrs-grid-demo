@@ -31,7 +31,7 @@ run-without-docker:
 	@echo "Make sure you have mongodb running locally on port 27017, and rabbitmq on port 5672"
 	cd validator; RABBITMQ_HOST=localhost node index.js &
 	cd query-service; MONGO_HOST=localhost RABBITMQ_HOST=localhost node --harmony index.js &
-	cd command-service; RABBITMQ_HOST=localhost node index.js &
+	cd command-service; MONGO_HOST=localhost RABBITMQ_HOST=localhost node index.js &
 	cd readmodel; MONGO_HOST=localhost RABBITMQ_HOST=localhost node index.js &
 	cd testing; RABBITMQ_HOST=localhost node index.js &
 	cd web-proxy; RABBITMQ_HOST=localhost node index.js &
