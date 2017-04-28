@@ -28,7 +28,7 @@ module.exports = function(o = {}) {
     this.add('role:entitiesQuery, domain:values, cmd:fetch', (m, r) => {
 	db(async (db) => {
 	    try {
-		const res = await db.collection('values').findOne({ _id: new ObjectID(m.id) });
+		const res = await db.collection('values').findOne({ _id: m.id });
 		if (res) r(null, res);
 		else r(null, { err$: 'unknownid' });
 	    }
