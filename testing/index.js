@@ -1,27 +1,29 @@
-const seneca = require("seneca")({
+const seneca = require('seneca')(
+  {
     //log: "all"
-});
+  }
+);
 
-console.log("Using connection: ", process.env.CMDSRVC_HOST);
+console.log('Using connection: ', process.env.CMDSRVC_HOST);
 
-seneca.
-    use("seneca-amqp-transport").
-    client({
-	type: "amqp",
-	hostname: process.env.RABBITMQ_HOST || "rabbitmq",
-	port: parseInt(process.env.RABBITMQ_PORT) || 5672,
-	pin: "role:entitiesCommand",
-	socketOptions: {
-	    noDelay: true
-	}
-    }).
-    use("testing").
-    listen({
-	type: "amqp",
-	hostname: process.env.RABBITMQ_HOST || "rabbitmq",
-	port: parseInt(process.env.RABBITMQ_PORT) || 5672,
-	pin: "role:testing",
-	socketOptions: {
-	    noDelay: true
-	}
-    });
+seneca
+  .use('seneca-amqp-transport')
+  .client({
+    type: 'amqp',
+    hostname: process.env.RABBITMQ_HOST || 'rabbitmq',
+    port: parseInt(process.env.RABBITMQ_PORT) || 5672,
+    pin: 'role:eventex',
+    socketOptions: {
+      noDelay: true
+    }
+  })
+  .use('testing')
+  .listen({
+    type: 'amqp',
+    hostname: process.env.RABBITMQ_HOST || 'rabbitmq',
+    port: parseInt(process.env.RABBITMQ_PORT) || 5672,
+    pin: 'role:testing',
+    socketOptions: {
+      noDelay: true
+    }
+  });
