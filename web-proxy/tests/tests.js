@@ -95,11 +95,9 @@ describe('REST tests', () => {
   }
 
   function validationStub(seneca, result) {
-    return resultStub(
-      seneca,
-      'role:validation,domain:values,cmd:validateOne',
-      result
-    );
+    return resultStub(seneca, 'role:validation,domain:values,cmd:validateOne', {
+      valid: result
+    });
   }
 
   function emptyStub(seneca, pin) {
@@ -307,24 +305,42 @@ describe('REST tests', () => {
 
   describe('GET value(s)', () => {
     it('retrieves all values', tdone => {
-      testServer(tdone, (server, ldone) => {
-        create(server, val1, () => {
-          create(server, val2, () => {
-            chai
-              .request(server)
-              .get(BASE)
-              .then(res => {
-                expect(res).to.have.status(200);
-                expect(res.body.data).to.be.a('array');
-                expect(res.body.data).to.have.lengthOf(2);
-                ldone();
-              })
-              .catch(err => {
-                throw err;
-              });
+      testServer(
+        tdone,
+        (server, ldone) => {
+          chai
+            .request(server)
+            .get(BASE)
+            .then(res => {
+              expect(res).to.have.status(200);
+              expect(res.body.data).to.be.a('array');
+              expect(res.body.data).to.have.lengthOf(2);
+              ldone();
+            })
+            .catch(err => {
+              throw err;
+            });
+        },
+        seneca => {
+          return resultStub(
+            seneca,
+            'role:entitiesQuery,domain:values,cmd:list',
+            {
+              data: [1, 2] // not important what's in the array
+            }
+          );
+        },
+        stub => {
+          expect(stub.callCount).to.eql(1);
+
+          expect(stub.data()).to.shallowDeepEqual({
+            role: 'entitiesQuery',
+            domain: 'values',
+            cmd: 'list',
+            params: {}
           });
-        });
-      });
+        }
+      );
     });
 
     it('retrieves one value', tdone => {
