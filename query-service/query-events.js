@@ -3,16 +3,17 @@ const fixObject = require('../message-utils').fixObject;
 const { listValues, fetchValue } = require('./query.js');
 
 module.exports = function(o = {}) {
+  o.mongoDbName = 'cqrs_demo_events';
   const conn = require('../db')(o);
 
-  this.add('role:entitiesQuery, domain:values, cmd:list', (m, r) => {
+  this.add('role:entitiesQuery, domain:events, cmd:list', (m, r) => {
     m = fixObject(m);
 
     //console.log('Query params: ', m.params);
 
     listValues(
       conn,
-      'values',
+      'events',
       {
         replaceIds: false
       },
@@ -21,7 +22,7 @@ module.exports = function(o = {}) {
     );
   });
 
-  this.add('role:entitiesQuery, domain:values, cmd:fetch', (m, r) => {
-    fetchValue(conn, 'values', '_id', m, r);
+  this.add('role:entitiesQuery, domain:events, cmd:fetch', (m, r) => {
+    fetchValue(conn, 'events', 'id', m, r);
   });
 };

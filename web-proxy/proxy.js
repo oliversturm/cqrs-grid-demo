@@ -109,7 +109,7 @@ module.exports = function(o) {
     );
   }
 
-  this.add('role:web, domain:values, cmd:list', function(m, r) {
+  function listValues(seneca, m, outgoing, r) {
     let p = {};
 
     if (m.args.query.take) {
@@ -238,12 +238,18 @@ module.exports = function(o) {
       } else this.log.info('Unknown type for select parameter');
     }
 
-    this.act(
+    outgoing.params = p;
+    seneca.act(outgoing, r);
+  }
+
+  this.add('role:web, domain:values, cmd:list', function(m, r) {
+    listValues(
+      this,
+      m,
       {
         role: 'entitiesQuery',
         domain: 'values',
-        cmd: 'list',
-        params: p
+        cmd: 'list'
       },
       r
     );
@@ -286,6 +292,11 @@ module.exports = function(o) {
     );
   });
 
+  function fetchValue(seneca, id, outgoing, r) {
+    outgoing.id = id;
+    return seneca.act(outgoing, r);
+  }
+
   this.add('role:web, domain:values, cmd:fetch', function(m, r) {
     const seneca = this;
     const id = m.args.params.id;
@@ -295,12 +306,13 @@ module.exports = function(o) {
       return r();
     }
 
-    return seneca.act(
+    return fetchValue(
+      seneca,
+      id,
       {
         role: 'entitiesQuery',
         domain: 'values',
-        cmd: 'fetch',
-        id: id
+        cmd: 'fetch'
       },
       function(err, res) {
         if (err) return r(err);
@@ -350,5 +362,45 @@ module.exports = function(o) {
         }
       );
     }
+  });
+
+  this.add('role:web, domain:events, cmd:fetch', function(m, r) {
+    const seneca = this;
+    const id = m.args.params.id;
+
+    if (!validateUuid(id, 4)) {
+      sendErrorStatus(m, 404, 'Invalid ID');
+      return r();
+    }
+
+    return fetchValue(
+      seneca,
+      id,
+      {
+        role: 'entitiesQuery',
+        domain: 'events',
+        cmd: 'fetch'
+      },
+      function(err, res) {
+        if (err) return r(err);
+        if (checkError(m, res)) return r();
+
+        m.response$.status(200).send(res);
+        return r();
+      }
+    );
+  });
+
+  this.add('role:web, domain:events, cmd:list', function(m, r) {
+    listValues(
+      this,
+      m,
+      {
+        role: 'entitiesQuery',
+        domain: 'events',
+        cmd: 'list'
+      },
+      r
+    );
   });
 };
