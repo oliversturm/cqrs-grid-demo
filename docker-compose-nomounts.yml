@@ -25,6 +25,11 @@ services:
       - rabbitmq
       - mongo
 
+  query-change-detector:
+    image: sturm/cqrs-grid-demo/query-change-detector
+    links:
+      - rabbitmq
+
   validator:
     image: sturm/cqrs-grid-demo/validator
     links:

@@ -1,6 +1,6 @@
 export SHELL=/bin/bash
 
-PROJECTS = command-service query-service web-proxy validator webapp testing readmodel
+PROJECTS = command-service query-service web-proxy validator webapp testing readmodel query-change-detector
 DOCKERS = $(PROJECTS:%=bd-%)
 
 .PHONY: dcup dcupb test
@@ -33,6 +33,7 @@ run-without-docker:
 	cd query-service; MONGO_HOST=localhost RABBITMQ_HOST=localhost node --harmony index.js &
 	cd command-service; MONGO_HOST=localhost RABBITMQ_HOST=localhost node index.js &
 	cd readmodel; MONGO_HOST=localhost RABBITMQ_HOST=localhost node index.js &
+	cd query-change-detector; RABBITMQ_HOST=localhost node index.js &
 	cd testing; RABBITMQ_HOST=localhost node index.js &
 	cd web-proxy; RABBITMQ_HOST=localhost node index.js &
 	cd webapp; node index.js & # port 8080

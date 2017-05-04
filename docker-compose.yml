@@ -40,6 +40,14 @@ services:
     links:
       - rabbitmq
       - mongo
+      
+  query-change-detector:
+    image: sturm/cqrs-grid-demo/query-change-detector
+    volumes:
+      - ./query-change-detector:/usr/src/app/query-change-detector
+      - ./message-utils:/usr/src/app/message-utils
+    links:
+      - rabbitmq
 
   validator:
     image: sturm/cqrs-grid-demo/validator
