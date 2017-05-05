@@ -1,19 +1,24 @@
-var seneca = require('seneca')();
-var web = require('seneca-web');
-var express = require('express');
-var bodyParser = require('body-parser');
-var cors = require('cors');
+const seneca = require('seneca')();
+const web = require('seneca-web');
+const express = require('express');
+const bodyParser = require('body-parser');
+const cors = require('cors');
+const socketIo = require('socket.io');
+const http = require('http');
 
-var routes = require('./routes');
-var expressApp = express();
+const routes = require('./routes');
 
-var messageUtils = require('../message-utils');
-var fixValue = messageUtils.fixValue;
-var fixDate = messageUtils.fixDate;
+const messageUtils = require('../message-utils');
+const fixValue = messageUtils.fixValue;
+const fixDate = messageUtils.fixDate;
+
+const liveClients = require('./liveClients.js')();
 
 function revive(key, value) {
   return fixValue(value, [fixDate]);
 }
+
+const expressApp = express();
 
 expressApp.use(
   bodyParser.json({
@@ -24,7 +29,11 @@ expressApp.use(cors());
 
 expressApp.use(require('morgan')('dev'));
 
-var config = {
+// const server = http.Server(expressApp);
+// const io = socketIo(server);
+// require('./sockets')(io, liveClients);
+
+const config = {
   routes: routes,
   adapter: require('seneca-web-adapter-express'),
   context: expressApp,
@@ -35,7 +44,8 @@ var config = {
 
 seneca
   .use('seneca-amqp-transport')
-  .use('proxy')
+  .use('proxy', liveClients)
+  .use('queryChanges', liveClients)
   .client({
     type: 'amqp',
     hostname: process.env.RABBITMQ_HOST || 'rabbitmq',
@@ -45,17 +55,30 @@ seneca
       'role:entitiesCommand',
       'role:validation',
       'role:testing',
-      'role:eventex'
+      'role:eventex',
+      'role:querychanges'
     ],
+    socketOptions: {
+      noDelay: true
+    }
+  })
+  .listen({
+    type: 'amqp',
+    hostname: process.env.RABBITMQ_HOST || 'rabbitmq',
+    port: parseInt(process.env.RABBITMQ_PORT) || 5672,
+    pin: 'role:querychangeevent',
     socketOptions: {
       noDelay: true
     }
   })
   .use(web, config)
   .ready(() => {
-    var server = seneca.export('web/context')();
+    const express = seneca.export('web/context')();
+    const server = http.Server(express);
+    const io = socketIo(server);
+    require('./sockets')(io, liveClients);
 
-    var port = process.env.WEBPROXY_PORT || 3000;
+    const port = process.env.WEBPROXY_PORT || 3000;
 
     server.listen(port, () => {
       console.log('Web Proxy running on port ' + port);

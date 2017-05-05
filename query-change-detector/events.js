@@ -7,10 +7,14 @@ function findId(data, id) {
 function checkQueries(seneca, store, aggregateId, triggerEvent) {
   store
     .ids()
-    .map(id => ({
-      id,
-      params: store.get(id)
-    }))
+    .map(id => {
+      console.log('mapping id ', id);
+
+      return {
+        id,
+        params: store.get(id)
+      };
+    })
     .forEach(q => {
       seneca.act(
         {

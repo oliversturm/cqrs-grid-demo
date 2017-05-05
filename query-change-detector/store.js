@@ -3,6 +3,13 @@ module.exports = function() {
 
   return {
     register(id, queryParams) {
+      if (!id || !queryParams)
+        console.error(
+          `Store can't register id ${id} with params ${JSON.stringify(queryParams)}`
+        );
+
+      console.log('Store registering id ', id);
+
       if (!queryParams.group) {
         content[id] = queryParams;
         return true;
@@ -10,7 +17,9 @@ module.exports = function() {
     },
 
     ids() {
-      return Object.getOwnPropertyNames(content);
+      const result = Object.getOwnPropertyNames(content);
+      console.log('Store returning ids ', result);
+      return result;
     },
 
     get(id) {

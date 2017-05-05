@@ -34,7 +34,7 @@ seneca
     type: 'amqp',
     hostname: process.env.RABBITMQ_HOST || 'rabbitmq',
     port: parseInt(process.env.RABBITMQ_PORT) || 5672,
-    pin: 'role:querychangeevent',
+    pin: ['role: querychangeevent', 'role: entitiesQuery'],
     socketOptions: {
       noDelay: true
     }

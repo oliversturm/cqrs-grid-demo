@@ -1,9 +1,13 @@
 var grid;
 
 $(function() {
-  const dataStore = createDataStore(
+  var dataStore = createDataStore(
     'http://localhost:3000/data/v1/values',
-    '_id'
+    '_id',
+    function(changeInfo) {
+      grid.refresh();
+    },
+    'http://localhost:3000'
   );
 
   $('#toolbar').dxToolbar({

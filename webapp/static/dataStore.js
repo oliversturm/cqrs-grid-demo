@@ -3,7 +3,12 @@
 
 var debugId = 0;
 
-function createDataStore(baseDataUrl, idField) {
+function createDataStore(
+  baseDataUrl,
+  idField,
+  changeNotification,
+  socketIoUrl = 'http://localhost'
+) {
   return new DevExpress.data.CustomStore({
     key: idField,
     load: function(options) {
@@ -42,6 +47,10 @@ function createDataStore(baseDataUrl, idField) {
           params.groupSummary = JSON.stringify(options.groupSummary);
       }
 
+      if (changeNotification && !options.group) {
+        params.live = true;
+      }
+
       var d = $.Deferred();
       d.debugId = debugId++;
 
@@ -55,6 +64,21 @@ function createDataStore(baseDataUrl, idField) {
         if (options.requireTotalCount) details.totalCount = res.totalCount;
         if (options.requireGroupCount) details.groupCount = res.groupCount;
         if (options.totalSummary) details.summary = res.summary;
+
+        if (params.live && res.liveId) {
+          var socket = io.connect(socketIoUrl);
+          socket.on('hello', function(args, reply) {
+            socket.on('registered', function() {
+              socket.on('querychange', function(changeInfo) {
+                changeNotification(changeInfo);
+              });
+            });
+
+            reply({
+              liveId: res.liveId
+            });
+          });
+        }
 
         d.resolve(res.data, details);
       });

@@ -36,7 +36,7 @@ function checkError(m, res) {
   return false;
 }
 
-module.exports = function(o) {
+module.exports = function(liveClients) {
   this.add('role:web, domain:values, cmd:createTestData', (m, r) => {
     console.log('proxy creating test data');
 
@@ -238,8 +238,31 @@ module.exports = function(o) {
       } else this.log.info('Unknown type for select parameter');
     }
 
+    let liveId;
+
+    if (m.args.query.live) {
+      liveId = uuid();
+
+      seneca.act(
+        {
+          role: 'querychanges',
+          cmd: 'register',
+          id: liveId,
+          queryParams: p
+        },
+        (err, res) => {
+          if (res.registered) {
+            liveClients.register(liveId);
+          } // else - wasn't registered for some reason, ignore
+        }
+      );
+    }
+
     outgoing.params = p;
-    seneca.act(outgoing, r);
+    seneca.act(outgoing, (err, res) => {
+      if (liveId) res.liveId = liveId;
+      r(err, res);
+    });
   }
 
   this.add('role:web, domain:values, cmd:list', function(m, r) {
