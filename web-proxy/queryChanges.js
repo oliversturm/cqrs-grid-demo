@@ -1,6 +1,6 @@
 module.exports = function(liveClients) {
   this.add('role:querychangeevent', (m, r) => {
-    console.log('Received query changed event', m);
+    console.log('Received query changed event for id ', m.queryId);
 
     if (liveClients.hasId(m.queryId)) {
       liveClients.getSocket(m.queryId).emit('querychange', {

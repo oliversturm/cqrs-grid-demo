@@ -5,6 +5,8 @@ function findId(data, id) {
 }
 
 function checkQueries(seneca, store, aggregateId, triggerEvent) {
+  console.log(`Checking ${store.ids().length} queries`);
+
   store
     .ids()
     .map(id => {
@@ -40,7 +42,7 @@ module.exports = function(store) {
   const knownEvents = ['entityCreated', 'entityUpdated'];
 
   this.add('role: event', function(m, r) {
-    console.log('Event received: ', m.event);
+    //console.log('Event received: ', m.event);
     if (knownEvents.includes(m.eventName)) {
       checkQueries(this, store, m.event.aggregate.id, m.eventName);
     }

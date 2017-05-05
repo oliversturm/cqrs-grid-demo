@@ -7,4 +7,9 @@ module.exports = function(store) {
       registered: store.register(m.id, m.queryParams)
     });
   });
+
+  this.add('role: querychanges, cmd: deregister', (m, r) => {
+    store.deregister(m.id);
+    r();
+  });
 };

@@ -16,6 +16,10 @@ module.exports = function() {
       } else return false;
     },
 
+    deregister(id) {
+      delete content[id];
+    },
+
     ids() {
       const result = Object.getOwnPropertyNames(content);
       console.log('Store returning ids ', result);

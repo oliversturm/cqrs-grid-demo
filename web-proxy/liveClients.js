@@ -6,6 +6,10 @@ module.exports = function() {
       content[id] = {};
     },
 
+    deregister(id) {
+      delete content[id];
+    },
+
     registerConnection(id, socket) {
       if (!this.hasId(id)) {
         console.error(`Can't register connection for ${id}`);

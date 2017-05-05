@@ -12,6 +12,13 @@ function createDataStore(
   return new DevExpress.data.CustomStore({
     key: idField,
     load: function(options) {
+      var store = this;
+
+      if (store.liveSocket) {
+        store.liveSocket.disconnect(true);
+        store.liveSocket = undefined;
+      }
+
       // from https://www.devexpress.com/Support/Center/Question/Details/KA18955
       var params = {};
 
@@ -69,6 +76,7 @@ function createDataStore(
           var socket = io.connect(socketIoUrl);
           socket.on('hello', function(args, reply) {
             socket.on('registered', function() {
+              store.liveSocket = socket;
               socket.on('querychange', function(changeInfo) {
                 changeNotification(changeInfo);
               });

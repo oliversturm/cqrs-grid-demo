@@ -29,10 +29,6 @@ expressApp.use(cors());
 
 expressApp.use(require('morgan')('dev'));
 
-// const server = http.Server(expressApp);
-// const io = socketIo(server);
-// require('./sockets')(io, liveClients);
-
 const config = {
   routes: routes,
   adapter: require('seneca-web-adapter-express'),
@@ -76,7 +72,7 @@ seneca
     const express = seneca.export('web/context')();
     const server = http.Server(express);
     const io = socketIo(server);
-    require('./sockets')(io, liveClients);
+    require('./sockets')(seneca, io, liveClients);
 
     const port = process.env.WEBPROXY_PORT || 3000;
 
