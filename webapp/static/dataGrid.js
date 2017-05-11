@@ -5,7 +5,43 @@ $(function() {
     'http://localhost:3000/data/v1/values',
     '_id',
     function(changeInfo) {
-      grid.refresh();
+      if (changeInfo.batchUpdate) {
+        console.log('full refresh');
+
+        grid.refresh();
+      } else {
+        const map = {
+          entityUpdated: {
+            true() {
+              const index = grid.getRowIndexByKey(changeInfo.data._id);
+              const row = grid.getDataSource().items()[index];
+              Object.assign(row, changeInfo.data);
+              grid.repaintRows([index]);
+
+              console.log('upd true');
+            },
+            false() {
+              const index = grid.getRowIndexByKey(changeInfo.data._id);
+              const items = grid.getDataSource().items();
+              items.splice(index, 1);
+
+              console.log('upd false');
+            }
+          },
+          entityCreated: {
+            true() {
+              const items = grid.getDataSource().items();
+              items.splice(changeInfo.dataIndex, 0, changeInfo.data);
+              grid.repaintRows(changeInfo.dataIndex);
+
+              console.log('crea true');
+            }
+            // false case doesn't exist
+          }
+        };
+
+        map[changeInfo.triggerEvent][changeInfo.aggregateIsPartOfQueryResult]();
+      }
     },
     'http://localhost:3000'
   );

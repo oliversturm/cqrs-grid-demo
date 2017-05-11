@@ -2,7 +2,8 @@ const fixObject = require('../message-utils').fixObject;
 
 module.exports = (() => {
   function findId(data, id, idFieldName) {
-    return data.find(d => d[idFieldName] === id);
+    const index = data.findIndex(d => d[idFieldName] === id);
+    return index === -1 ? undefined : index;
   }
 
   function checkQueries(seneca, store, aggregateId, triggerEvent) {
@@ -23,16 +24,25 @@ module.exports = (() => {
             params: q.params.queryParams
           },
           (err, res) => {
+            const dataIndex = findId(
+              res.data,
+              aggregateId,
+              q.params.idFieldName
+            );
+            const isPart = dataIndex != undefined;
+
+            // only case where we don't send notification: if the aggregate
+            // has just been created and it's not in the result set
+            if (!isPart && triggerEvent === 'entityCreated') return;
+
             seneca.act({
               role: 'querychangeevent',
               queryId: q.id,
               aggregateId,
               triggerEvent,
-              aggregateIsPartOfQueryResult: !!findId(
-                res.data,
-                aggregateId,
-                q.params.idFieldName
-              )
+              aggregateIsPartOfQueryResult: isPart,
+              data: isPart ? res.data[dataIndex] : undefined,
+              dataIndex
             });
           }
         );
