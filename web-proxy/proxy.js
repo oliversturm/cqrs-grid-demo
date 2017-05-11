@@ -242,12 +242,17 @@ module.exports = function(liveClients) {
 
     if (m.args.query.live) {
       liveId = uuid();
+      let idFieldName = '_id';
+      if (m.args.query.idFieldName) {
+        idFieldName = JSON.parse(m.args.query.idFieldName);
+      }
 
       seneca.act(
         {
           role: 'querychanges',
           cmd: 'register',
           id: liveId,
+          idFieldName,
           queryParams: p
         },
         (err, res) => {
@@ -297,7 +302,7 @@ module.exports = function(liveClients) {
           r();
         } else {
           instance.id = uuid();
-          console.log('Creating object with id: ' + instance.id);
+          //console.log('Creating object with id: ' + instance.id);
 
           seneca.act({
             role: 'eventex',

@@ -5,7 +5,10 @@ const store = require('./store')();
 
 seneca
   .use('seneca-amqp-transport')
-  .use('./events', store)
+  .use('./events', {
+    store,
+    idFieldName: '_id'
+  })
   .use('querychanges', store)
   .listen({
     type: 'amqp',
