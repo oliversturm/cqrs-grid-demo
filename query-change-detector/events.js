@@ -6,7 +6,7 @@ module.exports = (() => {
     return index === -1 ? undefined : index;
   }
 
-  function checkQueries(seneca, store, aggregateId, triggerEvent) {
+  function checkQueries(seneca, store, events) {
     //console.log(`Checking ${store.ids().length} queries`);
 
     store
@@ -24,26 +24,31 @@ module.exports = (() => {
             params: q.params.queryParams
           },
           (err, res) => {
-            const dataIndex = findId(
-              res.data,
-              aggregateId,
-              q.params.idFieldName
-            );
-            const isPart = dataIndex != undefined;
+            const results = events.reduce((r, v) => {
+              const dataIndex = findId(
+                res.data,
+                v.aggregateId,
+                q.params.idFieldName
+              );
+              const isPart = dataIndex != undefined;
 
-            // only case where we don't send notification: if the aggregate
-            // has just been created and it's not in the result set
-            if (!isPart && triggerEvent === 'entityCreated') return;
+              if (isPart || v.eventName != 'entityCreated')
+                r.push({
+                  aggregateId: v.aggregateId,
+                  triggerEvent: v.eventName,
+                  aggregateIsPartOfQueryResult: isPart,
+                  data: isPart ? res.data[dataIndex] : undefined,
+                  dataIndex
+                });
+              return r;
+            }, []);
 
-            seneca.act({
-              role: 'querychangeevent',
-              queryId: q.id,
-              aggregateId,
-              triggerEvent,
-              aggregateIsPartOfQueryResult: isPart,
-              data: isPart ? res.data[dataIndex] : undefined,
-              dataIndex
-            });
+            if (results.length > 0)
+              seneca.act({
+                role: 'querychangeevent',
+                queryId: q.id,
+                events: results
+              });
           }
         );
       });
@@ -73,6 +78,11 @@ module.exports = (() => {
     killQueue() {
       this.events = [];
     },
+    dequeueAll() {
+      const result = this.events.reverse();
+      this.killQueue();
+      return result;
+    },
     lastEventTimestamp: undefined,
     oldestEventTimestamp: undefined
   });
@@ -93,10 +103,7 @@ module.exports = (() => {
           batchNotify(seneca, o.store);
           eventQueue.killQueue();
         } else {
-          let e;
-          while ((e = eventQueue.dequeue())) {
-            checkQueries(seneca, o.store, e.aggregateId, e.eventName);
-          }
+          checkQueries(seneca, o.store, eventQueue.dequeueAll());
         }
       }
     }

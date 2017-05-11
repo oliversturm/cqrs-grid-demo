@@ -8,11 +8,7 @@ module.exports = function(liveClients) {
         socket.emit('querychange', {
           liveId: m.queryId,
           batchUpdate: m.batchUpdate,
-          aggregateId: m.aggregateId,
-          triggerEvent: m.triggerEvent,
-          aggregateIsPartOfQueryResult: m.aggregateIsPartOfQueryResult,
-          data: m.data,
-          dataIndex: m.dataIndex
+          events: m.events
         });
         //console.log(`Client notified for ${m.queryId}`);
       } else {

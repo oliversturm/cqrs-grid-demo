@@ -12,27 +12,28 @@ $(function() {
       } else {
         const map = {
           entityUpdated: {
-            true() {
-              const index = grid.getRowIndexByKey(changeInfo.data._id);
+            true(event) {
+              const index = grid.getRowIndexByKey(event.data._id);
               const row = grid.getDataSource().items()[index];
-              Object.assign(row, changeInfo.data);
+              Object.assign(row, event.data);
               grid.repaintRows([index]);
 
               console.log('upd true');
             },
-            false() {
-              const index = grid.getRowIndexByKey(changeInfo.data._id);
+            false(event) {
+              const index = grid.getRowIndexByKey(event.data._id);
               const items = grid.getDataSource().items();
               items.splice(index, 1);
+              grid.repaintRows([index]);
 
               console.log('upd false');
             }
           },
           entityCreated: {
-            true() {
+            true(event) {
               const items = grid.getDataSource().items();
-              items.splice(changeInfo.dataIndex, 0, changeInfo.data);
-              grid.repaintRows(changeInfo.dataIndex);
+              items.splice(event.dataIndex, 0, event.data);
+              grid.repaintRows([event.dataIndex]);
 
               console.log('crea true');
             }
@@ -40,7 +41,9 @@ $(function() {
           }
         };
 
-        map[changeInfo.triggerEvent][changeInfo.aggregateIsPartOfQueryResult]();
+        changeInfo.events.forEach(e =>
+          map[e.triggerEvent][e.aggregateIsPartOfQueryResult](e)
+        );
       }
     },
     'http://localhost:3000'
