@@ -1,5 +1,5 @@
 module.exports = function(o) {
-  this.add('role:testing, domain:values, cmd:createTestData', function(m, r) {
+  this.add('role:testing, domain:entity, cmd:createTestData', function(m, r) {
     console.log('creating test data');
 
     const seneca = this;

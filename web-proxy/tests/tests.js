@@ -16,7 +16,7 @@ const uuid = require('uuid/v4');
 const routes = require('../routes');
 const proxy = require('../proxy');
 
-const BASE = '/data/v1/values';
+const BASE = '/data/v1/entity';
 
 const val1 = {
   date1: new Date(),
@@ -95,7 +95,7 @@ describe('REST tests', () => {
   }
 
   function validationStub(seneca, result) {
-    return resultStub(seneca, 'role:validation,domain:values,cmd:validateOne', {
+    return resultStub(seneca, 'role:validation,domain:entity,cmd:validateOne', {
       valid: result
     });
   }
@@ -134,7 +134,7 @@ describe('REST tests', () => {
 
           expect(stubs.validationStub.data()).to.shallowDeepEqual({
             role: 'validation',
-            domain: 'values',
+            domain: 'entity',
             cmd: 'validateOne',
             instance: val1
           });
@@ -220,7 +220,7 @@ describe('REST tests', () => {
 
           expect(stubs.validationStub.data()).to.shallowDeepEqual({
             role: 'validation',
-            domain: 'values',
+            domain: 'entity',
             cmd: 'validateOne',
             instance: newVal,
             allowIncomplete: true
@@ -304,7 +304,7 @@ describe('REST tests', () => {
   });
 
   describe('GET value(s)', () => {
-    it('retrieves all values', tdone => {
+    it('retrieves all entities', tdone => {
       testServer(
         tdone,
         (server, ldone) => {
@@ -324,7 +324,7 @@ describe('REST tests', () => {
         seneca => {
           return resultStub(
             seneca,
-            'role:entitiesQuery,domain:values,cmd:list',
+            'role:entitiesQuery,domain:entity,cmd:list',
             {
               data: [1, 2] // not important what's in the array
             }
@@ -335,7 +335,7 @@ describe('REST tests', () => {
 
           expect(stub.data()).to.shallowDeepEqual({
             role: 'entitiesQuery',
-            domain: 'values',
+            domain: 'entity',
             cmd: 'list',
             params: {}
           });
@@ -370,7 +370,7 @@ describe('REST tests', () => {
         seneca => {
           return resultStub(
             seneca,
-            'role:entitiesQuery,domain:values,cmd:fetch',
+            'role:entitiesQuery,domain:entity,cmd:fetch',
             {
               result: 'all good'
             }
@@ -381,7 +381,7 @@ describe('REST tests', () => {
 
           expect(stub.data()).to.shallowDeepEqual({
             role: 'entitiesQuery',
-            domain: 'values',
+            domain: 'entity',
             cmd: 'fetch',
             id
           });
@@ -401,7 +401,7 @@ describe('REST tests', () => {
         seneca => {
           return emptyStub(
             seneca,
-            'role:entitiesQuery,domain:values,cmd:fetch'
+            'role:entitiesQuery,domain:entity,cmd:fetch'
           );
         },
         stub => {

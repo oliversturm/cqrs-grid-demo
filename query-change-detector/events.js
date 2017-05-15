@@ -6,8 +6,11 @@ module.exports = (() => {
     return index === -1 ? undefined : index;
   }
 
-  function checkQueries(seneca, store, events) {
-    //console.log(`Checking ${store.ids().length} queries`);
+  function checkQueries(seneca, store, aggregateName, events) {
+    console.log(
+      `Checking ${store.ids().length} queries, with events:`,
+      JSON.stringify(events, null, 2)
+    );
 
     store
       .ids()
@@ -15,15 +18,20 @@ module.exports = (() => {
         id,
         params: store.get(id)
       }))
+      .filter(q => q.params.aggregateName === aggregateName)
       .forEach(q => {
-        seneca.act(
-          {
-            role: 'entitiesQuery',
-            domain: 'values',
-            cmd: 'list',
-            params: q.params.queryParams
-          },
-          (err, res) => {
+        console.log('Checking query: ', JSON.stringify(q, null, 2));
+
+        if (q.params.queryMessage.params.group || q.params.notifyForAnyChange) {
+          console.log('sending batchUpdate');
+
+          seneca.act({
+            role: 'querychangeevent',
+            queryId: q.id,
+            batchUpdate: true
+          });
+        } else
+          seneca.act(q.params.queryMessage, (err, res) => {
             const results = events.reduce((r, v) => {
               const dataIndex = findId(
                 res.data,
@@ -49,64 +57,89 @@ module.exports = (() => {
                 queryId: q.id,
                 events: results
               });
-          }
-        );
+          });
       });
   }
 
-  function batchNotify(seneca, store) {
-    store.ids().forEach(id => {
-      seneca.act({
-        role: 'querychangeevent',
-        queryId: id,
-        batchUpdate: true
+  function batchNotify(seneca, store, aggregateName) {
+    store
+      .ids()
+      .filter(id => store.get(id).aggregateName === aggregateName)
+      .forEach(id => {
+        seneca.act({
+          role: 'querychangeevent',
+          queryId: id,
+          batchUpdate: true
+        });
       });
-    });
   }
 
   const createEventQueue = () => ({
-    events: [],
+    events: {},
+    ensureAggregate(aggregateName) {
+      if (!this.events[aggregateName]) this.events[aggregateName] = [];
+    },
     queue(e) {
-      this.events.push(e);
+      this.ensureAggregate(e.aggregateName);
+      this.events[e.aggregateName].push(e);
     },
-    dequeue() {
-      return this.events.shift();
+    dequeue(aggregateName) {
+      return this.events[aggregateName].shift();
     },
-    eventCount() {
-      return this.events.length;
+    eventCount(aggregateName) {
+      return this.events[aggregateName] ? this.events[aggregateName].length : 0;
     },
-    killQueue() {
-      this.events = [];
+    killQueue(aggregateName) {
+      this.events[aggregateName] = [];
     },
-    dequeueAll() {
-      const result = this.events.reverse();
-      this.killQueue();
+    dequeueAll(aggregateName) {
+      const result = this.events[aggregateName].reverse();
+      this.killQueue(aggregateName);
       return result;
     },
-    lastEventTimestamp: undefined,
-    oldestEventTimestamp: undefined
+    setLastEventTimestamp(aggregateName, stamp) {
+      this.ensureAggregate(aggregateName);
+      this.events[aggregateName].lastTimestamp = stamp;
+    },
+    getLastEventTimestamp(aggregateName) {
+      this.ensureAggregate(aggregateName);
+      return this.events[aggregateName].lastTimestamp;
+    },
+    setOldestEventTimestamp(aggregateName, stamp) {
+      this.ensureAggregate(aggregateName);
+      this.events[aggregateName].oldestEventTimestamp = stamp;
+    },
+    getOldestEventTimestamp(aggregateName) {
+      this.ensureAggregate(aggregateName);
+      return this.events[aggregateName].oldestEventTimestamp;
+    },
+    allAggregates() {
+      return Object.getOwnPropertyNames(this.events);
+    }
   });
 
   function loop(seneca, o, eventQueue) {
-    const eventCount = eventQueue.eventCount();
-    if (eventCount > 0) {
-      const stamp = Date.now();
+    eventQueue.allAggregates().forEach(agg => {
+      const eventCount = eventQueue.eventCount(agg);
+      if (eventCount > 0) {
+        const stamp = Date.now();
 
-      // checking is required when either the oldest event is too old by now
-      // or when the newest event is a certain time ago
-      const checkRequired =
-        stamp - eventQueue.oldestEventTimestamp > o.eventMaxAge ||
-        stamp - eventQueue.lastEventTimestamp > o.eventGapTime;
+        // checking is required when either the oldest event is too old by now
+        // or when the newest event is a certain time ago
+        const checkRequired =
+          stamp - eventQueue.getOldestEventTimestamp(agg) > o.eventMaxAge ||
+          stamp - eventQueue.getLastEventTimestamp(agg) > o.eventGapTime;
 
-      if (checkRequired) {
-        if (eventCount >= o.minimumBatchSize) {
-          batchNotify(seneca, o.store);
-          eventQueue.killQueue();
-        } else {
-          checkQueries(seneca, o.store, eventQueue.dequeueAll());
+        if (checkRequired) {
+          if (eventCount >= o.minimumBatchSize) {
+            batchNotify(seneca, o.store, agg);
+            eventQueue.killQueue(agg);
+          } else {
+            checkQueries(seneca, o.store, agg, eventQueue.dequeueAll(agg));
+          }
         }
       }
-    }
+    });
 
     setTimeout(() => loop(seneca, o, eventQueue), o.loopDelay);
   }
@@ -128,21 +161,26 @@ module.exports = (() => {
     // loopDelay specifies how often the event checking loop will run
     if (!o.loopDelay) o.loopDelay = 100;
 
-    const knownEvents = ['entityCreated', 'entityUpdated'];
+    const knownEvents = ['created', 'updated'];
+    const knownAggregates = ['entity'];
 
     const eventQueue = createEventQueue();
     setTimeout(() => loop(this, o, eventQueue), o.loopDelay);
 
     this.add('role: event', function(m, r) {
       //console.log('Event received: ', m.event);
-      if (knownEvents.includes(m.eventName)) {
+      if (
+        knownEvents.includes(m.eventName) &&
+        knownAggregates.includes(m.aggregateName)
+      ) {
         const stamp = Date.now();
-        eventQueue.lastEventTimestamp = stamp;
-        if (eventQueue.eventCount() == 0)
-          eventQueue.oldestEventTimestamp = stamp;
+        eventQueue.setLastEventTimestamp(m.aggregateName, stamp);
+        if (eventQueue.eventCount(m.aggregateName) == 0)
+          eventQueue.setOldestEventTimestamp(m.aggregateName, stamp);
 
         eventQueue.queue({
           aggregateId: m.event.aggregate.id,
+          aggregateName: m.aggregateName,
           eventName: m.eventName
         });
       }

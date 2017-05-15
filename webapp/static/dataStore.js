@@ -1,23 +1,23 @@
-//var BASEDATA = "http://localhost:3000/data/v1/values";
-//var BASEAPI = "http://localhost:3000/api/v1";
-
 var debugId = 0;
 
-function createDataStore(
-  baseDataUrl,
-  idField,
-  changeNotification,
-  socketIoUrl = 'http://localhost'
-) {
-  return new DevExpress.data.CustomStore({
-    key: idField,
+function createDataStore(options) {
+  const dataStoreOptions = Object.assign(
+    {
+      baseDataUrl: 'http://localhost',
+      idField: '_id',
+      changeNotification: undefined,
+      aggregateName: undefined,
+      trackGroupQueries: false,
+      notifyForAnyChange: false,
+      socketIoUrl: 'http://localhost'
+    },
+    options
+  );
+
+  var store = new DevExpress.data.CustomStore({
+    key: dataStoreOptions.idField,
     load: function(options) {
       var store = this;
-
-      if (store.liveSocket) {
-        store.liveSocket.disconnect(true);
-        store.liveSocket = undefined;
-      }
 
       // from https://www.devexpress.com/Support/Center/Question/Details/KA18955
       var params = {};
@@ -54,16 +54,23 @@ function createDataStore(
           params.groupSummary = JSON.stringify(options.groupSummary);
       }
 
-      if (changeNotification && !options.group) {
+      if (
+        dataStoreOptions.changeNotification &&
+        dataStoreOptions.aggregateName &&
+        (!options.group || dataStoreOptions.trackGroupQueries)
+      ) {
         params.live = true;
+        params.idFieldName = dataStoreOptions.idField;
+        params.aggregateName = dataStoreOptions.aggregateName;
+        params.notifyForAnyChange = dataStoreOptions.notifyForAnyChange;
       }
 
       var d = $.Deferred();
       d.debugId = debugId++;
 
-      console.log('Load options (' + d.debugId + '): ', options);
+      console.log('Load params (' + d.debugId + '): ', params);
 
-      $.getJSON(baseDataUrl, params).done(function(res) {
+      $.getJSON(dataStoreOptions.baseDataUrl, params).done(function(res) {
         //console.log("Static load result (" + d.debugId + "): " + JSON.stringify(res));
         console.log('Load result (' + d.debugId + '): ', res);
 
@@ -73,12 +80,12 @@ function createDataStore(
         if (options.totalSummary) details.summary = res.summary;
 
         if (params.live && res.liveId) {
-          var socket = io.connect(socketIoUrl);
+          var socket = io.connect(dataStoreOptions.socketIoUrl);
           socket.on('hello', function(args, reply) {
             socket.on('registered', function() {
-              store.liveSocket = socket;
+              store.registerSocket(res.liveId, socket);
               socket.on('querychange', function(changeInfo) {
-                changeNotification(changeInfo);
+                dataStoreOptions.changeNotification(changeInfo);
               });
             });
 
@@ -93,11 +100,13 @@ function createDataStore(
       return d.promise();
     },
     byKey: function(key) {
-      return $.getJSON(baseDataUrl + '/' + encodeURIComponent(key));
+      return $.getJSON(
+        dataStoreOptions.baseDataUrl + '/' + encodeURIComponent(key)
+      );
     },
     insert: function(value) {
       return $.ajax({
-        url: baseDataUrl,
+        url: dataStoreOptions.baseDataUrl,
         method: 'POST',
         data: JSON.stringify(value),
         contentType: 'application/json'
@@ -105,7 +114,7 @@ function createDataStore(
     },
     update: function(key, value) {
       return $.ajax({
-        url: baseDataUrl + '/' + encodeURIComponent(key),
+        url: dataStoreOptions.baseDataUrl + '/' + encodeURIComponent(key),
         method: 'PUT',
         data: JSON.stringify(value),
         contentType: 'application/json'
@@ -115,6 +124,27 @@ function createDataStore(
       return;
     }
   });
+
+  store.sockets = {};
+
+  store.registerSocket = function(id, socket) {
+    this.sockets[id] = socket;
+  };
+  store.deregisterSocket = function(id) {
+    delete this.sockets[id];
+  };
+  store.closeAllSockets = function() {
+    var store = this;
+
+    console.log('Disconnecting all sockets');
+
+    Object.getOwnPropertyNames(store.sockets).forEach(function(id) {
+      store.sockets[id].disconnect(true);
+    });
+    store.sockets = {};
+  };
+
+  return store;
 }
 
 function testDataStore(dataStore, baseApiUrl) {
@@ -130,4 +160,24 @@ function testDataStore(dataStore, baseApiUrl) {
     });
   };
   return dataStore;
+}
+
+function createDataSource(options) {
+  return new DevExpress.data.DataSource({
+    store: createDataStore(options),
+    onLoadingChanged: function(isLoading) {
+      console.log('Loading changed, isLoading ', isLoading);
+      if (isLoading) this.store().closeAllSockets();
+    }
+  });
+}
+
+function createPivotGridDataSource(pivotGridConfig, options) {
+  pivotGridConfig.store = createDataStore(options);
+
+  pivotGridConfig.onLoadingChanged = function(isLoading) {
+    console.log('Loading changed, isLoading ', isLoading);
+  };
+
+  return new DevExpress.data.PivotGridDataSource(pivotGridConfig);
 }

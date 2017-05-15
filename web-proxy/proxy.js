@@ -37,13 +37,13 @@ function checkError(m, res) {
 }
 
 module.exports = function(liveClients) {
-  this.add('role:web, domain:values, cmd:createTestData', (m, r) => {
+  this.add('role:web, domain:entity, cmd:createTestData', (m, r) => {
     console.log('proxy creating test data');
 
     this.act(
       {
         role: 'testing',
-        domain: 'values',
+        domain: 'entity',
         cmd: 'createTestData',
         count: m.args.query.count
       },
@@ -238,52 +238,63 @@ module.exports = function(liveClients) {
       } else this.log.info('Unknown type for select parameter');
     }
 
+    outgoing.params = p;
+
     let liveId;
 
-    if (m.args.query.live) {
-      liveId = uuid();
-      let idFieldName = '_id';
-      if (m.args.query.idFieldName) {
-        idFieldName = JSON.parse(m.args.query.idFieldName);
-      }
+    if (m.args.query.live === 'true') {
+      const notifyForAnyChange = m.args.query.notifyForAnyChanged === 'true';
 
-      seneca.act(
-        {
-          role: 'querychanges',
-          cmd: 'register',
-          id: liveId,
-          idFieldName,
-          queryParams: p
-        },
-        (err, res) => {
-          if (res.registered) {
-            liveClients.register(liveId);
-          } // else - wasn't registered for some reason, ignore
+      if (notifyForAnyChange || m.args.query.aggregateName) {
+        liveId = uuid();
+        let idFieldName = '_id';
+        if (m.args.query.idFieldName) {
+          idFieldName = m.args.query.idFieldName;
         }
-      );
+
+        seneca.act(
+          {
+            role: 'querychanges',
+            cmd: 'register',
+            id: liveId,
+            idFieldName,
+            aggregateName: m.args.query.aggregateName,
+            notifyForAnyChange,
+            queryMessage: outgoing
+          },
+          (err, res) => {
+            if (res.registered) {
+              console.log(`Registered live query ${liveId}`);
+
+              liveClients.register(liveId);
+            } else {
+              console.error(`Failed to register live query ${liveId}`);
+            }
+          }
+        );
+      }
     }
 
-    outgoing.params = p;
     seneca.act(outgoing, (err, res) => {
       if (liveId) res.liveId = liveId;
       r(err, res);
     });
   }
 
-  this.add('role:web, domain:values, cmd:list', function(m, r) {
+  this.add('role:web, domain:entity, cmd:list', function(m, r) {
     listValues(
       this,
       m,
       {
         role: 'entitiesQuery',
-        domain: 'values',
+        domain: 'entity',
         cmd: 'list'
       },
       r
     );
   });
 
-  this.add('role:web, domain:values, cmd:create', function(m, r) {
+  this.add('role:web, domain:entity, cmd:create', function(m, r) {
     const seneca = this;
     const instance = m.args.body;
 
@@ -291,7 +302,7 @@ module.exports = function(liveClients) {
     seneca.act(
       {
         role: 'validation',
-        domain: 'values',
+        domain: 'entity',
         cmd: 'validateOne',
         instance: instance
       },
@@ -312,7 +323,7 @@ module.exports = function(liveClients) {
             data: instance
           });
 
-          m.response$.location('/data/v1/values/' + instance.id);
+          m.response$.location('/data/v1/entity/' + instance.id);
           m.response$.sendStatus(201);
           r();
         }
@@ -325,7 +336,7 @@ module.exports = function(liveClients) {
     return seneca.act(outgoing, r);
   }
 
-  this.add('role:web, domain:values, cmd:fetch', function(m, r) {
+  this.add('role:web, domain:entity, cmd:fetch', function(m, r) {
     const seneca = this;
     const id = m.args.params.id;
 
@@ -339,7 +350,7 @@ module.exports = function(liveClients) {
       id,
       {
         role: 'entitiesQuery',
-        domain: 'values',
+        domain: 'entity',
         cmd: 'fetch'
       },
       function(err, res) {
@@ -352,7 +363,7 @@ module.exports = function(liveClients) {
     );
   });
 
-  this.add('role:web, domain:values, cmd:update', function(m, r) {
+  this.add('role:web, domain:entity, cmd:update', function(m, r) {
     const seneca = this;
     const id = m.args.params.id;
 
@@ -365,7 +376,7 @@ module.exports = function(liveClients) {
       seneca.act(
         {
           role: 'validation',
-          domain: 'values',
+          domain: 'entity',
           cmd: 'validateOne',
           instance,
           allowIncomplete: true

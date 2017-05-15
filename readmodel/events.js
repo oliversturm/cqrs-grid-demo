@@ -11,27 +11,27 @@ module.exports = function(o) {
   // I hear that an aggregate version or similar might be introduced
   // that would make this easier.
 
-  this.add('role: event, eventName: entityCreated', (m, r) => {
-    //        console.log('Event entityCreated received: ', m.event);
+  this.add('role: event, aggregateName: entity, eventName: created', (m, r) => {
+    //        console.log('Event entity created received: ', m.event);
     m = fixObject(m);
 
     const newObject = m.event.payload;
     newObject._id = m.event.aggregate.id;
     db(db =>
-      db.collection('values').insertOne(newObject, err => {
+      db.collection(m.aggregateName).insertOne(newObject, err => {
         if (err) console.error('Error persisting new entity: ', err);
         r();
       })
     );
   });
 
-  this.add('role: event, eventName: entityUpdated', (m, r) => {
-    //        console.log('Event entityUpdated received: ', m.event);
+  this.add('role: event, aggregateName: entity, eventName: updated', (m, r) => {
+    console.log('Event entity updated received: ', m.event);
     m = fixObject(m);
 
     db(db =>
       db
-        .collection('values')
+        .collection(m.aggregateName)
         .updateOne(
           { _id: m.event.aggregate.id },
           { $set: m.event.payload },

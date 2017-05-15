@@ -1,7 +1,7 @@
 module.exports = [
   {
-    pin: 'role:web,domain:values,cmd:*',
-    prefix: '/data/v1/values',
+    pin: 'role:web,domain:entity,cmd:*',
+    prefix: '/data/v1/entity',
     map: {
       list: {
         GET: true,
@@ -49,7 +49,7 @@ module.exports = [
     }
   },
   {
-    pin: 'role:web,domain:values,cmd:*',
+    pin: 'role:web,domain:entity,cmd:*',
     prefix: '/api/v1',
     map: {
       createTestData: {

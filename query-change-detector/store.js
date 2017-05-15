@@ -2,21 +2,22 @@ module.exports = function() {
   const content = {};
 
   return {
-    register(id, idFieldName, queryParams) {
-      if (!id || !queryParams || !idFieldName)
+    register(id, idFieldName, aggregateName, queryMessage, notifyForAnyChange) {
+      if (!id || !queryMessage || !idFieldName || !aggregateName) {
         console.error(
-          `Store can't register id ${id}, idFieldName ${idFieldName} with params ${JSON.stringify(queryParams)}`
+          `Store can't register id ${id}, idFieldName ${idFieldName}, aggregateName ${aggregateName} with params ${JSON.stringify(queryMessage)}`
         );
-
+        return false;
+      }
       //console.log('Store registering id ', id);
 
-      if (!queryParams.group) {
-        content[id] = {
-          idFieldName,
-          queryParams
-        };
-        return true;
-      } else return false;
+      content[id] = {
+        idFieldName,
+        aggregateName,
+        queryMessage,
+        notifyForAnyChange
+      };
+      return true;
     },
 
     deregister(id) {
@@ -24,8 +25,7 @@ module.exports = function() {
     },
 
     ids() {
-      const result = Object.getOwnPropertyNames(content);
-      return result;
+      return Object.getOwnPropertyNames(content);
     },
 
     get(id) {

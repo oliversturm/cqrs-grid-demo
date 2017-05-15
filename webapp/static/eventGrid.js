@@ -1,10 +1,18 @@
 var grid;
 
 $(function() {
-  const dataStore = createDataStore(
-    'http://localhost:3000/data/v1/events',
-    'id'
-  );
+  var trackingConfig = {
+    grid
+  };
+
+  var dataSource = createDataSource({
+    baseDataUrl: 'http://localhost:3000/data/v1/events',
+    idField: 'id',
+    changeNotification: trackGridChanges(trackingConfig),
+    notifyForAnyChange: true,
+    socketIoUrl: 'http://localhost:3000'
+  });
+
   $('#toolbar').dxToolbar({
     items: [
       {
@@ -23,9 +31,7 @@ $(function() {
 
   grid = $('#grid')
     .dxDataGrid({
-      dataSource: {
-        store: dataStore
-      },
+      dataSource: dataSource,
       remoteOperations: {
         filtering: true,
         grouping: true,
@@ -79,4 +85,6 @@ $(function() {
       }
     })
     .dxDataGrid('instance');
+
+  trackingConfig.grid = grid;
 });
