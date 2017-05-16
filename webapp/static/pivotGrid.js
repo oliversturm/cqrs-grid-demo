@@ -1,6 +1,10 @@
 var grid;
 
 $(function() {
+  var trackingConfig = {
+    grid
+  };
+
   $('#toolbar').dxToolbar({
     items: [
       {
@@ -106,9 +110,15 @@ $(function() {
           ]
         },
         {
-          baseDataUrl: 'http://localhost:3000/data/v1/entity'
+          baseDataUrl: 'http://localhost:3000/data/v1/entity',
+          changeNotification: trackPivotGridChanges(trackingConfig),
+          aggregateName: 'entity',
+          socketIoUrl: 'http://localhost:3000',
+          trackGroupQueries: true
         }
       )
     })
     .dxPivotGrid('instance');
+
+  trackingConfig.grid = grid;
 });

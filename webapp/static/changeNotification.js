@@ -88,3 +88,9 @@ function trackGridChanges(trackingConfig) {
     }
   };
 }
+
+function trackPivotGridChanges(trackingConfig) {
+  return function(changeInfo) {
+    trackingConfig.grid.getDataSource().reload();
+  };
+}

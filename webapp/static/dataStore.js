@@ -174,7 +174,7 @@ function createPivotGridDataSource(pivotGridConfig, options) {
   pivotGridConfig.store = createDataStore(options);
 
   pivotGridConfig.onLoadingChanged = function(isLoading) {
-    if (isLoading) this.store().closeAllSockets();
+    if (isLoading) this.store()._store.closeAllSockets();
   };
 
   return new DevExpress.data.PivotGridDataSource(pivotGridConfig);
