@@ -243,7 +243,7 @@ module.exports = function(liveClients) {
     let liveId;
 
     if (m.args.query.live === 'true') {
-      const notifyForAnyChange = m.args.query.notifyForAnyChanged === 'true';
+      const notifyForAnyChange = m.args.query.notifyForAnyChange === 'true';
 
       if (notifyForAnyChange || m.args.query.aggregateName) {
         liveId = uuid();

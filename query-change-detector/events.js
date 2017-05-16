@@ -8,7 +8,7 @@ module.exports = (() => {
 
   function checkQueries(seneca, store, aggregateName, events) {
     console.log(
-      `Checking ${store.ids().length} queries, with events:`,
+      `Checking ${store.ids().length} queries for aggregate ${aggregateName}, with events:`,
       JSON.stringify(events, null, 2)
     );
 
@@ -18,7 +18,11 @@ module.exports = (() => {
         id,
         params: store.get(id)
       }))
-      .filter(q => q.params.aggregateName === aggregateName)
+      .filter(
+        q =>
+          q.params.notifyForAnyChange ||
+          q.params.aggregateName === aggregateName
+      )
       .forEach(q => {
         console.log('Checking query: ', JSON.stringify(q, null, 2));
 

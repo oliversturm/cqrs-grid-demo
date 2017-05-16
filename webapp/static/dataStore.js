@@ -56,7 +56,8 @@ function createDataStore(options) {
 
       if (
         dataStoreOptions.changeNotification &&
-        dataStoreOptions.aggregateName &&
+        (dataStoreOptions.notifyForAnyChange ||
+          dataStoreOptions.aggregateName) &&
         (!options.group || dataStoreOptions.trackGroupQueries)
       ) {
         params.live = true;

@@ -3,7 +3,12 @@ module.exports = function() {
 
   return {
     register(id, idFieldName, aggregateName, queryMessage, notifyForAnyChange) {
-      if (!id || !queryMessage || !idFieldName || !aggregateName) {
+      if (
+        !id ||
+        !queryMessage ||
+        !idFieldName ||
+        (!aggregateName && !notifyForAnyChange)
+      ) {
         console.error(
           `Store can't register id ${id}, idFieldName ${idFieldName}, aggregateName ${aggregateName} with params ${JSON.stringify(queryMessage)}`
         );
