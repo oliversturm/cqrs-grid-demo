@@ -32,8 +32,6 @@ function findCollectionIncludingId(data, id) {
 function trackGridChanges(trackingConfig) {
   return function(changeInfo) {
     if (changeInfo.batchUpdate) {
-      console.log('full refresh');
-
       trackingConfig.grid.refresh();
     } else {
       var map = {

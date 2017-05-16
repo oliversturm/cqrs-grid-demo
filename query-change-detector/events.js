@@ -7,11 +7,6 @@ module.exports = (() => {
   }
 
   function checkQueries(seneca, store, aggregateName, events) {
-    console.log(
-      `Checking ${store.ids().length} queries for aggregate ${aggregateName}, with events:`,
-      JSON.stringify(events, null, 2)
-    );
-
     store
       .ids()
       .map(id => ({
@@ -24,11 +19,7 @@ module.exports = (() => {
           q.params.aggregateName === aggregateName
       )
       .forEach(q => {
-        console.log('Checking query: ', JSON.stringify(q, null, 2));
-
         if (q.params.queryMessage.params.group || q.params.notifyForAnyChange) {
-          console.log('sending batchUpdate');
-
           seneca.act({
             role: 'querychangeevent',
             queryId: q.id,

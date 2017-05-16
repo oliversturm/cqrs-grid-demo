@@ -14,7 +14,6 @@ module.exports = function() {
         );
         return false;
       }
-      //console.log('Store registering id ', id);
 
       content[id] = {
         idFieldName,

@@ -137,8 +137,6 @@ function createDataStore(options) {
   store.closeAllSockets = function() {
     var store = this;
 
-    console.log('Disconnecting all sockets');
-
     Object.getOwnPropertyNames(store.sockets).forEach(function(id) {
       store.sockets[id].disconnect(true);
     });
@@ -167,7 +165,6 @@ function createDataSource(options) {
   return new DevExpress.data.DataSource({
     store: createDataStore(options),
     onLoadingChanged: function(isLoading) {
-      console.log('Loading changed, isLoading ', isLoading);
       if (isLoading) this.store().closeAllSockets();
     }
   });
@@ -177,7 +174,7 @@ function createPivotGridDataSource(pivotGridConfig, options) {
   pivotGridConfig.store = createDataStore(options);
 
   pivotGridConfig.onLoadingChanged = function(isLoading) {
-    console.log('Loading changed, isLoading ', isLoading);
+    if (isLoading) this.store().closeAllSockets();
   };
 
   return new DevExpress.data.PivotGridDataSource(pivotGridConfig);

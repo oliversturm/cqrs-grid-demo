@@ -264,8 +264,6 @@ module.exports = function(liveClients) {
           },
           (err, res) => {
             if (res.registered) {
-              console.log(`Registered live query ${liveId}`);
-
               liveClients.register(liveId);
             } else {
               console.error(`Failed to register live query ${liveId}`);

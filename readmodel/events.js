@@ -26,7 +26,7 @@ module.exports = function(o) {
   });
 
   this.add('role: event, aggregateName: entity, eventName: updated', (m, r) => {
-    console.log('Event entity updated received: ', m.event);
+    //console.log('Event entity updated received: ', m.event);
     m = fixObject(m);
 
     db(db =>
