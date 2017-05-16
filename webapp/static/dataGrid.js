@@ -24,6 +24,22 @@ $(function() {
             grid.refresh();
           }
         }
+      },
+      {
+        location: 'before',
+        widget: 'dxCheckBox',
+        locateInMenu: 'auto',
+        options: {
+          text: 'Automatic Reloading',
+          value: true,
+          onValueChanged: function(e) {
+            if (e.value) {
+              grid.refresh();
+            } else {
+              dataSource.stopTracking();
+            }
+          }
+        }
       }
     ]
   });

@@ -162,12 +162,18 @@ function testDataStore(dataStore, baseApiUrl) {
 }
 
 function createDataSource(options) {
-  return new DevExpress.data.DataSource({
+  var dataSource = new DevExpress.data.DataSource({
     store: createDataStore(options),
     onLoadingChanged: function(isLoading) {
       if (isLoading) this.store().closeAllSockets();
     }
   });
+
+  dataSource.stopTracking = function() {
+    this.store().closeAllSockets();
+  };
+
+  return dataSource;
 }
 
 function createPivotGridDataSource(pivotGridConfig, options) {
@@ -177,5 +183,10 @@ function createPivotGridDataSource(pivotGridConfig, options) {
     if (isLoading) this.store()._store.closeAllSockets();
   };
 
-  return new DevExpress.data.PivotGridDataSource(pivotGridConfig);
+  var dataSource = new DevExpress.data.PivotGridDataSource(pivotGridConfig);
+  dataSource.stopTracking = function() {
+    this.store()._store.closeAllSockets();
+  };
+
+  return dataSource;
 }

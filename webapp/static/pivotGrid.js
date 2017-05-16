@@ -17,6 +17,22 @@ $(function() {
             grid.getDataSource().reload();
           }
         }
+      },
+      {
+        location: 'before',
+        widget: 'dxCheckBox',
+        locateInMenu: 'auto',
+        options: {
+          text: 'Automatic Reloading',
+          value: true,
+          onValueChanged: function(e) {
+            if (e.value) {
+              grid.getDataSource().reload();
+            } else {
+              grid.getDataSource().stopTracking();
+            }
+          }
+        }
       }
     ]
   });
