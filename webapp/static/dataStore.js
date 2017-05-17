@@ -66,6 +66,8 @@ function createDataStore(options) {
         params.notifyForAnyChange = dataStoreOptions.notifyForAnyChange;
       }
 
+      params.tzOffset = new Date().getTimezoneOffset();
+
       var d = $.Deferred();
       d.debugId = debugId++;
 

@@ -5,6 +5,7 @@ function listValues(connection, collection, queryParams, m, r) {
   // prettier-ignore
   connection(async (db) => {
     try {
+      queryParams.timezoneOffset = m.timezoneOffset || 0;
       r(null, await query(db.collection(collection), m.params, queryParams));
     } catch (err) {
       r(null, { err$: err });

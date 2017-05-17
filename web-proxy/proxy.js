@@ -273,6 +273,10 @@ module.exports = function(liveClients) {
       }
     }
 
+    let timezoneOffset = 0;
+    if (m.args.query.tzOffset) timezoneOffset = parseInt(m.args.query.tzOffset);
+    outgoing.timezoneOffset = timezoneOffset;
+
     seneca.act(outgoing, (err, res) => {
       if (liveId) res.liveId = liveId;
       r(err, res);
