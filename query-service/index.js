@@ -1,9 +1,7 @@
-const seneca = require("seneca")();
+const seneca = require('seneca')();
 
-seneca.
-    use("query-values").
-    listen({
-	type: "tcp",
-	port: process.env.QRYSRVC_PORT || 3001,
-	pin: "role:entitiesQuery"
-    });
+seneca.use('query-values').listen({
+  type: 'tcp',
+  port: process.env.QRYSRVC_PORT || 3001,
+  pin: 'role:entitiesQuery'
+});

@@ -5,9 +5,7 @@ module.exports = {
     loaders: [
       {
         test: /\.json$/,
-        loaders: [
-          'json-loader'
-        ]
+        loaders: ['json-loader']
       },
       {
         test: /\.ts$/,
@@ -18,15 +16,11 @@ module.exports = {
       {
         test: /\.ts$/,
         exclude: /node_modules/,
-        loaders: [
-          'ts-loader'
-        ]
+        loaders: ['ts-loader']
       },
       {
         test: /\.html$/,
-        loaders: [
-          'html-loader'
-        ]
+        loaders: ['html-loader']
       }
     ]
   },
@@ -50,11 +44,6 @@ module.exports = {
   ],
   devtool: 'source-map',
   resolve: {
-    extensions: [
-      '.webpack.js',
-      '.web.js',
-      '.js',
-      '.ts'
-    ]
+    extensions: ['.webpack.js', '.web.js', '.js', '.ts']
   }
 };
