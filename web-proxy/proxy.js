@@ -235,11 +235,16 @@ module.exports = function(o) {
       } else this.log.info('Unknown type for select parameter');
     }
 
+    let timezoneOffset = 0;
+
+    if (m.args.query.tzOffset) timezoneOffset = parseInt(m.args.query.tzOffset);
+
     this.act(
       {
         role: 'entitiesQuery',
         domain: 'values',
         cmd: 'list',
+        timezoneOffset,
         params: p
       },
       r

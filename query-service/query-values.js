@@ -18,9 +18,16 @@ module.exports = function(o = {}) {
 
     //console.log("Query params: ", m.params);
 
+    const timezoneOffset = m.timezoneOffset || 0;
+
     db(async db => {
       try {
-        r(null, await query(db.collection('values'), m.params));
+        r(
+          null,
+          await query(db.collection('values'), m.params, {
+            timezoneOffset
+          })
+        );
       } catch (err) {
         r(null, { err$: err });
       }
