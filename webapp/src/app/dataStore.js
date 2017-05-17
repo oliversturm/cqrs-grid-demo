@@ -49,10 +49,12 @@ var dataStore = new CustomStore({
         params.groupSummary = JSON.stringify(options.groupSummary);
     }
 
+    params.tzOffset = new Date().getTimezoneOffset();
+
     var d = $.Deferred();
     d.debugId = debugId++;
 
-    console.log('Load options (' + d.debugId + '): ', options);
+    console.log('Load options (' + d.debugId + '): ', params);
 
     $.getJSON(BASEDATA, params).done(function(res) {
       //console.log("Static load result (" + d.debugId + "): " + JSON.stringify(res));
