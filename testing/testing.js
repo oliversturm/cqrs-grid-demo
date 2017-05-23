@@ -27,10 +27,10 @@ module.exports = function(o) {
         };
 
         seneca.act({
-          role: 'eventex',
+          role: 'resolve',
           type: 'command',
-          domain: 'entity',
-          cmd: 'create',
+          aggregateName: 'entity',
+          command: 'create',
           data: instance
         });
       }

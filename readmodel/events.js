@@ -15,8 +15,8 @@ module.exports = function(o) {
     //        console.log('Event entity created received: ', m.event);
     m = fixObject(m);
 
-    const newObject = m.event.payload;
-    newObject._id = m.event.aggregate.id;
+    const newObject = m.event.payload.data;
+    newObject._id = m.event.payload.data.id;
     db(db =>
       db.collection(m.aggregateName).insertOne(newObject, err => {
         if (err) console.error('Error persisting new entity: ', err);
@@ -33,8 +33,8 @@ module.exports = function(o) {
       db
         .collection(m.aggregateName)
         .updateOne(
-          { _id: m.event.aggregate.id },
-          { $set: m.event.payload },
+          { _id: m.event.payload.data.id },
+          { $set: m.event.payload.data },
           null,
           (err, res) => {
             if (err) console.error('Error updating entity: ', err);

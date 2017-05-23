@@ -1,3 +1,3 @@
-[submodule "eventex-fork"]
-	path = eventex-fork
-	url = git@github.com:oliversturm/eventex.git
+[submodule "resolve"]
+	path = resolve
+	url = git@github.com:reimagined/resolve.git

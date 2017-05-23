@@ -4,8 +4,12 @@ RUN mkdir -p /usr/src/app
 
 COPY command-service /usr/src/app/command-service
 COPY message-utils /usr/src/app/message-utils
-COPY eventex-fork /usr/src/app/eventex-fork
-WORKDIR /usr/src/app/eventex-fork
+COPY resolve /usr/src/app/resolve
+COPY resolve-bus-seneca /usr/src/app/resolve-bus-seneca
+WORKDIR /usr/src/app/resolve
+RUN npm install
+RUN npm run bootstrap
+WORKDIR /usr/src/app/resolve-bus-seneca
 RUN npm install
 WORKDIR /usr/src/app/command-service
 RUN npm install

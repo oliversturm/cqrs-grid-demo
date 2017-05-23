@@ -174,7 +174,7 @@ module.exports = (() => {
           eventQueue.setOldestEventTimestamp(m.aggregateName, stamp);
 
         eventQueue.queue({
-          aggregateId: m.event.aggregate.id,
+          aggregateId: m.event.payload.data.id,
           aggregateName: m.aggregateName,
           eventName: m.eventName
         });

@@ -1,9 +1,7 @@
 const query = require('devextreme-query-mongodb');
 
 function listValues(connection, collection, queryParams, m, r) {
-  // Prettier wants to remove the parens here
-  // prettier-ignore
-  connection(async (db) => {
+  connection(async db => {
     try {
       queryParams.timezoneOffset = m.timezoneOffset || 0;
       r(null, await query(db.collection(collection), m.params, queryParams));
@@ -14,8 +12,7 @@ function listValues(connection, collection, queryParams, m, r) {
 }
 
 function fetchValue(connection, collection, idField, m, r) {
-  // prettier-ignore
-  connection(async (db) => {
+  connection(async db => {
     try {
       const res = await db.collection(collection).findOne({ [idField]: m.id });
       if (res) r(null, res);

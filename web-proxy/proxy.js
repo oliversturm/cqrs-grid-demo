@@ -318,10 +318,10 @@ module.exports = function(liveClients) {
           //console.log('Creating object with id: ' + instance.id);
 
           seneca.act({
-            role: 'eventex',
+            role: 'resolve',
             type: 'command',
-            domain: 'entity',
-            cmd: 'create',
+            aggregateName: 'entity',
+            command: 'create',
             data: instance
           });
 
@@ -391,10 +391,10 @@ module.exports = function(liveClients) {
           } else {
             instance.id = id;
             seneca.act({
-              role: 'eventex',
+              role: 'resolve',
               type: 'command',
-              domain: 'entity',
-              cmd: 'update',
+              aggregateName: 'entity',
+              command: 'update',
               data: instance
             });
             m.response$.sendStatus(204);

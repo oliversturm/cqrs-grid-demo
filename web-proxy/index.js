@@ -51,7 +51,7 @@ seneca
       'role:entitiesCommand',
       'role:validation',
       'role:testing',
-      'role:eventex',
+      'role:resolve',
       'role:querychanges'
     ],
     socketOptions: {
