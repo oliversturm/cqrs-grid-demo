@@ -10,8 +10,7 @@
   "license": "SEE LICENSE IN LICENSE",
   "dependencies": {
     "seneca": "^3.2.2",
-    "seneca-amqp-transport": "^2.1.0",
-    "uuid": "^3.0.1"
+    "seneca-amqp-transport": "^2.1.0"
   },
   "devDependencies": {
     "chai": "^3.5.0",

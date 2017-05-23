@@ -1,3 +1,5 @@
+const uuid = require('uuid/v4');
+
 module.exports = function(o) {
   this.add('role:testing, domain:entity, cmd:createTestData', function(m, r) {
     console.log('creating test data');
@@ -23,7 +25,8 @@ module.exports = function(o) {
           date2: addDays(nextYearStart(), Math.floor(Math.random() * 364 + 1)),
           int1: Math.floor(Math.random() * 100 + 1),
           int2: Math.floor(Math.random() * 100 + 1),
-          string: 'Item ' + i
+          string: 'Item ' + i,
+          id: uuid()
         };
 
         seneca.act({
