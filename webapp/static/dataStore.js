@@ -9,7 +9,8 @@ function createDataStore(options) {
       aggregateName: undefined,
       trackGroupQueries: false,
       notifyForAnyChange: false,
-      socketIoUrl: 'http://localhost'
+      socketIoUrl: 'http://localhost',
+      summaryQueryLimit: undefined
     },
     options
   );
@@ -24,6 +25,9 @@ function createDataStore(options) {
 
       if (options.filter) params.filter = JSON.stringify(options.filter);
       if (options.sort) params.sort = JSON.stringify(options.sort);
+
+      if (dataStoreOptions.summaryQueryLimit)
+        params.summaryQueryLimit = dataStoreOptions.summaryQueryLimit;
 
       params.skip = options.skip;
       params.take = options.take;

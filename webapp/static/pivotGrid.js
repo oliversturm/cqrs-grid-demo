@@ -130,7 +130,12 @@ $(function() {
           changeNotification: trackPivotGridChanges(trackingConfig),
           aggregateName: 'entity',
           socketIoUrl: 'http://localhost:3000',
-          trackGroupQueries: true
+          trackGroupQueries: true,
+
+          // The value is arbitrary. If you anticipate seeing pivot grid setups
+          // with even more summary values per page, increase it or even set to
+          // zero to deactivate the limit.
+          summaryQueryLimit: 500
         }
       )
     })

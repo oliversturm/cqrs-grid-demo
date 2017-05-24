@@ -4,6 +4,8 @@ function listValues(connection, collection, queryParams, m, r) {
   connection(async db => {
     try {
       queryParams.timezoneOffset = m.timezoneOffset || 0;
+      if (m.summaryQueryLimit)
+        queryParams.summaryQueryLimit = m.summaryQueryLimit;
       r(null, await query(db.collection(collection), m.params, queryParams));
     } catch (err) {
       r(null, { err$: err });

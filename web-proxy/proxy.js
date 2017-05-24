@@ -277,6 +277,9 @@ module.exports = function(liveClients) {
     if (m.args.query.tzOffset) timezoneOffset = parseInt(m.args.query.tzOffset);
     outgoing.timezoneOffset = timezoneOffset;
 
+    if (m.args.query.summaryQueryLimit)
+      outgoing.summaryQueryLimit = parseInt(m.args.query.summaryQueryLimit);
+
     seneca.act(outgoing, (err, res) => {
       if (liveId) res.liveId = liveId;
       r(err, res);
