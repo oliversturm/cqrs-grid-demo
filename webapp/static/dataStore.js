@@ -12,6 +12,17 @@ var dataStore = new DevExpress.data.CustomStore({
     if (options.filter) params.filter = JSON.stringify(options.filter);
     if (options.sort) params.sort = JSON.stringify(options.sort);
 
+    // This generation of the app, we don't distinguish between data grid
+    // and pivot grid data sources, so I'll just set this parameter
+    // globally even though it's really only required for the pivot grid.
+    // Since the query limit feature is mainly a protection against crazy
+    // queries running because of misconfigured grids, this shouldn't be
+    // a problem.
+    // The value is arbitrary. If you anticipate seeing pivot grid setups
+    // with even more summary values per page, increase it or even set to
+    // zero to deactivate the limit.
+    params.summaryQueryLimit = 500;
+
     params.skip = options.skip;
     params.take = options.take;
     params.requireTotalCount = options.requireTotalCount;
