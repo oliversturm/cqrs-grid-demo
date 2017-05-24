@@ -236,8 +236,11 @@ module.exports = function(o) {
     }
 
     let timezoneOffset = 0;
+    let summaryQueryLimit = undefined;
 
     if (m.args.query.tzOffset) timezoneOffset = parseInt(m.args.query.tzOffset);
+    if (m.args.query.summaryQueryLimit)
+      summaryQueryLimit = parseInt(m.args.query.summaryQueryLimit);
 
     this.act(
       {
@@ -245,6 +248,7 @@ module.exports = function(o) {
         domain: 'values',
         cmd: 'list',
         timezoneOffset,
+        summaryQueryLimit,
         params: p
       },
       r

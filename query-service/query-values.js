@@ -17,17 +17,15 @@ module.exports = function(o = {}) {
     m = fixObject(m);
 
     //console.log("Query params: ", m.params);
-
-    const timezoneOffset = m.timezoneOffset || 0;
+    const contextParams = {
+      timezoneOffset: m.timezoneOffset || 0
+    };
+    if (m.summaryQueryLimit)
+      contextParams.summaryQueryLimit = m.summaryQueryLimit;
 
     db(async db => {
       try {
-        r(
-          null,
-          await query(db.collection('values'), m.params, {
-            timezoneOffset
-          })
-        );
+        r(null, await query(db.collection('values'), m.params, contextParams));
       } catch (err) {
         r(null, { err$: err });
       }
