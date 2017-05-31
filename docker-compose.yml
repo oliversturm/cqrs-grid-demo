@@ -52,9 +52,6 @@ services:
 
   webapp:
     image: sturm/cqrs-grid-demo/webapp
-    volumes:
-      - ./webapp:/usr/src/app/webapp
-      - ./message-utils:/usr/src/app/message-utils
     ports:
       - "8080:8080"
 

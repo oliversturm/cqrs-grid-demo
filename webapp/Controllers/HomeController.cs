@@ -8,13 +8,16 @@ namespace webapp.Controllers
 {
     public class HomeController : Controller
     {
-        public IActionResult Index()
+        public IActionResult Error()
         {
             return View();
         }
 
-        public IActionResult Error()
-        {
+        public IActionResult DataGrid() {
+            return View();
+        }
+
+        public IActionResult PivotGrid() {
             return View();
         }
     }

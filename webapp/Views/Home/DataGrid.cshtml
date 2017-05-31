@@ -1,0 +1,93 @@
+﻿@{
+ViewData["Title"] = "Home Page";
+}
+<script>
+    function reloadGrid_click(e) {
+    
+    }
+</script>
+
+@(Html.DevExtreme().Toolbar()
+.Items(items => {
+    items.Add()
+    .Location(ToolbarItemLocation.Before)
+    .Widget(widget =>
+        widget.Button()
+        .Text("Reload grid")
+        .OnClick("reloadGrid_click")
+    )
+    .LocateInMenu(ToolbarItemLocateInMenuMode.Auto);
+}))
+
+<script>
+    var dataSource = new DevExpress.data.DataSource({
+        store: dataStore
+    });
+</script>
+
+@(Html.DevExtreme().DataGrid()
+.DataSource(new JS("dataSource"))
+.RemoteOperations(ro =>
+    ro.Filtering(true)
+    .Grouping(true)
+    .GroupPaging(true)
+    .Paging(true)
+    .Sorting(true)
+    .Summary(true))
+    .Columns(columns => {
+        columns.Add()
+        .DataField("date1")
+        .DataType(GridColumnDataType.Date);
+
+        columns.Add()
+        .DataField("date2")
+        .DataType(GridColumnDataType.Date);
+
+        columns.Add()
+        .DataField("int1")
+        .DataType(GridColumnDataType.Number)
+        .Format(Format.Decimal);
+
+        columns.Add()
+        .DataField("int2")
+        .DataType(GridColumnDataType.Number)
+        .Format(Format.Decimal);
+
+        columns.Add().DataField("string");
+    })
+.Editing(editing =>
+    editing.Mode(GridEditMode.Batch)
+    .AllowAdding(true)
+    .AllowDeleting(true)
+    .AllowUpdating(true)
+)
+.FilterRow(fr => fr.Visible(true))
+.HeaderFilter(hr => hr.Visible(true))
+.GroupPanel(gp => gp.Visible(true))
+.Grouping(g => g.AutoExpandAll(false))
+.Summary(summary => {
+    summary.TotalItems(ti => {
+        ti.Add()
+        .Column("date1")
+        .SummaryType(SummaryType.Max);
+        ti.Add()
+        .Column("int1")
+        .SummaryType(SummaryType.Avg);
+        ti.Add()
+        .Column("int1")
+        .SummaryType(SummaryType.Sum);
+    });
+    summary.GroupItems(ti => {
+        ti.Add()
+        .Column("date1")
+        .SummaryType(SummaryType.Max);
+        ti.Add()
+        .Column("int1")
+        .SummaryType(SummaryType.Avg);
+        ti.Add()
+        .Column("int1")
+        .SummaryType(SummaryType.Sum);
+        ti.Add().SummaryType(SummaryType.Count);
+    });
+})
+)

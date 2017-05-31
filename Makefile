@@ -1,6 +1,6 @@
 export SHELL=/bin/bash
 
-PROJECTS = command-service query-service web-proxy validator webapp testing
+PROJECTS = command-service query-service web-proxy validator testing
 DOCKERS = $(PROJECTS:%=bd-%)
 
 .PHONY: dcup dcupb test
@@ -10,10 +10,14 @@ test:
 		pushd $$p && make test; popd ; \
 	done
 
+bd-webapp:
+	pushd webapp && make publish; popd
+	docker build -t sturm/cqrs-grid-demo/webapp -f Dockerfile-webapp .
+
 bd-%:
 	docker build -t sturm/cqrs-grid-demo/$* -f Dockerfile-$* .
 
-build-docker: $(DOCKERS)
+build-docker: $(DOCKERS) bd-webapp
 
 dcup:
 	docker-compose up
@@ -25,7 +29,6 @@ modules-install:
 	for p in $(PROJECTS) db message-utils; do \
 		pushd $$p && npm install; popd ; \
 	done
-	pushd webapp/static && ../node_modules/.bin/bower install; popd
 
 run-without-docker:
 	@echo "Make sure you have mongodb running locally on port 27017"

@@ -5,20 +5,55 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>@ViewData["Title"] - webapp</title>
 
-    <link href="~/lib/devextreme/css/dx.common.css" rel="stylesheet" /> 
-    <link href="~/lib/devextreme/css/dx.light.css" rel="stylesheet" /> 
     <script src="~/lib/jquery/dist/jquery.js"></script>
+
     <script src="~/lib/devextreme/js/dx.all.js"></script>     
     <script src="~/lib/devextreme-aspnet-data/js/dx.aspnet.data.js"></script> 
     <script src="~/lib/devextreme/js/dx.aspnet.mvc.js"></script>
 
+    <script src="~/js/dataStore.js"></script>
+    <script src="~/js/_layout.js" asp-append-version="true"></script>
+
+    <link href="~/lib/devextreme/css/dx.common.css" rel="stylesheet" /> 
+    <link href="~/lib/devextreme/css/dx.light.css" rel="stylesheet" /> 
     <link rel="stylesheet" href="~/css/site.css" />
 </head>
 <body>
+    @(Html.DevExtreme().Toolbar()
+    .Items(items => {
+        items.Add()
+        .Location(ToolbarItemLocation.Before)
+        .Widget(widget =>
+            widget.Button()
+            .Type(ButtonType.Danger)
+            .Text("Create 1000 Test Objects")
+            .OnClick("createTestObjects_click")
+        )
+        .LocateInMenu(ToolbarItemLocateInMenuMode.Auto);
+        
+        items.Add()
+        .Location(ToolbarItemLocation.Before)
+        .Widget(widget =>
+            widget.Button()
+            .Type(ButtonType.Success)
+            .Text("Show Data Grid")
+            .OnClick("showDataGrid_click")
+        )
+        .LocateInMenu(ToolbarItemLocateInMenuMode.Auto);
+        
+        items.Add()
+        .Location(ToolbarItemLocation.Before)
+        .Widget(widget =>
+            widget.Button()
+            .Type(ButtonType.Success)
+            .Text("Show Pivot Grid")
+            .OnClick("showPivotGrid_click")
+        )
+        .LocateInMenu(ToolbarItemLocateInMenuMode.Auto);
+    }))
+
   @RenderBody()
 
-  <script src="~/lib/jquery/dist/jquery.js"></script>
-  <script src="~/js/site.js" asp-append-version="true"></script>
   @RenderSection("Scripts", required: false)
 </body>
 </html>
