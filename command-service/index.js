@@ -1,12 +1,10 @@
 const Seneca = require('seneca');
 const { fixObject } = require('../message-utils');
 const busDriver = require('../resolve-bus-seneca');
-const storeDriver = require('../resolve/packages/resolve-es-mongo').default;
-const createBus = require('../resolve/packages/resolve-bus').default;
-const createStore = require('../resolve/packages/resolve-es').default;
-const commandHandler = require('../resolve/packages/resolve-command').default;
-
-console.log('Createbus: ', JSON.stringify(createBus, null, 2));
+const storeDriver = require('resolve-es-mongo');
+const createBus = require('resolve-bus');
+const createStore = require('resolve-es');
+const commandHandler = require('resolve-command');
 
 const bus = createBus({
   driver: busDriver({

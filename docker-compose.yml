@@ -25,7 +25,6 @@ services:
     image: sturm/cqrs-grid-demo/command-service
     volumes:
       - ./command-service:/usr/src/app/command-service
-      - ./resolve:/usr/src/app/resolve
       - ./resolve-bus-seneca:/usr/src/app/resolve-bus-seneca
       - ./message-utils:/usr/src/app/message-utils
     links:
