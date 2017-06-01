@@ -3,7 +3,7 @@ ViewData["Title"] = "Home Page";
 }
 <script>
     function reloadGrid_click(e) {
-    
+        $('#grid').dxDataGrid('instance').refresh();
     }
 </script>
 
@@ -26,6 +26,7 @@ ViewData["Title"] = "Home Page";
 </script>
 
 @(Html.DevExtreme().DataGrid()
+.ID("grid")
 .DataSource(new JS("dataSource"))
 .RemoteOperations(ro =>
     ro.Filtering(true)
