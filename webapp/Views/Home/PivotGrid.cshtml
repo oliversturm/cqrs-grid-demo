@@ -2,3 +2,108 @@
 ViewData["Title"] = "Home Page";
 }
 
+<script>
+ function reloadGrid_click(e) {
+     $('#grid').dxPivotGrid('instance').getDataSource().reload();
+ }
+</script>
+
+@(Html.DevExtreme().Toolbar()
+.Items(items => {
+    items.Add()
+    .Location(ToolbarItemLocation.Before)
+    .Widget(widget =>
+        widget.Button()
+        .Text("Reload grid")
+        .OnClick("reloadGrid_click")
+    )
+    .LocateInMenu(ToolbarItemLocateInMenuMode.Auto);
+}))
+
+
+@(Html.DevExtreme().PivotGrid()
+.ID("grid")
+.FieldPanel(fp => fp.Visible(true))
+.DataSource(ds => {
+    ds.RemoteOperations(true)
+    .RetrieveFields(false)
+    .Fields(fs => {
+        fs.Add()
+        .DataField("date1")
+        .DataType(PivotGridDataType.Date)
+        .Format(Format.ShortDate)
+        .AllowFiltering(false)
+        .AllowSorting(true)
+        .AllowSortingBySummary(true)
+        .Area(PivotGridArea.Filter);
+
+        fs.Add()
+        .DataField("date1")
+        .Caption("date1 DOW")
+        .DataType(PivotGridDataType.Date)
+        .AllowFiltering(false)
+        .AllowSorting(true)
+        .AllowSortingBySummary(true)
+        .Area(PivotGridArea.Column)
+        .AreaIndex(1)
+        .GroupInterval(PivotGridGroupInterval.DayOfWeek);
+
+        fs.Add()
+        .DataField("date1")
+        .Caption("date1 Month")
+        .DataType(PivotGridDataType.Date)
+        .AllowFiltering(false)
+        .AllowSorting(true)
+        .AllowSortingBySummary(true)
+        .Area(PivotGridArea.Column)
+        .AreaIndex(0)
+        .GroupInterval(PivotGridGroupInterval.Month);
+
+        fs.Add()
+        .DataField("date2")
+        .DataType(PivotGridDataType.Date)
+        .AllowFiltering(true)
+        .AllowSorting(true)
+        .AllowSortingBySummary(true)
+        .Area(PivotGridArea.Filter)
+        .GroupInterval(PivotGridGroupInterval.Quarter);
+
+        fs.Add()
+        .DataField("int1")
+        .DataType(PivotGridDataType.Number)
+        .AllowFiltering(true)
+        .AllowSorting(true)
+        .AllowSortingBySummary(true)
+        .Area(PivotGridArea.Data)
+        .SummaryType(SummaryType.Sum);
+
+        fs.Add()
+        .DataField("int2")
+        .DataType(PivotGridDataType.Number)
+        .AllowFiltering(true)
+        .AllowSorting(true)
+        .AllowSortingBySummary(true)
+        .Area(PivotGridArea.Filter)
+        .SummaryType(SummaryType.Sum);
+
+        fs.Add()
+        .DataField("int2")
+        .Caption("int2 groupInt 10")
+        .DataType(PivotGridDataType.Number)
+        .AllowFiltering(true)
+        .AllowSorting(true)
+        .AllowSortingBySummary(true)
+        .Area(PivotGridArea.Row)
+        .GroupInterval(10);
+
+        fs.Add()
+        .DataField("string")
+        .DataType(PivotGridDataType.String)
+        .AllowFiltering(true)
+        .AllowSorting(true)
+        .AllowSortingBySummary(true)
+        .Area(PivotGridArea.Filter);
+    })
+    .Option("store", new JS("dataStore"));
+})
+)
