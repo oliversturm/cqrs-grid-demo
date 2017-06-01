@@ -29,6 +29,7 @@ modules-install:
 	for p in $(PROJECTS) db message-utils; do \
 		pushd $$p && npm install; popd ; \
 	done
+	pushd webapp && make modules-install; popd
 
 run-without-docker:
 	@echo "Make sure you have mongodb running locally on port 27017"
@@ -38,4 +39,4 @@ run-without-docker:
 	cd testing; CMDSRVC_HOST=localhost node index.js & # port 3005
 	cd web-proxy; QRYSRVC_HOST=localhost CMDSRVC_HOST=localhost VALSRVC_HOST=localhost \
 		TESTSRVC_HOST=localhost node index.js & # port 3000
-	cd webapp; node index.js & # port 8080
+	cd webapp; dotnet run # port 8080
