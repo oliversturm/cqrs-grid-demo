@@ -1,16 +1,29 @@
 #!/bin/bash
 
 # install require node version
+
+### block copied from .profile to initialize nvm
+################################################
+export NVM_DIR="/home/ubuntu/.nvm"
+[ "$BASH_VERSION" ] && npm() { if [ "$*" == "config get prefix" ]; then which node | sed "s/bin\/node//"; else $(which npm) "$@"; fi } # hack: avoid slow npm sanity check in nvm
+[ -s "$NVM_DIR/nvm.sh" ] && . "$NVM_DIR/nvm.sh"  # This loads nvm
+unset npm # end hack
+[ "$BASH_VERSION" ] && npm() { if [ "$*" == "config get prefix" ]; then which node | sed "s/bin\/node//"; else $(which npm) "$@"; fi } # hack: avoid slow npm sanity check in nvm
+[ -s "/home/ubuntu/.nvm/nvm.sh" ] && . "/home/ubuntu/.nvm/nvm.sh" # This loads nvm
+unset npm # end hack
+### end copied block
+###############################################
+
 nvm install 7.4
 
 # install v3.x mongodb
-curl -o- https://raw.githubusercontent.com/mongodb/mongo/master/debian/init.d | sudo tee /etc/init.d/mongod
+curl -o- https://raw.githubusercontent.com/mongodb/mongo/master/debian/init.d | sudo tee /etc/init.d/mongod > /dev/null
 sudo chmod +x /etc/init.d/mongod
 
 sudo apt-key adv --keyserver hkp://keyserver.ubuntu.com:80 --recv 0C49F3730359A14518585931BC711F9BA15703C6
 echo "deb [ arch=amd64 ] http://repo.mongodb.org/apt/ubuntu trusty/mongodb-org/3.4 multiverse" | sudo tee /etc/apt/sources.list.d/mongodb-org-3.4.list
-sudo apt update
-sudo apt install -y mongodb-org
+sudo apt-get -q update
+sudo apt-get -q install -y mongodb-org
     
 /etc/init.d/mongod start
 
