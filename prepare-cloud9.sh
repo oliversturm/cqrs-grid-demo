@@ -15,6 +15,7 @@ unset npm # end hack
 ###############################################
 
 nvm install 7.4
+nvm alias default 7.4
 
 # install v3.x mongodb
 curl -o- https://raw.githubusercontent.com/mongodb/mongo/master/debian/init.d | sudo tee /etc/init.d/mongod > /dev/null
