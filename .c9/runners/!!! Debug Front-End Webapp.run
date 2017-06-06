@@ -1,0 +1,12 @@
+{
+    "script": [
+        "cd $project_path",
+        "make stop-run-without-docker",
+        "EXCLUDE=WEBAPP make run-without-docker",
+        "cd webapp",
+        "node --nocrankshaft --nolazy --debug-brk=15454 index.js"
+        ],
+    "info" : "Starting demo, debugging front-end webapp",
+    "debugger": "v8",
+    "debugport": 15454
+}
