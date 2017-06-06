@@ -11,12 +11,27 @@ Sign in to Cloud9 by [following this link](https://c9.io/login), create a new ac
 Using the Cloud9 dashboard, create a new workspace. Fill out the form with these details:
 
 * *Workspace name*: Decide for yourself
-* *Clone from Git or Mercurial URL*: Paste the repository or branch URL from GitHub. For example, for the Master branch of the demo, use https://github.com/oliversturm/cqrs-grid-demo.git . **Note** that branches other than *Master* have not been tested with Cloud9 yet.
+* *Clone from Git or Mercurial URL*: Paste the repository from GitHub: https://github.com/oliversturm/cqrs-grid-demo.git 
 * *Choose a template*: Select the *Node.js* template.
 
 ![Create a new workspace](cloud9newworkspace.png "Create a new workspace")
 
 Click *Create Workspace* and sit back for a moment while Cloud9 does its job.
+
+### 2a - Switch to the desired branch
+
+In the terminal window, you have access to the `git` command line tool. If you want to work with a repository branch other than *Master*, you need to issue these commands:
+
+```
+git checkout <branch>
+git clean -df
+```
+
+`<branch>` must be a valid branch name, for instance `knockout-frontend`. [Follow this link](https://github.com/oliversturm/cqrs-grid-demo/branches) to see all the branches of the demo project.
+
+**Note** that the `git clean` command isn't strictly necessary at all times. It is meant to clean up files and directories from the workspace that don't exist in the branch you're switching to. 
+
+**Note** that at the point of writing, not all branches of the demo project have been tested with Cloud9 yet, and for those branches you won't find the `prepare-cloud9.sh` script.
 
 ### 3 - Prepare the project
 
