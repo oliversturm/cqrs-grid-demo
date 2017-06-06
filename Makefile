@@ -25,7 +25,6 @@ modules-install:
 	for p in $(PROJECTS) db message-utils; do \
 		pushd $$p && npm install; popd ; \
 	done
-	pushd webapp/static && ../node_modules/.bin/bower install; popd
 
 run-without-docker:
 	@echo "Make sure you have mongodb running locally on port 27017"
