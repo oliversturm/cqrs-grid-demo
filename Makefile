@@ -29,10 +29,14 @@ modules-install:
 
 run-without-docker:
 	@echo "Make sure you have mongodb running locally on port 27017"
-	cd validator; node index.js & # port 3003
-	cd query-service; MONGO_HOST=localhost node --harmony index.js & # port 3001
-	cd command-service; MONGO_HOST=localhost VALSRVC_HOST=localhost node index.js & # port 3002
-	cd testing; CMDSRVC_HOST=localhost node index.js & # port 3005
-	cd web-proxy; QRYSRVC_HOST=localhost CMDSRVC_HOST=localhost VALSRVC_HOST=localhost \
-		TESTSRVC_HOST=localhost node index.js & # port 3000
-	cd webapp; node index.js & # port 8080
+	if echo $$EXCLUDE | grep -v -q VALIDATOR; then cd validator; node index.js & fi # port 3003
+	if echo $$EXCLUDE | grep -v -q QUERY; then cd query-service; MONGO_HOST=localhost node --harmony index.js & fi # port 3001
+	if echo $$EXCLUDE | grep -v -q COMMAND; then cd command-service; MONGO_HOST=localhost VALSRVC_HOST=localhost node index.js & fi # port 3002
+	if echo $$EXCLUDE | grep -v -q TESTING; then cd testing; CMDSRVC_HOST=localhost node index.js & fi # port 3005
+	if echo $$EXCLUDE | grep -v -q PROXY; then cd web-proxy; QRYSRVC_HOST=localhost CMDSRVC_HOST=localhost VALSRVC_HOST=localhost \
+		TESTSRVC_HOST=localhost node index.js & fi # port 3000
+	if echo $$EXCLUDE | grep -v -q WEBAPP; then cd webapp; node index.js & fi # port 8080
+
+stop-run-without-docker:
+	skill node
+
