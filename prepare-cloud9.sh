@@ -30,7 +30,7 @@ sudo apt-get -q install -y mongodb-org
 
 # patch files
 sed -i -e 's/node index.js & fi # port 3000/WEBPROXY_PORT=8081 \0/' Makefile
-sed -i -e "s/\/localhost:3000\//\/$C9_HOSTNAME:8081\//" webapp/static/dataStore.js
+sed -i -e "s/\/localhost:3000\//\/$C9_HOSTNAME:8081\//" webapp/src/app/dataStore.js
 
 # output follow-up instructions
 cat <<EOF
