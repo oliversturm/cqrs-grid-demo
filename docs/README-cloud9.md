@@ -11,7 +11,7 @@ Sign in to Cloud9 by [following this link](https://c9.io/login), create a new ac
 Using the Cloud9 dashboard, create a new workspace. Fill out the form with these details:
 
 * *Workspace name*: Decide for yourself
-* *Clone from Git or Mercurial URL*: Paste the repository or branch URL from GitHub. For example, for the Master branch of the demo, use https://github.com/oliversturm/cqrs-grid-demo.git . For the branch `knockout-frontend` it would be https://github.com/oliversturm/cqrs-grid-demo.git .
+* *Clone from Git or Mercurial URL*: Paste the repository or branch URL from GitHub. For example, for the Master branch of the demo, use https://github.com/oliversturm/cqrs-grid-demo.git . **Note** that branches other than *Master* have not been tested with Cloud9 yet.
 * *Choose a template*: Select the *Node.js* template.
 
 ![Create a new workspace](cloud9newworkspace.png "Create a new workspace")
