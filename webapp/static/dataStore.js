@@ -1,5 +1,5 @@
-var BASEDATA = 'http://localhost:3000/data/v1/values';
-var BASEAPI = 'http://localhost:3000/api/v1';
+var BASEDATA = '//localhost:3000/data/v1/values';
+var BASEAPI = '//localhost:3000/api/v1';
 
 var debugId = 0;
 
