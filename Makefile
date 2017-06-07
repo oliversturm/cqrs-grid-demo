@@ -29,11 +29,11 @@ modules-install:
 
 run-without-docker:
 	@echo "Make sure you have mongodb running locally on port 27017, and rabbitmq on port 5672"
-	cd validator; RABBITMQ_HOST=localhost node index.js &
-	cd query-service; MONGO_HOST=localhost RABBITMQ_HOST=localhost node --harmony index.js &
-	cd command-service; MONGO_HOST=localhost RABBITMQ_HOST=localhost node index.js &
-	cd readmodel; MONGO_HOST=localhost RABBITMQ_HOST=localhost node index.js &
-	cd query-change-detector; RABBITMQ_HOST=localhost node index.js &
-	cd testing; RABBITMQ_HOST=localhost node index.js &
-	cd web-proxy; RABBITMQ_HOST=localhost node index.js &
-	cd webapp; node index.js & # port 8080
+	if echo $$EXCLUDE | grep -v -q VALIDATOR; then cd validator; RABBITMQ_HOST=localhost node index.js & fi
+	if echo $$EXCLUDE | grep -v -q QUERY; then cd query-service; MONGO_HOST=localhost RABBITMQ_HOST=localhost node --harmony index.js & fi
+	if echo $$EXCLUDE | grep -v -q COMMAND; then cd command-service; MONGO_HOST=localhost RABBITMQ_HOST=localhost node index.js & fi
+	if echo $$EXCLUDE | grep -v -q READMODEL; then cd readmodel; MONGO_HOST=localhost RABBITMQ_HOST=localhost node index.js & fi
+	if echo $$EXCLUDE | grep -v -q QRYCHANGES; then cd query-change-detector; RABBITMQ_HOST=localhost node index.js & fi
+	if echo $$EXCLUDE | grep -v -q TESTING; then cd testing; RABBITMQ_HOST=localhost node index.js & fi
+	if echo $$EXCLUDE | grep -v -q PROXY; then cd web-proxy; RABBITMQ_HOST=localhost node index.js & fi
+	if echo $$EXCLUDE | grep -v -q WEBAPP; then cd webapp; node index.js & fi # port 8080

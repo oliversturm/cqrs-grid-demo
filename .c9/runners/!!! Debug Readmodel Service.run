@@ -1,0 +1,12 @@
+{
+    "script": [
+        "cd $project_path",
+        "make stop-run-without-docker",
+        "EXCLUDE=READMODEL make run-without-docker",
+        "cd readmodel",
+        "MONGO_HOST=localhost RABBITMQ_HOST=localhost node --harmony --nocrankshaft --nolazy --debug-brk=15454 index.js"
+        ],
+    "info" : "Starting demo, debugging readmodel service",
+    "debugger": "v8",
+    "debugport": 15454
+}

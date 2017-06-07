@@ -1,0 +1,12 @@
+{
+    "script": [
+        "cd $project_path",
+        "make stop-run-without-docker",
+        "EXCLUDE=VALIDATOR make run-without-docker",
+        "cd validator",
+        "RABBITMQ_HOST=localhost node --nocrankshaft --nolazy --debug-brk=15454 index.js"
+        ],
+    "info" : "Starting demo, debugging validator service",
+    "debugger": "v8",
+    "debugport": 15454
+}

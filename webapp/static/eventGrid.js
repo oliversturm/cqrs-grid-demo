@@ -6,11 +6,11 @@ $(function() {
   };
 
   var dataSource = createDataSource({
-    baseDataUrl: 'http://localhost:3000/data/v1/events',
+    baseDataUrl: '//localhost:3000/data/v1/events',
     idField: 'id',
     changeNotification: trackGridChanges(trackingConfig),
     notifyForAnyChange: true,
-    socketIoUrl: 'http://localhost:3000'
+    socketIoUrl: '//localhost:3000'
   });
 
   $('#toolbar').dxToolbar({

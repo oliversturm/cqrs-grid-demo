@@ -126,10 +126,10 @@ $(function() {
           ]
         },
         {
-          baseDataUrl: 'http://localhost:3000/data/v1/entity',
+          baseDataUrl: '//localhost:3000/data/v1/entity',
           changeNotification: trackPivotGridChanges(trackingConfig),
           aggregateName: 'entity',
-          socketIoUrl: 'http://localhost:3000',
+          socketIoUrl: '//localhost:3000',
           trackGroupQueries: true,
 
           // The value is arbitrary. If you anticipate seeing pivot grid setups

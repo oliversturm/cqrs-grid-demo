@@ -3,13 +3,13 @@ var debugId = 0;
 function createDataStore(options) {
   const dataStoreOptions = Object.assign(
     {
-      baseDataUrl: 'http://localhost',
+      baseDataUrl: '//localhost',
       idField: '_id',
       changeNotification: undefined,
       aggregateName: undefined,
       trackGroupQueries: false,
       notifyForAnyChange: false,
-      socketIoUrl: 'http://localhost',
+      socketIoUrl: '//localhost',
       summaryQueryLimit: undefined
     },
     options
