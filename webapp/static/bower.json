@@ -12,6 +12,6 @@
     "tests"
   ],
   "dependencies": {
-    "devextreme": "^16.2.4"
+    "devextreme": "^17.1.3"
   }
 }
