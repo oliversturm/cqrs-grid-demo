@@ -70,6 +70,7 @@ EOF
   </packageSources>
 </configuration>
 EOF
+        echo "Created NuGet config file: $NUGETCFG"
     fi
 fi
 
