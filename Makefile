@@ -22,7 +22,7 @@ dcup-nomounts:
 	docker-compose -f docker-compose-nomounts.yml up
 
 modules-install:
-	for p in $(PROJECTS) db message-utils; do \
+	for p in $(PROJECTS) db message-utils resolve-bus-seneca; do \
 		pushd $$p && npm install; popd ; \
 	done
 	pushd webapp/static && ../node_modules/.bin/bower install; popd
