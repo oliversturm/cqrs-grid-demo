@@ -37,3 +37,6 @@ run-without-docker:
 	if echo $$EXCLUDE | grep -v -q TESTING; then cd testing; RABBITMQ_HOST=localhost node index.js & fi
 	if echo $$EXCLUDE | grep -v -q PROXY; then cd web-proxy; RABBITMQ_HOST=localhost node index.js & fi
 	if echo $$EXCLUDE | grep -v -q WEBAPP; then cd webapp; node index.js & fi # port 8080
+
+stop-run-without-docker:
+	skill node
