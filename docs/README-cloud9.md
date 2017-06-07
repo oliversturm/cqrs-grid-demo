@@ -31,8 +31,6 @@ git clean -df
 
 **Note** that the `git clean` command isn't strictly necessary at all times. It is meant to clean up files and directories from the workspace that don't exist in the branch you're switching to. 
 
-**Note** that at the point of writing, not all branches of the demo project have been tested with Cloud9 yet, and for those branches you won't find the `prepare-cloud9.sh` script.
-
 ### 3 - Prepare the project
 
 Once the IDE comes up, you see a terminal panel at the bottom of the browser window, with a title starting with `bash`. This is your command line terminal. Enter the following command to prepare the environment for the demo project.
