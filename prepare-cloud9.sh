@@ -52,7 +52,7 @@ EOF
 else
     mkdir -p ~/.nuget/NuGet
     cat <<EOF 
-Creating NuGet config file: $NUGETCFG. 
+Creating NuGet config file: $NUGETCFG
 Please find your DevExpress NuGet access key at the bottom of the 
 Download Manager, as described here:
 https://www.devexpress.com/Support/Center/Question/Details/T466415/devexpress-nuget-packages
