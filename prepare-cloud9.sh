@@ -59,8 +59,9 @@ https://www.devexpress.com/Support/Center/Question/Details/T466415/devexpress-nu
 
 Then paste the key at the following prompt.
 EOF
-    read "Your DevExpress NuGet key: " APIKEY
-    cat <<EOF > $NUGETCFG
+    read -p "Your DevExpress NuGet key: " APIKEY
+    if [ -n "$APIKEY" ]; then
+        cat <<EOF > $NUGETCFG
 <?xml version="1.0" encoding="utf-8"?>
 <configuration>
   <packageSources>
@@ -69,6 +70,7 @@ EOF
   </packageSources>
 </configuration>
 EOF
+    fi
 fi
 
 
