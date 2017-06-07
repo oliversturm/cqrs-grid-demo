@@ -1,0 +1,12 @@
+{
+    "script": [
+        "cd $project_path",
+        "make stop-run-without-docker",
+        "EXCLUDE=PROXY make run-without-docker",
+        "cd web-proxy",
+        "QRYSRVC_HOST=localhost CMDSRVC_HOST=localhost VALSRVC_HOST=localhost TESTSRVC_HOST=localhost WEBPROXY_PORT=8081 node --nocrankshaft --nolazy --debug-brk=15454 index.js"
+        ],
+    "info" : "Starting demo, debugging web-proxy service",
+    "debugger": "v8",
+    "debugport": 15454
+}
