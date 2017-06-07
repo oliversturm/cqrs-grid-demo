@@ -38,4 +38,5 @@ run-without-docker:
 
 stop-run-without-docker:
 	skill node
+	skill gulp
 
