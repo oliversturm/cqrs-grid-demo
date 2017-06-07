@@ -32,6 +32,9 @@ sudo apt-get -q install -y mongodb-org
     
 /etc/init.d/mongod start
 
+# install bower
+npm install -g bower
+
 # install .NET Core
 sudo apt-get -q install -y dotnet-dev-1.0.4
 
