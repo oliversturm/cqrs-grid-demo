@@ -35,7 +35,7 @@ sudo service rabbitmq-server start
 # patch files
 sed -i -e 's/\(cd web-proxy; RABBITMQ_HOST=localhost\)\(.*\)$/\1 WEBPROXY_PORT=8081\2/' Makefile
 REPLACE_URL="s/\/localhost:3000\(\/\|$\)/\/$C9_HOSTNAME:8081\1/"
-sed -i -e $REPLACE_URL webapp/static/*Grid.js webapp/static/index.js
+sed -i -e $REPLACE_URL webapp/static/*Grid.js webapp/static/*Grid.html webapp/static/index.js
 
 # output follow-up instructions
 cat <<EOF
