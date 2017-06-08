@@ -1,19 +1,24 @@
 {
   "name": "webapp",
-  "version": "1.0.0",
-  "description": "",
-  "main": "index.js",
-  "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
-  },
-  "author": "Oliver Sturm",
-  "license": "SEE LICENSE IN LICENSE",
+  "version": "0.1.0",
+  "private": true,
   "dependencies": {
-    "express": "^4.14.0"
+    "@devexpress/dx-react-grid": "^1.0.0-alpha.2",
+    "@devexpress/dx-react-grid-bootstrap3": "^1.0.0-alpha.2",
+    "bootstrap": "^3.3.7",
+    "react": "^15.5.4",
+    "react-bootstrap": "^0.31.0",
+    "react-dom": "^15.5.4",
+    "react-redux": "^5.0.5",
+    "redux": "^3.6.0"
   },
   "devDependencies": {
-    "bower": "^1.8.0",
-    "morgan": "^1.7.0",
-    "nodemon": "^1.11.0"
+    "react-scripts": "1.0.7"
+  },
+  "scripts": {
+    "start": "react-scripts start",
+    "build": "react-scripts build",
+    "test": "react-scripts test --env=jsdom",
+    "eject": "react-scripts eject"
   }
 }
