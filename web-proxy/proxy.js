@@ -116,8 +116,6 @@ module.exports = function(o) {
   this.add('role:web, domain:values, cmd:list', function(m, r) {
     let p = {};
 
-    console.log('Received query: ', JSON.stringify(m.args.query));
-
     if (m.args.query.take) {
       const take = parseInt(m.args.query.take);
       if (take > 0) p.take = take;
