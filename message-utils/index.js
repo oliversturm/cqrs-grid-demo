@@ -12,8 +12,19 @@ function fixDate(value, fixers = defaultFixers) {
     if (!isNaN(ms)) {
       return new Date(ms);
     }
-  }
-  return value;
+  } else return value;
+}
+
+var regexBool = /(true|false)/i;
+
+function fixBool(value, fixers = defaultFixers) {
+  let match;
+  if (typeof value === 'string' && (match = value.match(regexBool)))
+    return {
+      true: true,
+      false: false
+    }[match[0].toLowerCase()];
+  else return value;
 }
 
 function fixRecursive(value, fixers = defaultFixers) {
@@ -55,6 +66,7 @@ if (!('toJSON' in Error.prototype))
 module.exports = {
   fixDate,
   fixRecursive,
+  fixBool,
   defaultFixers,
   fixValue,
   fixObject

@@ -2,7 +2,8 @@ const mongodb = require('mongodb');
 const ObjectID = mongodb.ObjectID;
 const parambulator = require('parambulator');
 
-const fixObject = require('../message-utils').fixObject;
+const messageUtils = require('../message-utils');
+const fixObject = messageUtils.fixObject;
 
 function sendErrorStatus(m, status, msg = '') {
   //    console.log("Sending error status '" + status + "': ", msg);
@@ -106,8 +107,16 @@ module.exports = function(o) {
     );
   }
 
+  function parseOrFix(arg) {
+    return typeof arg === 'string'
+      ? JSON.parse(arg)
+      : fixObject(arg, messageUtils.defaultFixers.concat(messageUtils.fixBool));
+  }
+
   this.add('role:web, domain:values, cmd:list', function(m, r) {
     let p = {};
+
+    console.log('Received query: ', JSON.stringify(m.args.query));
 
     if (m.args.query.take) {
       const take = parseInt(m.args.query.take);
@@ -124,7 +133,7 @@ module.exports = function(o) {
     p.requireTotalCount = m.args.query.requireTotalCount === 'true';
 
     if (m.args.query.sort) {
-      const sortOptions = JSON.parse(m.args.query.sort);
+      const sortOptions = parseOrFix(m.args.query.sort);
 
       if (sortOptions instanceof Array && sortOptions.length > 0) {
         const vr = validateAll(sortOptions, sortOptionsChecker);
@@ -134,7 +143,7 @@ module.exports = function(o) {
     }
 
     if (m.args.query.group) {
-      const groupOptions = JSON.parse(m.args.query.group);
+      const groupOptions = parseOrFix(m.args.query.group);
 
       if (groupOptions instanceof Array) {
         if (groupOptions.length > 0) {
@@ -145,7 +154,7 @@ module.exports = function(o) {
             p.requireGroupCount = m.args.query.requireGroupCount === 'true';
 
             if (m.args.query.groupSummary) {
-              const gsOptions = JSON.parse(m.args.query.groupSummary);
+              const gsOptions = parseOrFix(m.args.query.groupSummary);
 
               if (gsOptions instanceof Array) {
                 if (gsOptions.length > 0) {
@@ -171,7 +180,7 @@ module.exports = function(o) {
     }
 
     if (m.args.query.totalSummary) {
-      const tsOptions = JSON.parse(m.args.query.totalSummary);
+      const tsOptions = parseOrFix(m.args.query.totalSummary);
 
       if (tsOptions instanceof Array) {
         if (tsOptions.length > 0) {
@@ -196,7 +205,7 @@ module.exports = function(o) {
       // an array of elements and nested arrays
       // the query service uses it if it can and returns errors
       // otherwise
-      const filterOptions = JSON.parse(m.args.query.filter);
+      const filterOptions = parseOrFix(m.args.query.filter);
       if (typeof filterOptions === 'string' || filterOptions.length) {
         p.filter = filterOptions;
       } else
@@ -208,9 +217,9 @@ module.exports = function(o) {
       m.args.query.searchOperation &&
       m.args.query.searchValue
     ) {
-      const searchValue = JSON.parse(m.args.query.searchValue);
-      const searchOperation = JSON.parse(m.args.query.searchOperation);
-      const searchExpr = JSON.parse(m.args.query.searchExpr);
+      const searchValue = parseOrFix(m.args.query.searchValue);
+      const searchOperation = parseOrFix(m.args.query.searchOperation);
+      const searchExpr = parseOrFix(m.args.query.searchExpr);
       if (
         typeof searchValue === 'string' &&
         typeof searchValue === 'string' &&
@@ -223,7 +232,7 @@ module.exports = function(o) {
     }
 
     if (m.args.query.select) {
-      const selectOptions = JSON.parse(m.args.query.select);
+      const selectOptions = parseOrFix(m.args.query.select);
       if (typeof selectOptions === 'string') p.select = [selectOptions];
       else if (selectOptions.length > 0) {
         if (selectOptions.reduce((r, v) => r && typeof v === 'string', true))
