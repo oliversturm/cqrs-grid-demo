@@ -116,6 +116,8 @@ module.exports = function(o) {
   this.add('role:web, domain:values, cmd:list', function(m, r) {
     let p = {};
 
+    //console.log('Received query: ', JSON.stringify(m.args.query, null, 2));
+
     if (m.args.query.take) {
       const take = parseInt(m.args.query.take);
       if (take > 0) p.take = take;
@@ -215,14 +217,10 @@ module.exports = function(o) {
       m.args.query.searchOperation &&
       m.args.query.searchValue
     ) {
-      const searchValue = parseOrFix(m.args.query.searchValue);
-      const searchOperation = parseOrFix(m.args.query.searchOperation);
+      const searchValue = m.args.query.searchValue;
+      const searchOperation = m.args.query.searchOperation;
       const searchExpr = parseOrFix(m.args.query.searchExpr);
-      if (
-        typeof searchValue === 'string' &&
-        typeof searchValue === 'string' &&
-        (typeof searchExpr === 'string' || searchExpr.length)
-      ) {
+      if (typeof searchExpr === 'string' || searchExpr.length) {
         p.searchValue = searchValue;
         p.searchOperation = searchOperation;
         p.searchExpr = searchExpr;
