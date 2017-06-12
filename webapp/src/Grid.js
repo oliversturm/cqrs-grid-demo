@@ -1,9 +1,17 @@
 import React from 'react';
-import { Grid, PagingState, SortingState } from '@devexpress/dx-react-grid';
+import {
+  Grid,
+  PagingState,
+  SortingState,
+  FilteringState,
+  GroupingState
+} from '@devexpress/dx-react-grid';
 import {
   TableView,
   TableHeaderRow,
-  PagingPanel
+  PagingPanel,
+  TableFilterRow,
+  TableGroupRow
 } from '@devexpress/dx-react-grid-bootstrap3';
 
 import { connect } from 'react-redux';
@@ -28,10 +36,13 @@ class ReduxGrid extends React.PureComponent {
       onPageSizeChange,
       totalCount,
       allowedPageSizes,
-      onCurrentPageChange
+      onCurrentPageChange,
+      filters,
+      onFiltersChange
     } = this.props;
     return (
       <Grid rows={rows} columns={columns}>
+        <FilteringState filters={filters} onFiltersChange={onFiltersChange} />
         <PagingState
           pageSize={pageSize}
           onPageSizeChange={onPageSizeChange}
@@ -41,8 +52,9 @@ class ReduxGrid extends React.PureComponent {
         />
         <SortingState sorting={sorting} onSortingChange={onSortingChange} />
         <TableView />
-        <TableHeaderRow allowSorting />
+        <TableHeaderRow allowSorting allowGrouping allowDragging />
         <PagingPanel allowedPageSizes={allowedPageSizes} />
+        <TableFilterRow />
       </Grid>
     );
   }
@@ -58,7 +70,8 @@ class ReduxGrid extends React.PureComponent {
     const loadOptions = {
       sorting: this.props.sorting,
       currentPage: this.props.currentPage,
-      pageSize: this.props.pageSize
+      pageSize: this.props.pageSize,
+      filters: this.props.filters
     };
 
     const queryURL = createQueryURL(
@@ -67,6 +80,8 @@ class ReduxGrid extends React.PureComponent {
     );
 
     if (!(queryURL === this.lastQueryURL)) {
+      console.log('Querying (decoded): ', decodeURIComponent(queryURL));
+
       fetch(queryURL)
         .then(response => response.json())
         .then(data =>
@@ -90,6 +105,11 @@ const mapDispatchToProps = dispatch => ({
   },
   onPageSizeChange: pageSize => {
     dispatch(gridPageSizeChange(pageSize));
+  },
+  onFiltersChange: filters => {
+    console.log('Filters changed: ', JSON.stringify(filters));
+
+    dispatch(gridStateChange('filters', filters));
   },
   dispatch
 });
@@ -125,6 +145,7 @@ const gridReducer = createGridReducer({
   totalCount: 0,
   pageSize: 10,
   allowedPageSizes: [5, 10, 20, 50],
+  filters: [],
   loading: false
 });
 

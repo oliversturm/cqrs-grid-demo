@@ -113,10 +113,77 @@ module.exports = function(o) {
       : fixObject(arg, messageUtils.defaultFixers.concat(messageUtils.fixBool));
   }
 
+  function fixFilterAndSearch(schema) {
+    // currently only for int and float, since date and bool
+    // are handled by heuristics
+    // schema can be
+    // {
+    //   fieldName1: 'int',
+    //   fieldName2: 'float',
+    // }
+
+    const operators = ['=', '<>', '>', '>=', '<', '<='];
+
+    function fixValue(type, value) {
+      const converter = {
+        int: parseInt,
+        float: parseFloat
+      };
+      return converter[type](value);
+    }
+
+    // fixing the array in-place - not the nicest thing, but much easier
+    // on the eye
+    function fixFilter(filterArray) {
+      const isArray = Array.isArray(filterArray);
+
+      if (isArray) {
+        if (
+          filterArray.length === 3 &&
+          typeof filterArray[2] === 'string' &&
+          schema[filterArray[0]] &&
+          operators.includes(filterArray[1])
+        ) {
+          filterArray[2] = fixValue(schema[filterArray[0]], filterArray[2]);
+        } else filterArray.forEach(e => fixFilter(e));
+      }
+    }
+
+    function fixSearch(options) {
+      const fieldName = typeof options.searchExpr === 'string'
+        ? schema[options.searchExpr]
+        : Array.isArray(options.searchExpr)
+            ? options.searchExpr.find(e => (schema[e] ? e : null))
+            : null;
+
+      if (fieldName)
+        options.searchValue = fixValue(schema[fieldName], options.searchValue);
+    }
+
+    return function(value) {
+      if (value != null) {
+        if (value.filter) fixFilter(value.filter);
+        if (
+          value.searchExpr &&
+          value.searchOperation &&
+          value.searchValue &&
+          typeof value.searchValue === 'string'
+        )
+          fixSearch(value);
+      }
+      return value;
+    };
+  }
+
   this.add('role:web, domain:values, cmd:list', function(m, r) {
     let p = {};
 
-    //console.log('Received query: ', JSON.stringify(m.args.query, null, 2));
+    console.log('Received query: ', JSON.stringify(m.args.query, null, 2));
+
+    fixFilterAndSearch({
+      int1: 'int',
+      int2: 'int'
+    })(m.args.query);
 
     if (m.args.query.take) {
       const take = parseInt(m.args.query.take);
