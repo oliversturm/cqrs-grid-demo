@@ -6,7 +6,7 @@
     "@devexpress/dx-react-grid": "^1.0.0-alpha.2",
     "@devexpress/dx-react-grid-bootstrap3": "^1.0.0-alpha.2",
     "bootstrap": "^3.3.7",
-    "jquery-param": "^0.2.0",
+    "qs": "^6.4.0",
     "react": "^15.5.4",
     "react-bootstrap": "^0.31.0",
     "react-dom": "^15.5.4",

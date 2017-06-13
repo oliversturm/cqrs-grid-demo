@@ -1,4 +1,4 @@
-import jqueryParam from 'jquery-param';
+import qs from 'qs';
 
 const getSortingParams = loadOptions =>
   loadOptions.sorting && loadOptions.sorting.length > 0
@@ -36,7 +36,7 @@ const getFilterParams = loadOptions =>
             r.push([
               v.columnName,
               '=',
-              v.columnName === 'int1' ? parseInt(v.value) : v.value
+              v.columnName === 'int1' ? parseInt(v.value, 10) : v.value
             ]);
           }
           return r;
@@ -53,7 +53,9 @@ const createQueryURL = (baseUrl, loadOptions) => {
 
   console.log('Created params: ', params);
 
-  const query = jqueryParam(params);
+  const query = qs.stringify(params, {
+    arrayFormat: 'indices'
+  });
   return query ? baseUrl.concat('?', query) : baseUrl;
 };
 
