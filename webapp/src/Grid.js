@@ -10,6 +10,7 @@ import {
   TableView,
   TableHeaderRow,
   PagingPanel,
+  GroupingPanel,
   TableFilterRow,
   TableGroupRow
 } from '@devexpress/dx-react-grid-bootstrap3';
@@ -38,7 +39,11 @@ class ReduxGrid extends React.PureComponent {
       allowedPageSizes,
       onCurrentPageChange,
       filters,
-      onFiltersChange
+      onFiltersChange,
+      grouping,
+      onGroupingChange,
+      expandedGroups,
+      onExpandedGroupsChange
     } = this.props;
     return (
       <Grid rows={rows} columns={columns}>
@@ -51,10 +56,18 @@ class ReduxGrid extends React.PureComponent {
           totalCount={totalCount}
         />
         <SortingState sorting={sorting} onSortingChange={onSortingChange} />
+        <GroupingState
+          grouping={grouping}
+          onGroupingChange={onGroupingChange}
+          expandedGroups={expandedGroups}
+          onExpandedGroupsChange={onExpandedGroupsChange}
+        />
         <TableView />
         <TableHeaderRow allowSorting allowGrouping allowDragging />
-        <PagingPanel allowedPageSizes={allowedPageSizes} />
         <TableFilterRow />
+        <TableGroupRow />
+        <PagingPanel allowedPageSizes={allowedPageSizes} />
+        <GroupingPanel allowSorting />
       </Grid>
     );
   }
@@ -71,7 +84,8 @@ class ReduxGrid extends React.PureComponent {
       sorting: this.props.sorting,
       currentPage: this.props.currentPage,
       pageSize: this.props.pageSize,
-      filters: this.props.filters
+      filters: this.props.filters,
+      grouping: this.props.grouping
     };
 
     const queryURL = createQueryURL(
@@ -85,7 +99,9 @@ class ReduxGrid extends React.PureComponent {
       fetch(queryURL)
         .then(response => response.json())
         .then(data =>
-          this.props.dispatch(gridDataLoaded(convertResponseData(data)))
+          this.props.dispatch(
+            gridDataLoaded(convertResponseData(data, loadOptions))
+          )
         )
         .catch(() => this.props.dispatch(gridStateChange('loading', false)));
 
@@ -97,20 +113,14 @@ class ReduxGrid extends React.PureComponent {
 const mapStateToProps = state => state;
 
 const mapDispatchToProps = dispatch => ({
-  onSortingChange: sorting => {
-    dispatch(gridStateChange('sorting', sorting));
-  },
-  onCurrentPageChange: currentPage => {
-    dispatch(gridStateChange('currentPage', currentPage));
-  },
-  onPageSizeChange: pageSize => {
-    dispatch(gridPageSizeChange(pageSize));
-  },
-  onFiltersChange: filters => {
-    console.log('Filters changed: ', JSON.stringify(filters));
-
-    dispatch(gridStateChange('filters', filters));
-  },
+  onSortingChange: sorting => dispatch(gridStateChange('sorting', sorting)),
+  onCurrentPageChange: currentPage =>
+    dispatch(gridStateChange('currentPage', currentPage)),
+  onPageSizeChange: pageSize => dispatch(gridPageSizeChange(pageSize)),
+  onFiltersChange: filters => dispatch(gridStateChange('filters', filters)),
+  onGroupingChange: grouping => dispatch(gridStateChange('grouping', grouping)),
+  onExpandedGroupsChange: expandedGroups =>
+    dispatch(gridStateChange('expandedGroups', expandedGroups)),
   dispatch
 });
 
@@ -146,6 +156,8 @@ const gridReducer = createGridReducer({
   pageSize: 10,
   allowedPageSizes: [5, 10, 20, 50],
   filters: [],
+  grouping: [],
+  expandedGroups: [],
   loading: false
 });
 

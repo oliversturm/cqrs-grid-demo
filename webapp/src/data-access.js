@@ -44,11 +44,22 @@ const getFilterParams = loadOptions =>
       }
     : {};
 
+const getGroupParams = loadOptions =>
+  loadOptions.grouping && loadOptions.grouping.length > 0
+    ? {
+        group: loadOptions.grouping.map(g => ({
+          selector: g.columnName,
+          isExpanded: true
+        }))
+      }
+    : {};
+
 const createQueryURL = (baseUrl, loadOptions) => {
   const params = Object.assign.apply({}, [
     getSortingParams(loadOptions),
     getPagingParams(loadOptions),
-    getFilterParams(loadOptions)
+    getFilterParams(loadOptions),
+    getGroupParams(loadOptions)
   ]);
 
   console.log('Created params: ', params);
@@ -59,9 +70,32 @@ const createQueryURL = (baseUrl, loadOptions) => {
   return query ? baseUrl.concat('?', query) : baseUrl;
 };
 
-const convertResponseData = data => ({
-  rows: data.data,
-  totalCount: data.totalCount
-});
+const convertResponseData = (data, loadOptions) => {
+  function getRows(list, parentGroup) {
+    if (list.length > 0) {
+      if (list[0].key && list[0].items) {
+        // assume this is a group list
+        return list.map(g => ({
+          key: (parentGroup ? `${parentGroup.key}|` : '') + g.key,
+          value: g.key,
+          type: 'groupRow',
+          // column:
+          rows: getRows(g.items, g)
+        }));
+      } else return list;
+    } else return [];
+  }
+
+  console.log('Converting response: ', data);
+
+  let result;
+
+  if (loadOptions.grouping && loadOptions.grouping.length > 0)
+    result = { rows: getRows(data.data), totalCount: data.totalCount };
+  else result = { rows: data.data, totalCount: data.totalCount };
+
+  console.log('Conversion result: ', result);
+  return result;
+};
 
 export { createQueryURL, convertResponseData };
