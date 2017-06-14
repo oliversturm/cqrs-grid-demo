@@ -49,8 +49,9 @@ const getGroupParams = loadOptions =>
     ? {
         group: loadOptions.grouping.map(g => ({
           selector: g.columnName,
-          isExpanded: true
-        }))
+          isExpanded: false
+        })),
+        requireGroupCount: true
       }
     : {};
 
@@ -70,36 +71,90 @@ const createQueryURL = (baseUrl, loadOptions) => {
   return query ? baseUrl.concat('?', query) : baseUrl;
 };
 
-const convertResponseData = (data, loadOptions) => {
-  function getRows(list, groupLevel, parentGroup) {
-    if (list.length > 0) {
-      if (groupLevel + 1 <= loadOptions.grouping.length) {
-        return list.map(g => ({
-          _headerKey: `groupRow_${loadOptions.grouping[groupLevel].columnName}`,
-          key: (parentGroup ? `${parentGroup.key}|` : '') + `${g.key}`,
-          colspan: parentGroup ? parentGroup.colspan + 1 : 1,
-          value: g.key,
-          type: 'groupRow',
-          column: {
-            name: loadOptions.grouping[groupLevel].columnName,
-            title: loadOptions.grouping[groupLevel].columnName
-          },
-          rows: getRows(g.items, groupLevel + 1, g)
-        }));
-      } else return list;
-    } else return [];
+const convertSimpleQueryData = data => ({
+  rows: data.data,
+  totalCount: data.totalCount
+});
+
+const createGroupQueryData = (data, loadOptions) => {
+  function recurse(source, groupLevel, parentGroup, parentFilters = []) {
+    function createGroupNode(group) {
+      return {
+        _headerKey: `groupRow_${loadOptions.grouping[groupLevel].columnName}`,
+        key: (parentGroup ? `${parentGroup.key}|` : '') + `${group.key}`,
+        colspan: parentGroup ? parentGroup.colspan + 1 : 1,
+        value: group.key,
+        type: 'groupRow',
+        column: {
+          name: loadOptions.grouping[groupLevel].columnName,
+          title: loadOptions.grouping[groupLevel].columnName
+        },
+        rows: []
+      };
+    }
+
+    function getParentFilter(group) {
+      return {
+        columnName: loadOptions.grouping[groupLevel].columnName,
+        value: group.key
+      };
+    }
+
+    function getParentFilters(group) {
+      return [...parentFilters, getParentFilter(group)];
+    }
+
+    function getNestedElements(group, newGroup) {
+      return new Promise((resolve, reject) => {
+        if (loadOptions.expandedGroups.includes(newGroup.key)) {
+          if (groupLevel + 1 < loadOptions.grouping.length)
+            resolve(
+              recurse(
+                group.items,
+                groupLevel + 1,
+                newGroup,
+                getParentFilters(group)
+              )
+            );
+          else {
+            const query = createQueryURL(BASEDATA, {
+              sorting: loadOptions.sorting,
+              pageSize: loadOptions.pageSize,
+              currentPage: 0,
+              filters: loadOptions.filters.concat(getParentFilters(group))
+            });
+
+            simpleQuery(query).then(res => {
+              console.log('Group query result', res);
+
+              if (res.dataFetched) resolve(res.data.rows);
+              else reject();
+            });
+          }
+        } else resolve([]);
+      });
+    }
+
+    return Promise.resolve(
+      source.reduce((r, v) => {
+        const groupNode = createGroupNode(v);
+        return getNestedElements(v, groupNode).then(elements =>
+          r.then(list => list.concat([groupNode], elements))
+        );
+      }, Promise.resolve([]))
+    );
+  }
+  function getRows(list) {
+    return recurse(list, 0);
   }
 
   console.log('Converting response: ', data);
 
-  let result;
-
-  if (loadOptions.grouping && loadOptions.grouping.length > 0)
-    result = { rows: getRows(data.data, 0), totalCount: data.totalCount };
-  else result = { rows: data.data, totalCount: data.totalCount };
-
-  console.log('Conversion result: ', result);
-  return result;
+  return new Promise((resolve, reject) => {
+    getRows(data.data).then(rows => {
+      resolve({ rows, totalCount: data.groupCount });
+    });
+  });
 };
 
 function sendChange(row, add = true, key) {
@@ -126,34 +181,69 @@ const commitChanges = ({ added, changed, deleted }) => {
   if (changed) for (const key in changed) sendChange(changed[key], false, key);
 };
 
+const BASEDATA = '//localhost:3000/data/v1/values';
+
+const simpleQuery = queryUrl => {
+  return fetch(queryUrl)
+    .then(response => response.json())
+    .then(data => {
+      return {
+        dataFetched: true,
+        data: convertSimpleQueryData(data)
+      };
+    })
+    .catch(reason => ({
+      dataFetched: false,
+      reason
+    }));
+};
+
+const groupQuery = (queryUrl, loadOptions) => {
+  return fetch(queryUrl)
+    .then(response => response.json())
+    .then(data => {
+      return createGroupQueryData(data, loadOptions).then(data => {
+        return {
+          dataFetched: true,
+          data
+        };
+      });
+    })
+    .catch(reason => ({
+      dataFetched: false,
+      reason
+    }));
+};
+
+const createExpandedGroupsString = expandedGroups =>
+  expandedGroups ? expandedGroups.join(',') : undefined;
+
 const fetchData = (() => {
   let lastQueryUrl;
+  let lastExpandedGroups;
 
   return loadOptions => {
-    const queryUrl = createQueryURL(
-      '//localhost:3000/data/v1/values',
-      loadOptions
+    const queryUrl = createQueryURL(BASEDATA, loadOptions);
+    const expandedGroupsString = createExpandedGroupsString(
+      loadOptions.expandedGroups
     );
 
     return new Promise((resolve, reject) => {
-      if (!(queryUrl === lastQueryUrl)) {
+      if (
+        !(queryUrl === lastQueryUrl) ||
+        !(expandedGroupsString === lastExpandedGroups)
+      ) {
         console.log('Querying (decoded): ', decodeURIComponent(queryUrl));
 
-        fetch(queryUrl)
-          .then(response => response.json())
-          .then(data => {
+        (loadOptions.grouping && loadOptions.grouping.length > 0
+          ? groupQuery(queryUrl, loadOptions)
+          : simpleQuery(queryUrl)).then(result => {
+          if (result.dataFetched) {
             lastQueryUrl = queryUrl;
-            resolve({
-              dataFetched: true,
-              data: convertResponseData(data, loadOptions)
-            });
-          })
-          .catch(reason =>
-            resolve({
-              dataFetched: false,
-              reason
-            })
-          );
+            lastExpandedGroups = expandedGroupsString;
+          }
+          resolve(result);
+        });
       } else resolve({ dataFetched: false });
     });
   };
