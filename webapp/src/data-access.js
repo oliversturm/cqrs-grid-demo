@@ -71,16 +71,21 @@ const createQueryURL = (baseUrl, loadOptions) => {
 };
 
 const convertResponseData = (data, loadOptions) => {
-  function getRows(list, parentGroup) {
+  function getRows(list, groupLevel, parentGroup) {
     if (list.length > 0) {
       if (list[0].key && list[0].items) {
         // assume this is a group list
         return list.map(g => ({
-          key: (parentGroup ? `${parentGroup.key}|` : '') + g.key,
+          _headerKey: `groupRow_${loadOptions.grouping[groupLevel].columnName}`,
+          key: (parentGroup ? `${parentGroup.key}|` : '') + `${g.key}`,
+          colspan: parentGroup ? parentGroup.colspan + 1 : 0,
           value: g.key,
           type: 'groupRow',
-          // column:
-          rows: getRows(g.items, g)
+          column: {
+            name: loadOptions.grouping[groupLevel].columnName,
+            title: loadOptions.grouping[groupLevel].columnName
+          },
+          rows: getRows(g.items, groupLevel + 1, g)
         }));
       } else return list;
     } else return [];
@@ -91,7 +96,7 @@ const convertResponseData = (data, loadOptions) => {
   let result;
 
   if (loadOptions.grouping && loadOptions.grouping.length > 0)
-    result = { rows: getRows(data.data), totalCount: data.totalCount };
+    result = { rows: getRows(data.data, 0), totalCount: data.totalCount };
   else result = { rows: data.data, totalCount: data.totalCount };
 
   console.log('Conversion result: ', result);
