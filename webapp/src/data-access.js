@@ -73,8 +73,7 @@ const createQueryURL = (baseUrl, loadOptions) => {
 const convertResponseData = (data, loadOptions) => {
   function getRows(list, groupLevel, parentGroup) {
     if (list.length > 0) {
-      if (list[0].key && list[0].items) {
-        // assume this is a group list
+      if (groupLevel + 1 <= loadOptions.grouping.length) {
         return list.map(g => ({
           _headerKey: `groupRow_${loadOptions.grouping[groupLevel].columnName}`,
           key: (parentGroup ? `${parentGroup.key}|` : '') + `${g.key}`,
@@ -127,4 +126,37 @@ const commitChanges = ({ added, changed, deleted }) => {
   if (changed) for (const key in changed) sendChange(changed[key], false, key);
 };
 
-export { createQueryURL, convertResponseData, commitChanges };
+const fetchData = (() => {
+  let lastQueryUrl;
+
+  return loadOptions => {
+    const queryUrl = createQueryURL(
+      '//localhost:3000/data/v1/values',
+      loadOptions
+    );
+
+    return new Promise((resolve, reject) => {
+      if (!(queryUrl === lastQueryUrl)) {
+        console.log('Querying (decoded): ', decodeURIComponent(queryUrl));
+
+        fetch(queryUrl)
+          .then(response => response.json())
+          .then(data => {
+            lastQueryUrl = queryUrl;
+            resolve({
+              dataFetched: true,
+              data: convertResponseData(data, loadOptions)
+            });
+          })
+          .catch(reason =>
+            resolve({
+              dataFetched: false,
+              reason
+            })
+          );
+      } else resolve({ dataFetched: false });
+    });
+  };
+})();
+
+export { fetchData, commitChanges };

@@ -1,3 +1,5 @@
+import uuid from 'uuid/v4';
+
 import React from 'react';
 import {
   Grid,
@@ -26,11 +28,7 @@ import {
   gridPageSizeChange,
   createGridReducer
 } from './grid-reducer';
-import {
-  createQueryURL,
-  convertResponseData,
-  commitChanges
-} from './data-access';
+import { fetchData, commitChanges } from './data-access';
 
 class ReduxGrid extends React.PureComponent {
   render() {
@@ -104,10 +102,7 @@ class ReduxGrid extends React.PureComponent {
   }
 
   getRowId(row) {
-    if (!row._id) console.error('Found row with no id: ', row);
-    if (row.type && row.type === 'groupRow') return row.key;
-
-    return row._id;
+    return row._id || uuid();
   }
 
   loadData() {
@@ -116,28 +111,15 @@ class ReduxGrid extends React.PureComponent {
       currentPage: this.props.currentPage,
       pageSize: this.props.pageSize,
       filters: this.props.filters,
-      grouping: this.props.grouping
+      grouping: this.props.grouping,
+      expandedGroups: this.props.expandedGroups
     };
 
-    const queryURL = createQueryURL(
-      '//localhost:3000/data/v1/values',
-      loadOptions
-    );
-
-    if (!(queryURL === this.lastQueryURL)) {
-      console.log('Querying (decoded): ', decodeURIComponent(queryURL));
-
-      fetch(queryURL)
-        .then(response => response.json())
-        .then(data =>
-          this.props.dispatch(
-            gridDataLoaded(convertResponseData(data, loadOptions))
-          )
-        )
-        .catch(() => this.props.dispatch(gridStateChange('loading', false)));
-
-      this.lastQueryURL = queryURL;
-    } else this.props.dispatch(gridStateChange('loading', false));
+    fetchData(loadOptions).then(res => {
+      if (res.dataFetched) {
+        this.props.dispatch(gridDataLoaded(res.data));
+      } else this.props.dispatch(gridStateChange('loading', false));
+    });
   }
 }
 
