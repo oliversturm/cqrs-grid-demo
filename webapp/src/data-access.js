@@ -93,15 +93,14 @@ const createGroupQueryData = (data, loadOptions) => {
       };
     }
 
-    function getParentFilter(group) {
-      return {
-        columnName: loadOptions.grouping[groupLevel].columnName,
-        value: group.key
-      };
-    }
-
     function getParentFilters(group) {
-      return [...parentFilters, getParentFilter(group)];
+      return [
+        ...parentFilters,
+        {
+          columnName: loadOptions.grouping[groupLevel].columnName,
+          value: group.key
+        }
+      ];
     }
 
     function getNestedElements(group, newGroup) {
@@ -144,17 +143,17 @@ const createGroupQueryData = (data, loadOptions) => {
       }, Promise.resolve([]))
     );
   }
+
   function getRows(list) {
     return recurse(list, 0);
   }
 
   console.log('Converting response: ', data);
 
-  return new Promise((resolve, reject) => {
-    getRows(data.data).then(rows => {
-      resolve({ rows, totalCount: data.groupCount });
-    });
-  });
+  return getRows(data.data).then(rows => ({
+    rows,
+    totalCount: data.groupCount
+  }));
 };
 
 function sendChange(row, add = true, key) {
