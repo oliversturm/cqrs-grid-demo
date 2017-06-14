@@ -4,7 +4,8 @@ import {
   PagingState,
   SortingState,
   FilteringState,
-  GroupingState
+  GroupingState,
+  EditingState
 } from '@devexpress/dx-react-grid';
 import {
   TableView,
@@ -12,7 +13,9 @@ import {
   PagingPanel,
   GroupingPanel,
   TableFilterRow,
-  TableGroupRow
+  TableGroupRow,
+  TableEditRow,
+  TableEditColumn
 } from '@devexpress/dx-react-grid-bootstrap3';
 
 import { connect } from 'react-redux';
@@ -23,7 +26,11 @@ import {
   gridPageSizeChange,
   createGridReducer
 } from './grid-reducer';
-import { createQueryURL, convertResponseData } from './data-access';
+import {
+  createQueryURL,
+  convertResponseData,
+  commitChanges
+} from './data-access';
 
 class ReduxGrid extends React.PureComponent {
   render() {
@@ -43,10 +50,16 @@ class ReduxGrid extends React.PureComponent {
       grouping,
       onGroupingChange,
       expandedGroups,
-      onExpandedGroupsChange
+      onExpandedGroupsChange,
+      editingRows,
+      onEditingRowsChange,
+      changedRows,
+      onChangedRowsChange,
+      addedRows,
+      onAddedRowsChange
     } = this.props;
     return (
-      <Grid rows={rows} columns={columns}>
+      <Grid rows={rows} columns={columns} getRowId={this.getRowId}>
         <FilteringState filters={filters} onFiltersChange={onFiltersChange} />
         <PagingState
           pageSize={pageSize}
@@ -62,12 +75,23 @@ class ReduxGrid extends React.PureComponent {
           expandedGroups={expandedGroups}
           onExpandedGroupsChange={onExpandedGroupsChange}
         />
+        <EditingState
+          editingRows={editingRows}
+          onEditingRowsChange={onEditingRowsChange}
+          changedRows={changedRows}
+          onChangedRowsChange={onChangedRowsChange}
+          addedRows={addedRows}
+          onAddedRowsChange={onAddedRowsChange}
+          onCommitChanges={commitChanges}
+        />
         <TableView />
         <TableHeaderRow allowSorting allowGrouping allowDragging />
         <TableFilterRow />
         <TableGroupRow />
         <PagingPanel allowedPageSizes={allowedPageSizes} />
         <GroupingPanel allowSorting />
+        <TableEditRow />
+        <TableEditColumn allowAdding allowEditing />
       </Grid>
     );
   }
@@ -77,6 +101,13 @@ class ReduxGrid extends React.PureComponent {
   }
   componentDidUpdate() {
     this.loadData();
+  }
+
+  getRowId(row) {
+    if (!row._id) console.error('Found row with no id: ', row);
+    if (row.type && row.type === 'groupRow') return row.key;
+
+    return row._id;
   }
 
   loadData() {
@@ -121,6 +152,12 @@ const mapDispatchToProps = dispatch => ({
   onGroupingChange: grouping => dispatch(gridStateChange('grouping', grouping)),
   onExpandedGroupsChange: expandedGroups =>
     dispatch(gridStateChange('expandedGroups', expandedGroups)),
+  onEditingRowsChange: editingRows =>
+    dispatch(gridStateChange('editingRows', editingRows)),
+  onAddedRowsChange: addedRows =>
+    dispatch(gridStateChange('addedRows', addedRows)),
+  onChangedRowsChange: changedRows =>
+    dispatch(gridStateChange('changedRows', changedRows)),
   dispatch
 });
 
@@ -158,6 +195,9 @@ const gridReducer = createGridReducer({
   filters: [],
   grouping: [],
   expandedGroups: [],
+  editingRows: [],
+  addedRows: [],
+  changedRows: {},
   loading: false
 });
 

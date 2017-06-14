@@ -78,7 +78,7 @@ const convertResponseData = (data, loadOptions) => {
         return list.map(g => ({
           _headerKey: `groupRow_${loadOptions.grouping[groupLevel].columnName}`,
           key: (parentGroup ? `${parentGroup.key}|` : '') + `${g.key}`,
-          colspan: parentGroup ? parentGroup.colspan + 1 : 0,
+          colspan: parentGroup ? parentGroup.colspan + 1 : 1,
           value: g.key,
           type: 'groupRow',
           column: {
@@ -103,4 +103,28 @@ const convertResponseData = (data, loadOptions) => {
   return result;
 };
 
-export { createQueryURL, convertResponseData };
+function sendChange(row, add = true, key) {
+  console.log(`Sending change with add=${add}, key=${key}: `, row);
+
+  const params = {
+    headers: {
+      Accept: 'application/json',
+      'Content-Type': 'application/json'
+    },
+    method: add ? 'POST' : 'PUT',
+    body: JSON.stringify(row)
+  };
+  const url = '//localhost:3000/data/v1/values' + (add ? '' : `/${key}`);
+  fetch(url, params).catch(r =>
+    console.log('Something went wrong POSTing this row: ', row)
+  );
+}
+
+const commitChanges = ({ added, changed, deleted }) => {
+  console.log('committing changes: ', changed);
+
+  if (added && added.length > 0) for (const row of added) sendChange(row);
+  if (changed) for (const key in changed) sendChange(changed[key], false, key);
+};
+
+export { createQueryURL, convertResponseData, commitChanges };
