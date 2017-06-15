@@ -1,4 +1,5 @@
 import qs from 'qs';
+const _ = require('lodash');
 
 const getSortingParams = loadOptions =>
   loadOptions.sorting && loadOptions.sorting.length > 0
@@ -83,13 +84,34 @@ const convertSimpleQueryData = data => ({
 });
 
 const createGroupQueryData = (data, loadOptions) => {
-  function recurse(source, groupLevel, parentGroup, parentFilters = []) {
+  function recurse(
+    source,
+    groupLevel,
+    parentGroup,
+    parentFilters = [],
+    totalListLength = 0
+  ) {
     function createGroupNode(group) {
       return {
         _headerKey: `groupRow_${loadOptions.grouping[groupLevel].columnName}`,
         key: (parentGroup ? `${parentGroup.key}|` : '') + `${group.key}`,
         colspan: parentGroup ? parentGroup.colspan + 1 : 1,
         value: group.key,
+        type: 'groupRow',
+        column: {
+          name: loadOptions.grouping[groupLevel].columnName,
+          title: loadOptions.grouping[groupLevel].columnName
+        },
+        rows: []
+      };
+    }
+
+    function createContGroupNode(group) {
+      return {
+        _headerKey: `groupRow_${loadOptions.grouping[groupLevel].columnName}`,
+        key: (parentGroup ? `${parentGroup.key}|` : '') + `${group.key}`,
+        colspan: parentGroup ? parentGroup.colspan + 1 : 1,
+        value: `${group.key} continued...`,
         type: 'groupRow',
         column: {
           name: loadOptions.grouping[groupLevel].columnName,
@@ -140,11 +162,60 @@ const createGroupQueryData = (data, loadOptions) => {
       });
     }
 
+    let newTotalListLength = totalListLength;
+
+    function createSplits(list, firstChunkSize, remainingChunkSize) {
+      return [_.take(list, firstChunkSize)].concat(
+        _.chunk(_.drop(list, firstChunkSize), remainingChunkSize)
+      );
+    }
+
+    function intersperse(newElements, group) {
+      const firstSplitSize =
+        (Math.trunc(newTotalListLength / loadOptions.pageSize) + 1) *
+          loadOptions.pageSize -
+        newTotalListLength;
+      const splits = createSplits(
+        newElements,
+        firstSplitSize,
+        loadOptions.pageSize
+      );
+      const contNodes = _.fill(
+        Array(splits.length - 1),
+        createContGroupNode(group)
+      );
+      return _([splits, contNodes])
+        .unzipWith(Array.concat)
+        .flattenDeep()
+        .compact()
+        .value();
+    }
+
     return Promise.resolve(
       source.reduce((r, v) => {
         const groupNode = createGroupNode(v);
+        const newR = r.then(list => {
+          const newList = list.concat([groupNode]);
+          newTotalListLength++;
+
+          const fraction = newList.length / loadOptions.pageSize;
+          if (
+            loadOptions.expandedGroups.includes(groupNode.key) &&
+            fraction > 0 &&
+            fraction === Math.trunc(fraction)
+          ) {
+            newTotalListLength++;
+            return newList.concat([createContGroupNode(v)]);
+          } else return newList;
+        });
         return getNestedElements(v, groupNode).then(elements =>
-          r.then(list => list.concat([groupNode], elements))
+          newR.then(list => {
+            const newElements = elements.length > 0
+              ? intersperse(elements, v)
+              : elements;
+            newTotalListLength += newElements.length;
+            return list.concat(newElements);
+          })
         );
       }, Promise.resolve([]))
     );
