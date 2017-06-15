@@ -44,23 +44,29 @@ const getFilterParams = loadOptions =>
       }
     : {};
 
-const getGroupParams = loadOptions =>
-  loadOptions.grouping && loadOptions.grouping.length > 0
-    ? {
-        group: loadOptions.grouping.map(g => ({
-          selector: g.columnName,
-          isExpanded: false
-        })),
-        requireGroupCount: true
-      }
-    : {};
+const getGroupParams = loadOptions => {
+  if (loadOptions.grouping && loadOptions.grouping.length > 0) {
+    const result = {
+      group: loadOptions.grouping.map(g => ({
+        selector: g.columnName,
+        isExpanded: false
+      })),
+      requireGroupCount: true
+    };
+    if (loadOptions.pageSize) {
+      result.skip = 0;
+      result.take = ((loadOptions.currentPage || 0) + 1) * loadOptions.pageSize;
+    }
+    return result;
+  } else return {};
+};
 
 const createQueryURL = (baseUrl, loadOptions) => {
   const params = Object.assign.apply({}, [
     getSortingParams(loadOptions),
     getPagingParams(loadOptions),
     getFilterParams(loadOptions),
-    getGroupParams(loadOptions)
+    getGroupParams(loadOptions) // overrides skip and take
   ]);
 
   console.log('Created params: ', params);
@@ -150,8 +156,15 @@ const createGroupQueryData = (data, loadOptions) => {
 
   console.log('Converting response: ', data);
 
+  const sliceFrom = loadOptions.pageSize
+    ? loadOptions.pageSize * (loadOptions.currentPage || 0)
+    : 0;
+  const sliceTo = loadOptions.pageSize
+    ? sliceFrom + loadOptions.pageSize
+    : undefined;
+
   return getRows(data.data).then(rows => ({
-    rows,
+    rows: rows.slice(sliceFrom, sliceTo),
     totalCount: data.groupCount
   }));
 };
