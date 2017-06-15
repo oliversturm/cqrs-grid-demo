@@ -45,22 +45,18 @@ const getFilterParams = loadOptions =>
       }
     : {};
 
-const getGroupParams = loadOptions => {
-  if (loadOptions.grouping && loadOptions.grouping.length > 0) {
-    const result = {
-      group: loadOptions.grouping.map(g => ({
-        selector: g.columnName,
-        isExpanded: false
-      })),
-      requireGroupCount: true
-    };
-    if (loadOptions.pageSize) {
-      result.skip = 0;
-      result.take = ((loadOptions.currentPage || 0) + 1) * loadOptions.pageSize;
-    }
-    return result;
-  } else return {};
-};
+const getGroupParams = loadOptions =>
+  loadOptions.grouping && loadOptions.grouping.length > 0
+    ? {
+        group: loadOptions.grouping.map(g => ({
+          selector: g.columnName,
+          isExpanded: false
+        })),
+        requireGroupCount: true,
+        skip: undefined,
+        take: undefined // always query all groups
+      }
+    : {};
 
 const createQueryURL = (baseUrl, loadOptions) => {
   const params = Object.assign.apply({}, [
@@ -84,13 +80,9 @@ const convertSimpleQueryData = data => ({
 });
 
 const createGroupQueryData = (data, loadOptions) => {
-  function recurse(
-    source,
-    groupLevel,
-    parentGroup,
-    parentFilters = [],
-    totalListLength = 0
-  ) {
+  let totalListLength = 0;
+
+  function recurse(source, groupLevel, parentGroup, parentFilters = []) {
     function createGroupNode(group) {
       return {
         _headerKey: `groupRow_${loadOptions.grouping[groupLevel].columnName}`,
@@ -162,8 +154,6 @@ const createGroupQueryData = (data, loadOptions) => {
       });
     }
 
-    let newTotalListLength = totalListLength;
-
     function createSplits(list, firstChunkSize, remainingChunkSize) {
       return [_.take(list, firstChunkSize)].concat(
         _.chunk(_.drop(list, firstChunkSize), remainingChunkSize)
@@ -172,9 +162,9 @@ const createGroupQueryData = (data, loadOptions) => {
 
     function intersperse(newElements, group) {
       const firstSplitSize =
-        (Math.trunc(newTotalListLength / loadOptions.pageSize) + 1) *
+        (Math.trunc(totalListLength / loadOptions.pageSize) + 1) *
           loadOptions.pageSize -
-        newTotalListLength;
+        totalListLength;
       const splits = createSplits(
         newElements,
         firstSplitSize,
@@ -196,7 +186,7 @@ const createGroupQueryData = (data, loadOptions) => {
         const groupNode = createGroupNode(v);
         const newR = r.then(list => {
           const newList = list.concat([groupNode]);
-          newTotalListLength++;
+          totalListLength++;
 
           const fraction = newList.length / loadOptions.pageSize;
           if (
@@ -204,7 +194,7 @@ const createGroupQueryData = (data, loadOptions) => {
             fraction > 0 &&
             fraction === Math.trunc(fraction)
           ) {
-            newTotalListLength++;
+            totalListLength++;
             return newList.concat([createContGroupNode(v)]);
           } else return newList;
         });
@@ -213,7 +203,7 @@ const createGroupQueryData = (data, loadOptions) => {
             const newElements = elements.length > 0
               ? intersperse(elements, v)
               : elements;
-            newTotalListLength += newElements.length;
+            totalListLength += newElements.length;
             return list.concat(newElements);
           })
         );
@@ -236,7 +226,7 @@ const createGroupQueryData = (data, loadOptions) => {
 
   return getRows(data.data).then(rows => ({
     rows: rows.slice(sliceFrom, sliceTo),
-    totalCount: data.groupCount
+    totalCount: totalListLength
   }));
 };
 
@@ -302,8 +292,7 @@ const createExpandedGroupsString = expandedGroups =>
   expandedGroups ? expandedGroups.join(',') : undefined;
 
 const fetchData = (() => {
-  let lastQueryUrl;
-  let lastExpandedGroups;
+  let lastQueryDetails;
 
   return loadOptions => {
     const queryUrl = createQueryURL(BASEDATA, loadOptions);
@@ -312,19 +301,20 @@ const fetchData = (() => {
     );
 
     return new Promise((resolve, reject) => {
-      if (
-        !(queryUrl === lastQueryUrl) ||
-        !(expandedGroupsString === lastExpandedGroups)
-      ) {
+      const thisQueryDetails = {
+        queryUrl,
+        expandedGroupsString,
+        pageSize: loadOptions.pageSize,
+        currentPage: loadOptions.currentPage
+      };
+      if (!_.isMatch(lastQueryDetails, thisQueryDetails)) {
         console.log('Querying (decoded): ', decodeURIComponent(queryUrl));
 
         (loadOptions.grouping && loadOptions.grouping.length > 0
           ? groupQuery(queryUrl, loadOptions)
           : simpleQuery(queryUrl)).then(result => {
-          if (result.dataFetched) {
-            lastQueryUrl = queryUrl;
-            lastExpandedGroups = expandedGroupsString;
-          }
+          if (result.dataFetched) lastQueryDetails = thisQueryDetails;
+
           resolve(result);
         });
       } else resolve({ dataFetched: false });
