@@ -80,39 +80,16 @@ const convertSimpleQueryData = data => ({
 });
 
 const createGroupQueryData = (data, loadOptions) => {
-  let totalListLength = 0;
+  const isExpanded = groupKey => loadOptions.expandedGroups.includes(groupKey);
+  const furtherGroupLevels = groupLevel =>
+    groupLevel + 1 < loadOptions.grouping.length;
 
-  function recurse(source, groupLevel, parentGroup, parentFilters = []) {
-    function createGroupNode(group) {
-      return {
-        _headerKey: `groupRow_${loadOptions.grouping[groupLevel].columnName}`,
-        key: (parentGroup ? `${parentGroup.key}|` : '') + `${group.key}`,
-        colspan: parentGroup ? parentGroup.colspan + 1 : 1,
-        value: group.key,
-        type: 'groupRow',
-        column: {
-          name: loadOptions.grouping[groupLevel].columnName,
-          title: loadOptions.grouping[groupLevel].columnName
-        },
-        rows: []
-      };
-    }
-
-    function createContGroupNode(group) {
-      return {
-        _headerKey: `groupRow_${loadOptions.grouping[groupLevel].columnName}`,
-        key: (parentGroup ? `${parentGroup.key}|` : '') + `${group.key}`,
-        colspan: parentGroup ? parentGroup.colspan + 1 : 1,
-        value: `${group.key} continued...`,
-        type: 'groupRow',
-        column: {
-          name: loadOptions.grouping[groupLevel].columnName,
-          title: loadOptions.grouping[groupLevel].columnName
-        },
-        rows: []
-      };
-    }
-
+  function* generateContentQueries(
+    list,
+    groupLevel = 0,
+    parentGroupKey,
+    parentFilters = []
+  ) {
     function getParentFilters(group) {
       return [
         ...parentFilters,
@@ -123,111 +100,132 @@ const createGroupQueryData = (data, loadOptions) => {
       ];
     }
 
-    function getNestedElements(group, newGroup) {
-      return new Promise((resolve, reject) => {
-        if (loadOptions.expandedGroups.includes(newGroup.key)) {
-          if (groupLevel + 1 < loadOptions.grouping.length)
-            resolve(
-              recurse(
-                group.items,
-                groupLevel + 1,
-                newGroup,
-                getParentFilters(group)
-              )
-            );
-          else {
-            const query = createQueryURL(BASEDATA, {
+    for (let group of list) {
+      const groupKey = (parentGroupKey ? `${parentGroupKey}|` : '') + group.key;
+      if (isExpanded(groupKey)) {
+        if (furtherGroupLevels(groupLevel))
+          yield* generateContentQueries(
+            group.items,
+            groupLevel + 1,
+            groupKey,
+            getParentFilters(group)
+          );
+        else
+          yield {
+            groupKey,
+            queryString: createQueryURL(BASEDATA, {
               sorting: loadOptions.sorting,
               pageSize: loadOptions.pageSize,
               currentPage: 0,
               filters: loadOptions.filters.concat(getParentFilters(group))
-            });
+            })
+          };
+      }
+    }
+  }
 
-            simpleQuery(query).then(res => {
-              console.log('Group query result', res);
+  let totalCount = 0;
 
-              if (res.dataFetched) resolve(res.data.rows);
-              else reject();
-            });
-          }
-        } else resolve([]);
-      });
+  function* generateRows(list, contentData, groupLevel = 0, parentGroupRow) {
+    console.log('generateRows');
+
+    function isPageBoundary(count) {
+      const fraction = count / loadOptions.pageSize;
+      return fraction > 0 && fraction === Math.trunc(fraction);
     }
 
-    function createSplits(list, firstChunkSize, remainingChunkSize) {
-      return [_.take(list, firstChunkSize)].concat(
-        _.chunk(_.drop(list, firstChunkSize), remainingChunkSize)
-      );
+    function* yieldRow(row, group) {
+      // before we yield this row, check whether we're at a page boundary
+      // if row is not a group row itself, yield a continuation row first
+      if (isPageBoundary(totalCount) && row.type !== 'groupRow') {
+        yield createGroupRow(group, 'continued...');
+        totalCount++;
+      }
+
+      // now yield the actual row
+      yield row;
+      totalCount++;
     }
 
-    function intersperse(newElements, group) {
-      const firstSplitSize =
-        (Math.trunc(totalListLength / loadOptions.pageSize) + 1) *
-          loadOptions.pageSize -
-        totalListLength;
-      const splits = createSplits(
-        newElements,
-        firstSplitSize,
-        loadOptions.pageSize
-      );
-      const contNodes = _.fill(
-        Array(splits.length - 1),
-        createContGroupNode(group)
-      );
-      return _([splits, contNodes])
-        .unzipWith(Array.concat)
-        .flattenDeep()
-        .compact()
-        .value();
+    function createGroupRow(group, valuePostfix = '') {
+      console.log('createGroupRow');
+
+      return {
+        _headerKey: `groupRow_${loadOptions.grouping[groupLevel].columnName}`,
+        key: (parentGroupRow ? `${parentGroupRow.key}|` : '') + `${group.key}`,
+        colspan: parentGroupRow ? parentGroupRow.colspan + 1 : 1,
+        value: `${group.key} ${valuePostfix}`,
+        type: 'groupRow',
+        column: {
+          name: loadOptions.grouping[groupLevel].columnName,
+          title: loadOptions.grouping[groupLevel].columnName
+        },
+        rows: []
+      };
     }
 
-    return Promise.resolve(
-      source.reduce((r, v) => {
-        const groupNode = createGroupNode(v);
-        const newR = r.then(list => {
-          const newList = list.concat([groupNode]);
-          totalListLength++;
+    function* getGroupContent(group, groupRow, contentData) {
+      console.log('getGroupContent');
 
-          const fraction = newList.length / loadOptions.pageSize;
-          if (
-            loadOptions.expandedGroups.includes(groupNode.key) &&
-            fraction > 0 &&
-            fraction === Math.trunc(fraction)
-          ) {
-            totalListLength++;
-            return newList.concat([createContGroupNode(v)]);
-          } else return newList;
-        });
-        return getNestedElements(v, groupNode).then(elements =>
-          newR.then(list => {
-            const newElements = elements.length > 0
-              ? intersperse(elements, v)
-              : elements;
-            totalListLength += newElements.length;
-            return list.concat(newElements);
-          })
-        );
-      }, Promise.resolve([]))
+      const cd = contentData.find(c => c.groupKey === groupRow.key);
+      if (cd) {
+        console.log(`Found content, yielding ${cd.content.length} rows`);
+
+        for (let row of cd.content)
+          yield* yieldRow(row, group);
+      }
+    }
+
+    for (let group of list) {
+      console.log('Handling group: ', group);
+
+      // Top group row
+      const groupRow = createGroupRow(group);
+      yield* yieldRow(groupRow, group);
+
+      // Is the group expanded?
+      if (isExpanded(groupRow.key)) {
+        // Are there further group levels?
+        if (furtherGroupLevels(groupLevel)) {
+          yield* generateRows(
+            group.items,
+            contentData,
+            groupLevel + 1,
+            groupRow
+          );
+        } else {
+          // Now we need to return the group content
+          yield* getGroupContent(group, groupRow, contentData);
+        }
+      }
+    }
+  }
+
+  function getContentData(groups) {
+    console.log('Getting content data');
+
+    const queries = Array.from(generateContentQueries(groups)).map(q =>
+      simpleQuery(q.queryString).then(res => ({
+        groupKey: q.groupKey,
+        content: res.dataFetched ? res.data.rows : undefined
+      }))
     );
+    return Promise.all(queries);
   }
 
-  function getRows(list) {
-    return recurse(list, 0);
-  }
+  console.log('Getting group query data');
 
-  console.log('Converting response: ', data);
+  return getContentData(data.data).then(contentData => {
+    console.log(
+      'Have content data, now returning main result. Content data:',
+      contentData
+    );
 
-  const sliceFrom = loadOptions.pageSize
-    ? loadOptions.pageSize * (loadOptions.currentPage || 0)
-    : 0;
-  const sliceTo = loadOptions.pageSize
-    ? sliceFrom + loadOptions.pageSize
-    : undefined;
-
-  return getRows(data.data).then(rows => ({
-    rows: rows.slice(sliceFrom, sliceTo),
-    totalCount: totalListLength
-  }));
+    return {
+      rows: Array.from(generateRows(data.data, contentData)),
+      totalCount
+    };
+  });
 };
 
 function sendChange(row, add = true, key) {
