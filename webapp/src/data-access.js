@@ -125,10 +125,22 @@ const createGroupQueryData = (data, loadOptions) => {
   }
 
   let totalCount = 0;
+  // page range: if totalCount is >= pageRangeStart and < pageRangeEnd
+  // *before* the yield, then we yield
+  const pageRangeStart = loadOptions.currentPage >= 0 && loadOptions.pageSize
+    ? loadOptions.currentPage * loadOptions.pageSize
+    : undefined;
+  const pageRangeEnd = pageRangeStart >= 0
+    ? pageRangeStart + loadOptions.pageSize
+    : undefined;
+
+  function totalCountInPageRange() {
+    return pageRangeStart >= 0
+      ? totalCount >= pageRangeStart && totalCount < pageRangeEnd
+      : true;
+  }
 
   function* generateRows(list, contentData, groupLevel = 0, parentGroupRow) {
-    console.log('generateRows');
-
     function isPageBoundary(count) {
       const fraction = count / loadOptions.pageSize;
       return fraction > 0 && fraction === Math.trunc(fraction);
@@ -145,18 +157,16 @@ const createGroupQueryData = (data, loadOptions) => {
           value: `${rowsParent.value} continued...`,
           column: rowsParent.column
         });
-        yield contRow;
+        if (totalCountInPageRange()) yield contRow;
         totalCount++;
       }
 
       // now yield the actual row
-      yield row;
+      if (totalCountInPageRange()) yield row;
       totalCount++;
     }
 
     function createGroupRow(group) {
-      console.log('createGroupRow');
-
       return {
         _headerKey: `groupRow_${loadOptions.grouping[groupLevel].columnName}`,
         key: (parentGroupRow ? `${parentGroupRow.key}|` : '') + `${group.key}`,
@@ -172,20 +182,14 @@ const createGroupQueryData = (data, loadOptions) => {
     }
 
     function* getGroupContent(groupRow, contentData) {
-      console.log('getGroupContent');
-
       const cd = contentData.find(c => c.groupKey === groupRow.key);
       if (cd) {
-        console.log(`Found content, yielding ${cd.content.length} rows`);
-
         for (let row of cd.content)
           yield* yieldRow(row, groupRow);
       }
     }
 
     for (let group of list) {
-      console.log('Handling group: ', group);
-
       // Top group row
       const groupRow = createGroupRow(group);
       yield* yieldRow(groupRow, parentGroupRow);
@@ -209,8 +213,6 @@ const createGroupQueryData = (data, loadOptions) => {
   }
 
   function getContentData(groups) {
-    console.log('Getting content data');
-
     const queries = Array.from(generateContentQueries(groups)).map(q =>
       simpleQuery(q.queryString).then(res => ({
         groupKey: q.groupKey,
@@ -220,19 +222,10 @@ const createGroupQueryData = (data, loadOptions) => {
     return Promise.all(queries);
   }
 
-  console.log('Getting group query data');
-
-  return getContentData(data.data).then(contentData => {
-    console.log(
-      'Have content data, now returning main result. Content data:',
-      contentData
-    );
-
-    return {
-      rows: Array.from(generateRows(data.data, contentData)),
-      totalCount
-    };
-  });
+  return getContentData(data.data).then(contentData => ({
+    rows: Array.from(generateRows(data.data, contentData)),
+    totalCount
+  }));
 };
 
 function sendChange(row, add = true, key) {
