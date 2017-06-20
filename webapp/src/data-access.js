@@ -134,11 +134,18 @@ const createGroupQueryData = (data, loadOptions) => {
       return fraction > 0 && fraction === Math.trunc(fraction);
     }
 
-    function* yieldRow(row, group) {
-      // before we yield this row, check whether we're at a page boundary
-      // if row is not a group row itself, yield a continuation row first
-      if (isPageBoundary(totalCount) && row.type !== 'groupRow') {
-        yield createGroupRow(group, 'continued...');
+    function* yieldRow(row, rowsParent) {
+      // rowsParent is the actual parent group row for this row -
+      // it differs from parentGroupRow on the generateRows function in
+      // that content rows of top-level groups have a rowsParent, but
+      // no parentGroupRow.
+
+      if (rowsParent && isPageBoundary(totalCount)) {
+        const contRow = Object.assign({}, rowsParent, {
+          value: `${rowsParent.value} continued...`,
+          column: rowsParent.column
+        });
+        yield contRow;
         totalCount++;
       }
 
@@ -147,14 +154,14 @@ const createGroupQueryData = (data, loadOptions) => {
       totalCount++;
     }
 
-    function createGroupRow(group, valuePostfix = '') {
+    function createGroupRow(group) {
       console.log('createGroupRow');
 
       return {
         _headerKey: `groupRow_${loadOptions.grouping[groupLevel].columnName}`,
         key: (parentGroupRow ? `${parentGroupRow.key}|` : '') + `${group.key}`,
         colspan: parentGroupRow ? parentGroupRow.colspan + 1 : 1,
-        value: `${group.key} ${valuePostfix}`,
+        value: group.key,
         type: 'groupRow',
         column: {
           name: loadOptions.grouping[groupLevel].columnName,
@@ -164,7 +171,7 @@ const createGroupQueryData = (data, loadOptions) => {
       };
     }
 
-    function* getGroupContent(group, groupRow, contentData) {
+    function* getGroupContent(groupRow, contentData) {
       console.log('getGroupContent');
 
       const cd = contentData.find(c => c.groupKey === groupRow.key);
@@ -172,7 +179,7 @@ const createGroupQueryData = (data, loadOptions) => {
         console.log(`Found content, yielding ${cd.content.length} rows`);
 
         for (let row of cd.content)
-          yield* yieldRow(row, group);
+          yield* yieldRow(row, groupRow);
       }
     }
 
@@ -181,7 +188,7 @@ const createGroupQueryData = (data, loadOptions) => {
 
       // Top group row
       const groupRow = createGroupRow(group);
-      yield* yieldRow(groupRow, group);
+      yield* yieldRow(groupRow, parentGroupRow);
 
       // Is the group expanded?
       if (isExpanded(groupRow.key)) {
@@ -195,7 +202,7 @@ const createGroupQueryData = (data, loadOptions) => {
           );
         } else {
           // Now we need to return the group content
-          yield* getGroupContent(group, groupRow, contentData);
+          yield* getGroupContent(groupRow, contentData);
         }
       }
     }
