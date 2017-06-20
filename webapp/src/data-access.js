@@ -84,6 +84,29 @@ const createGroupQueryData = (data, loadOptions) => {
   const furtherGroupLevels = groupLevel =>
     groupLevel + 1 < loadOptions.grouping.length;
 
+  let cqTotalCount = 0;
+  let totalCount = 0;
+  // page range: if totalCount is >= pageRangeStart and < pageRangeEnd
+  // *before* the yield, then we yield
+  const pageRangeStart = loadOptions.currentPage >= 0 && loadOptions.pageSize
+    ? loadOptions.currentPage * loadOptions.pageSize
+    : undefined;
+  const pageRangeEnd = pageRangeStart >= 0
+    ? pageRangeStart + loadOptions.pageSize
+    : undefined;
+
+  function countInPageRange(count) {
+    return pageRangeStart >= 0
+      ? count >= pageRangeStart && count < pageRangeEnd
+      : true;
+  }
+
+  function groupContentOverlapsPageRange(groupStart, groupLength) {
+    return pageRangeStart >= 0
+      ? groupStart < pageRangeEnd && groupStart + groupLength >= pageRangeStart
+      : true;
+  }
+
   function* generateContentQueries(
     list,
     groupLevel = 0,
@@ -100,7 +123,20 @@ const createGroupQueryData = (data, loadOptions) => {
       ];
     }
 
+    function countRow(rowsParent) {
+      // represents yielding a cont row
+      if (rowsParent && isPageBoundary(cqTotalCount)) cqTotalCount++;
+      // yielding the row itself
+      cqTotalCount++;
+    }
+
+    function countRows(c, rowsParent) {
+      for (let i = 0; i < c; i++)
+        countRow(rowsParent);
+    }
+
     for (let group of list) {
+      countRow(parentGroupKey);
       const groupKey = (parentGroupKey ? `${parentGroupKey}|` : '') + group.key;
       if (isExpanded(groupKey)) {
         if (furtherGroupLevels(groupLevel))
@@ -110,42 +146,28 @@ const createGroupQueryData = (data, loadOptions) => {
             groupKey,
             getParentFilters(group)
           );
-        else
-          yield {
-            groupKey,
-            queryString: createQueryURL(BASEDATA, {
-              sorting: loadOptions.sorting,
-              pageSize: loadOptions.pageSize,
-              currentPage: 0,
-              filters: loadOptions.filters.concat(getParentFilters(group))
-            })
-          };
+        else {
+          if (groupContentOverlapsPageRange(cqTotalCount, group.count))
+            yield {
+              groupKey,
+              queryString: createQueryURL(BASEDATA, {
+                sorting: loadOptions.sorting,
+                // not passing paging options
+                filters: loadOptions.filters.concat(getParentFilters(group))
+              })
+            };
+          countRows(group.count, group);
+        }
       }
     }
   }
 
-  let totalCount = 0;
-  // page range: if totalCount is >= pageRangeStart and < pageRangeEnd
-  // *before* the yield, then we yield
-  const pageRangeStart = loadOptions.currentPage >= 0 && loadOptions.pageSize
-    ? loadOptions.currentPage * loadOptions.pageSize
-    : undefined;
-  const pageRangeEnd = pageRangeStart >= 0
-    ? pageRangeStart + loadOptions.pageSize
-    : undefined;
-
-  function totalCountInPageRange() {
-    return pageRangeStart >= 0
-      ? totalCount >= pageRangeStart && totalCount < pageRangeEnd
-      : true;
+  function isPageBoundary(count) {
+    const fraction = count / loadOptions.pageSize;
+    return fraction > 0 && fraction === Math.trunc(fraction);
   }
 
   function* generateRows(list, contentData, groupLevel = 0, parentGroupRow) {
-    function isPageBoundary(count) {
-      const fraction = count / loadOptions.pageSize;
-      return fraction > 0 && fraction === Math.trunc(fraction);
-    }
-
     function* yieldRow(row, rowsParent) {
       // rowsParent is the actual parent group row for this row -
       // it differs from parentGroupRow on the generateRows function in
@@ -157,12 +179,12 @@ const createGroupQueryData = (data, loadOptions) => {
           value: `${rowsParent.value} continued...`,
           column: rowsParent.column
         });
-        if (totalCountInPageRange()) yield contRow;
+        if (countInPageRange(totalCount)) yield contRow;
         totalCount++;
       }
 
       // now yield the actual row
-      if (totalCountInPageRange()) yield row;
+      if (countInPageRange(totalCount)) yield row;
       totalCount++;
     }
 
@@ -181,11 +203,18 @@ const createGroupQueryData = (data, loadOptions) => {
       };
     }
 
-    function* getGroupContent(groupRow, contentData) {
+    function* getGroupContent(groupRow, contentData, itemCount) {
       const cd = contentData.find(c => c.groupKey === groupRow.key);
       if (cd) {
         for (let row of cd.content)
           yield* yieldRow(row, groupRow);
+      } else {
+        // no content found for this expanded group means no
+        // query was run, which means that this group content
+        // is not visible on the current page
+        // to count properly, I'll just yield dummy rows instead
+        for (let i = 0; i < itemCount; i++)
+          yield* yieldRow(null, groupRow);
       }
     }
 
@@ -206,7 +235,7 @@ const createGroupQueryData = (data, loadOptions) => {
           );
         } else {
           // Now we need to return the group content
-          yield* getGroupContent(groupRow, contentData);
+          yield* getGroupContent(groupRow, contentData, group.count);
         }
       }
     }
@@ -219,6 +248,7 @@ const createGroupQueryData = (data, loadOptions) => {
         content: res.dataFetched ? res.data.rows : undefined
       }))
     );
+
     return Promise.all(queries);
   }
 
@@ -258,6 +288,8 @@ const simpleQuery = queryUrl => {
   return fetch(queryUrl)
     .then(response => response.json())
     .then(data => {
+      console.log('Received simple data: ', data);
+
       return {
         dataFetched: true,
         data: convertSimpleQueryData(data)
@@ -273,12 +305,12 @@ const groupQuery = (queryUrl, loadOptions) => {
   return fetch(queryUrl)
     .then(response => response.json())
     .then(data => {
-      return createGroupQueryData(data, loadOptions).then(data => {
-        return {
-          dataFetched: true,
-          data
-        };
-      });
+      console.log('Received group data: ', data);
+
+      return createGroupQueryData(data, loadOptions).then(data => ({
+        dataFetched: true,
+        data
+      }));
     })
     .catch(reason => ({
       dataFetched: false,
