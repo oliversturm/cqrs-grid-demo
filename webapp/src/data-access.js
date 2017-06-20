@@ -1,6 +1,8 @@
 import qs from 'qs';
 const _ = require('lodash');
 
+const BASEDATA = '//localhost:3000/data/v1/values';
+
 const getSortingParams = loadOptions =>
   loadOptions.sorting && loadOptions.sorting.length > 0
     ? {
@@ -78,6 +80,9 @@ const convertSimpleQueryData = data => ({
   rows: data.data,
   totalCount: data.totalCount
 });
+
+const createExpandedGroupsString = expandedGroups =>
+  expandedGroups ? expandedGroups.join(',') : undefined;
 
 const createGroupQueryData = (data, loadOptions) => {
   const isExpanded = groupKey => loadOptions.expandedGroups.includes(groupKey);
@@ -206,6 +211,10 @@ const createGroupQueryData = (data, loadOptions) => {
     function* getGroupContent(groupRow, contentData, itemCount) {
       const cd = contentData.find(c => c.groupKey === groupRow.key);
       if (cd) {
+        // optimization idea: only query as many content records
+        // as will fit on the page, then yield dummy rows for the
+        // remainder - currently I'm still doing a full query for
+        // content, even if part of it won't be visible.
         for (let row of cd.content)
           yield* yieldRow(row, groupRow);
       } else {
@@ -258,32 +267,6 @@ const createGroupQueryData = (data, loadOptions) => {
   }));
 };
 
-function sendChange(row, add = true, key) {
-  console.log(`Sending change with add=${add}, key=${key}: `, row);
-
-  const params = {
-    headers: {
-      Accept: 'application/json',
-      'Content-Type': 'application/json'
-    },
-    method: add ? 'POST' : 'PUT',
-    body: JSON.stringify(row)
-  };
-  const url = '//localhost:3000/data/v1/values' + (add ? '' : `/${key}`);
-  fetch(url, params).catch(r =>
-    console.log('Something went wrong POSTing this row: ', row)
-  );
-}
-
-const commitChanges = ({ added, changed, deleted }) => {
-  console.log('committing changes: ', changed);
-
-  if (added && added.length > 0) for (const row of added) sendChange(row);
-  if (changed) for (const key in changed) sendChange(changed[key], false, key);
-};
-
-const BASEDATA = '//localhost:3000/data/v1/values';
-
 const simpleQuery = queryUrl => {
   return fetch(queryUrl)
     .then(response => response.json())
@@ -318,9 +301,6 @@ const groupQuery = (queryUrl, loadOptions) => {
     }));
 };
 
-const createExpandedGroupsString = expandedGroups =>
-  expandedGroups ? expandedGroups.join(',') : undefined;
-
 const fetchData = (() => {
   let lastQueryDetails;
 
@@ -351,5 +331,29 @@ const fetchData = (() => {
     });
   };
 })();
+
+function sendChange(row, add = true, key) {
+  console.log(`Sending change with add=${add}, key=${key}: `, row);
+
+  const params = {
+    headers: {
+      Accept: 'application/json',
+      'Content-Type': 'application/json'
+    },
+    method: add ? 'POST' : 'PUT',
+    body: JSON.stringify(row)
+  };
+  const url = '//localhost:3000/data/v1/values' + (add ? '' : `/${key}`);
+  fetch(url, params).catch(r =>
+    console.log('Something went wrong POSTing this row: ', row)
+  );
+}
+
+const commitChanges = ({ added, changed, deleted }) => {
+  console.log('committing changes: ', changed);
+
+  if (added && added.length > 0) for (const row of added) sendChange(row);
+  if (changed) for (const key in changed) sendChange(changed[key], false, key);
+};
 
 export { fetchData, commitChanges };
