@@ -317,7 +317,7 @@ const fetchData = (() => {
         pageSize: loadOptions.pageSize,
         currentPage: loadOptions.currentPage
       };
-      if (!_.isMatch(lastQueryDetails, thisQueryDetails)) {
+      if (loadOptions.force || !_.isMatch(lastQueryDetails, thisQueryDetails)) {
         console.log('Querying (decoded): ', decodeURIComponent(queryUrl));
 
         (loadOptions.grouping && loadOptions.grouping.length > 0
@@ -350,6 +350,7 @@ function sendChange(row, add = true, key) {
 }
 
 const commitChanges = ({ added, changed, deleted }) => {
+  console.log('committing added: ', added);
   console.log('committing changes: ', changed);
 
   if (added && added.length > 0) for (const row of added) sendChange(row);

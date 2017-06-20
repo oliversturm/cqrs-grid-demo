@@ -132,7 +132,7 @@ module.exports = function(o) {
       return converter[type](value);
     }
 
-    // fixing the array in-place - not the nicest thing, but much easier
+    // Fixing the array in-place - not the nicest thing, but much easier
     // on the eye
     function fixFilter(filterArray) {
       const isArray = Array.isArray(filterArray);
@@ -175,15 +175,17 @@ module.exports = function(o) {
     };
   }
 
+  const schema = {
+    int1: 'int',
+    int2: 'int'
+  };
+
+  const fixFilterAndSearchForSchema = fixFilterAndSearch(schema);
+
   this.add('role:web, domain:values, cmd:list', function(m, r) {
     let p = {};
 
-    console.log('Received query: ', JSON.stringify(m.args.query, null, 2));
-
-    fixFilterAndSearch({
-      int1: 'int',
-      int2: 'int'
-    })(m.args.query);
+    fixFilterAndSearchForSchema(m.args.query);
 
     if (m.args.query.take) {
       const take = parseInt(m.args.query.take);
@@ -327,11 +329,42 @@ module.exports = function(o) {
     );
   });
 
+  function fixForSchema(schema) {
+    // currently only for int and float, since date and bool
+    // are handled by heuristics
+    // schema can be
+    // {
+    //   fieldName1: 'int',
+    //   fieldName2: 'float',
+    // }
+
+    function fixValue(type, value) {
+      const converter = {
+        int: parseInt,
+        float: parseFloat
+      };
+      return converter[type](value);
+    }
+
+    return o => {
+      const heuristicFixed = fixObject(
+        o,
+        messageUtils.defaultFixers.concat(messageUtils.fixBool)
+      );
+      for (const f in heuristicFixed) {
+        const type = schema[f];
+        if (type) heuristicFixed[f] = fixValue(type, heuristicFixed[f]);
+      }
+      return heuristicFixed;
+    };
+  }
+
+  const fixForSchema_ = fixForSchema(schema);
+
   this.add('role:web, domain:values, cmd:create', function(m, r) {
     const seneca = this;
-    const instance = m.args.body;
+    const instance = fixForSchema_(m.args.body);
 
-    // not fixing object - we'll just pass it on
     seneca.act(
       {
         role: 'validation',
@@ -398,14 +431,12 @@ module.exports = function(o) {
     const seneca = this;
     const id = m.args.params.id;
 
-    // not fixing object - we'll just pass it on
-
     if (!ObjectID.isValid(id)) {
       sendErrorStatus(m, 404, 'Invalid ID');
       return r();
     }
 
-    const instance = m.args.body;
+    const instance = fixForSchema_(m.args.body);
 
     return seneca.act(
       {

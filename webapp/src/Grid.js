@@ -31,6 +31,11 @@ import {
 import { fetchData, commitChanges } from './data-access';
 
 class ReduxGrid extends React.PureComponent {
+  constructor(props) {
+    super(props);
+    this.onCommitChanges = this.onCommitChanges.bind(this);
+  }
+
   render() {
     const {
       rows,
@@ -80,7 +85,7 @@ class ReduxGrid extends React.PureComponent {
           onChangedRowsChange={onChangedRowsChange}
           addedRows={addedRows}
           onAddedRowsChange={onAddedRowsChange}
-          onCommitChanges={commitChanges}
+          onCommitChanges={this.onCommitChanges}
         />
         <TableView />
         <TableHeaderRow allowSorting allowGrouping allowDragging />
@@ -105,7 +110,7 @@ class ReduxGrid extends React.PureComponent {
     return row._id || uuid();
   }
 
-  loadData() {
+  loadData(force = false) {
     const loadOptions = {
       sorting: this.props.sorting,
       currentPage: this.props.currentPage,
@@ -114,12 +119,22 @@ class ReduxGrid extends React.PureComponent {
       grouping: this.props.grouping,
       expandedGroups: this.props.expandedGroups
     };
+    if (force) loadOptions.force = true;
 
     fetchData(loadOptions).then(res => {
       if (res.dataFetched) {
         this.props.dispatch(gridDataLoaded(res.data));
       } else this.props.dispatch(gridStateChange('loading', false));
     });
+  }
+
+  onCommitChanges(changes) {
+    commitChanges(changes);
+    // Without the delay, the grid reacts so quickly that we won't
+    // see the change coming back from the service. Delaying may
+    // not be the most elegant option in reality, but then this
+    // part of the demo doesn't have change notifications.
+    setTimeout(() => this.loadData(true), 100);
   }
 }
 
