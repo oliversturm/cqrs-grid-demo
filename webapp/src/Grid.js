@@ -24,18 +24,13 @@ import { connect } from 'react-redux';
 
 import {
   gridStateChange,
-  gridDataLoaded,
   gridPageSizeChange,
+  gridEditingStateChange,
+  gridLoad,
   createGridReducer
 } from './grid-reducer';
-import { fetchData, commitChanges } from './data-access';
 
 class ReduxGrid extends React.PureComponent {
-  constructor(props) {
-    super(props);
-    this.onCommitChanges = this.onCommitChanges.bind(this);
-  }
-
   render() {
     const {
       rows,
@@ -94,51 +89,32 @@ class ReduxGrid extends React.PureComponent {
         <PagingPanel allowedPageSizes={allowedPageSizes} />
         <GroupingPanel allowSorting />
         <TableEditRow />
-        <TableEditColumn allowAdding allowEditing />
+        <TableEditColumn
+          allowAdding
+          allowEditing
+          commandTemplate={({ id }) => (id === 'commit' ? null : undefined)}
+        />
       </Grid>
     );
   }
 
   componentDidMount() {
-    this.loadData();
+    this.props.dispatch(gridLoad());
   }
   componentDidUpdate() {
-    this.loadData();
+    this.props.dispatch(gridLoad());
   }
 
   getRowId(row) {
     return row._id || uuid();
   }
 
-  loadData(force = false) {
-    const loadOptions = {
-      sorting: this.props.sorting,
-      currentPage: this.props.currentPage,
-      pageSize: this.props.pageSize,
-      filters: this.props.filters,
-      grouping: this.props.grouping,
-      expandedGroups: this.props.expandedGroups
-    };
-    if (force) loadOptions.force = true;
-
-    fetchData(loadOptions).then(res => {
-      if (res.dataFetched) {
-        this.props.dispatch(gridDataLoaded(res.data));
-      } else this.props.dispatch(gridStateChange('loading', false));
-    });
-  }
-
-  onCommitChanges(changes) {
-    commitChanges(changes);
-    // Without the delay, the grid reacts so quickly that we won't
-    // see the change coming back from the service. Delaying may
-    // not be the most elegant option in reality, but then this
-    // part of the demo doesn't have change notifications.
-    setTimeout(() => this.loadData(true), 100);
-  }
+  // I get complaints if I don't bind onCommitChanges on EditingState
+  // Guess this should be optional
+  onCommitChanges() {}
 }
 
-const mapStateToProps = state => state;
+const mapStateToProps = state => state.grid;
 
 const mapDispatchToProps = dispatch => ({
   onSortingChange: sorting => dispatch(gridStateChange('sorting', sorting)),
@@ -150,11 +126,11 @@ const mapDispatchToProps = dispatch => ({
   onExpandedGroupsChange: expandedGroups =>
     dispatch(gridStateChange('expandedGroups', expandedGroups)),
   onEditingRowsChange: editingRows =>
-    dispatch(gridStateChange('editingRows', editingRows)),
+    dispatch(gridEditingStateChange('editingRows', editingRows)),
   onAddedRowsChange: addedRows =>
-    dispatch(gridStateChange('addedRows', addedRows)),
+    dispatch(gridEditingStateChange('addedRows', addedRows)),
   onChangedRowsChange: changedRows =>
-    dispatch(gridStateChange('changedRows', changedRows)),
+    dispatch(gridEditingStateChange('changedRows', changedRows)),
   dispatch
 });
 
