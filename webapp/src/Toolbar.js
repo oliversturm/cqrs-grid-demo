@@ -1,8 +1,15 @@
 import React from 'react';
 import { connect } from 'react-redux';
-import { Button, ButtonToolbar } from 'react-bootstrap';
+import { Button, ButtonToolbar, ButtonGroup } from 'react-bootstrap';
 
-import { batchSave, batchDiscard, createTestData } from './toolbar-reducer';
+import {
+  batchSave,
+  batchDiscard,
+  createTestData,
+  activateBootstrapUI,
+  activateMaterialUI,
+  createToolbarReducer
+} from './toolbar-reducer';
 import { gridLoad } from './grid-reducer';
 
 class Toolbar extends React.PureComponent {
@@ -12,7 +19,10 @@ class Toolbar extends React.PureComponent {
       onReloadButtonClick,
       onSaveButtonClick,
       onDiscardButtonClick,
-      onTestDataButtonClick
+      onTestDataButtonClick,
+      onBootstrapButtonClick,
+      onMaterialButtonClick,
+      activeUI
     } = this.props;
     return (
       <ButtonToolbar>
@@ -34,6 +44,20 @@ class Toolbar extends React.PureComponent {
         >
           Discard Changes
         </Button>
+        <ButtonGroup>
+          <Button
+            active={activeUI === 'bootstrap'}
+            onClick={onBootstrapButtonClick}
+          >
+            Bootstrap UI
+          </Button>
+          <Button
+            active={activeUI === 'material'}
+            onClick={onMaterialButtonClick}
+          >
+            Material UI
+          </Button>
+        </ButtonGroup>
       </ButtonToolbar>
     );
   }
@@ -47,9 +71,15 @@ const mapDispatchToProps = dispatch => ({
   onReloadButtonClick: () => dispatch(gridLoad(true)),
   onSaveButtonClick: () => dispatch(batchSave()),
   onDiscardButtonClick: () => dispatch(batchDiscard()),
-  onTestDataButtonClick: () => dispatch(createTestData())
+  onTestDataButtonClick: () => dispatch(createTestData()),
+  onBootstrapButtonClick: () => dispatch(activateBootstrapUI()),
+  onMaterialButtonClick: () => dispatch(activateMaterialUI())
 });
 
 const connectedToolbar = connect(mapStateToProps, mapDispatchToProps)(Toolbar);
 
-export { connectedToolbar as Toolbar };
+const toolbarReducer = createToolbarReducer({
+  activeUI: 'bootstrap'
+});
+
+export { connectedToolbar as Toolbar, toolbarReducer };

@@ -4,3 +4,7 @@
 .rdtPicker {
     position: fixed !important
 }
+
+.btn-toolbar {
+    margin: 10px;
+}

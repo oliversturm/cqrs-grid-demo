@@ -37,35 +37,20 @@ const gridResetEditingState = () => ({
 });
 
 const createGridReducer = initialState => (state, action) => {
-  if (!state)
-    return {
-      grid: initialState
-    };
-  else if (!state.grid)
-    return {
-      ...state,
-      grid: initialState
-    };
+  if (!state) return initialState;
 
   switch (action.type) {
     case GRID_STATE_CHANGE:
       return {
         ...state,
-        grid: {
-          ...state.grid,
-          loading: true,
-          [action.stateFieldName]: action.stateFieldValue
-        }
+        [action.stateFieldName]: action.stateFieldValue
       };
     case GRID_DATA_LOADED:
       return {
         ...state,
-        grid: {
-          ...state.grid,
-          rows: action.data.rows,
-          totalCount: action.data.totalCount,
-          loading: false
-        }
+        rows: action.data.rows,
+        totalCount: action.data.totalCount,
+        loading: false
       };
     case GRID_PAGE_SIZE_CHANGE:
       const newPage = Math.trunc(
@@ -73,15 +58,11 @@ const createGridReducer = initialState => (state, action) => {
       );
       return {
         ...state,
-        grid: {
-          ...state.grid,
-          currentPage: newPage,
-          pageSize: action.pageSize,
-          loading: true
-        }
+        currentPage: newPage,
+        pageSize: action.pageSize
       };
     case GRID_EDITING_STATE_CHANGE:
-      const { editingRows, changedRows, addedRows } = state.grid;
+      const { editingRows, changedRows, addedRows } = state;
       const es = {
         editingRows,
         changedRows,
@@ -96,23 +77,16 @@ const createGridReducer = initialState => (state, action) => {
 
       return {
         ...state,
-        grid: {
-          ...state.grid,
-          loading: true,
-          hasEditingChanges,
-          [action.stateFieldName]: action.stateFieldValue
-        }
+        hasEditingChanges,
+        [action.stateFieldName]: action.stateFieldValue
       };
     case GRID_RESET_EDITING_STATE:
       return {
         ...state,
-        grid: {
-          ...state.grid,
-          editingRows: [],
-          addedRows: [],
-          changedRows: {},
-          hasEditingChanges: false
-        }
+        editingRows: [],
+        addedRows: [],
+        changedRows: {},
+        hasEditingChanges: false
       };
 
     default:

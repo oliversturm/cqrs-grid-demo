@@ -3,6 +3,8 @@ import { delay } from 'redux-saga';
 
 import {
   GRID_LOAD,
+  GRID_PAGE_SIZE_CHANGE,
+  GRID_STATE_CHANGE,
   gridDataLoaded,
   gridStateChange,
   gridLoad,
@@ -40,6 +42,7 @@ function loadData(loadOptions, force) {
 }
 
 function* gridLoadHandler(action) {
+  yield put(gridStateChange('loading', true));
   const loadOptions = yield select(getLoadOptions);
   const data = yield call(loadData, loadOptions, action.force);
   if (data) yield put(gridDataLoaded(data));
@@ -69,10 +72,29 @@ function* batchDiscardHandler(action) {
   yield put(gridResetEditingState());
 }
 
+function* followWithGridLoad(action) {
+  yield put(gridLoad());
+}
+
+function* gridStateChangeHandler(action) {
+  if (
+    [
+      'sorting',
+      'currentPage',
+      'filters',
+      'grouping',
+      'expandedGroups'
+    ].includes(action.stateFieldName)
+  )
+    yield* followWithGridLoad(action);
+}
+
 function* gridSaga() {
   yield takeEvery(GRID_LOAD, gridLoadHandler);
   yield takeEvery(BATCH_SAVE, batchSaveHandler);
   yield takeEvery(BATCH_DISCARD, batchDiscardHandler);
+  yield takeEvery(GRID_PAGE_SIZE_CHANGE, followWithGridLoad);
+  yield takeEvery(GRID_STATE_CHANGE, gridStateChangeHandler);
 }
 
 export default gridSaga;

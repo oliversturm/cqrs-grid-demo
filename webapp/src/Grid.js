@@ -138,10 +138,6 @@ class ReduxGrid extends React.PureComponent {
     this.props.dispatch(gridLoad());
   }
 
-  componentDidUpdate() {
-    this.props.dispatch(gridLoad());
-  }
-
   getRowId(row) {
     return row._id || uuid();
   }
