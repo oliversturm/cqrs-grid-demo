@@ -2,7 +2,6 @@ import uuid from 'uuid/v4';
 
 import React from 'react';
 import {
-  Grid,
   PagingState,
   SortingState,
   FilteringState,
@@ -10,6 +9,7 @@ import {
   EditingState
 } from '@devexpress/dx-react-grid';
 import {
+  Grid,
   TableView,
   TableHeaderRow,
   PagingPanel,
@@ -113,7 +113,7 @@ class ReduxGrid extends React.PureComponent {
           onCommitChanges={this.onCommitChanges}
         />
         <TableView />
-        <TableHeaderRow allowSorting allowGrouping allowDragging />
+        <TableHeaderRow allowSorting allowGrouping />
         <TableFilterRow filterCellTemplate={this.filterCellTemplate} />
         <TableGroupRow />
         <PagingPanel allowedPageSizes={allowedPageSizes} />
