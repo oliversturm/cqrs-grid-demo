@@ -1,5 +1,3 @@
-> **Note: this branch is in development at the moment and will be unstable until this notice is removed.**
-
 # Running
 
 > **New: There are now instructions available that describe how to run the demo in the Cloud9 online IDE, in just a few steps and without the requirement of any local installation. [Please follow this link for the details!](docs/README-cloud9.md)**
