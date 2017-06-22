@@ -33,6 +33,8 @@ import {
 import DateTimePicker from 'react-datetime';
 import NumericInput from 'react-numeric-input';
 
+import Loading from './loading';
+
 const DateEditor = ({ value, onValueChange }) => (
   <td>
     <DateTimePicker
@@ -84,47 +86,51 @@ class ReduxGrid extends React.PureComponent {
       changedRows,
       onChangedRowsChange,
       addedRows,
-      onAddedRowsChange
+      onAddedRowsChange,
+      loading
     } = this.props;
     return (
-      <Grid rows={rows} columns={columns} getRowId={this.getRowId}>
-        <FilteringState filters={filters} onFiltersChange={onFiltersChange} />
-        <PagingState
-          pageSize={pageSize}
-          onPageSizeChange={onPageSizeChange}
-          currentPage={currentPage}
-          onCurrentPageChange={onCurrentPageChange}
-          totalCount={totalCount}
-        />
-        <SortingState sorting={sorting} onSortingChange={onSortingChange} />
-        <GroupingState
-          grouping={grouping}
-          onGroupingChange={onGroupingChange}
-          expandedGroups={expandedGroups}
-          onExpandedGroupsChange={onExpandedGroupsChange}
-        />
-        <EditingState
-          editingRows={editingRows}
-          onEditingRowsChange={onEditingRowsChange}
-          changedRows={changedRows}
-          onChangedRowsChange={onChangedRowsChange}
-          addedRows={addedRows}
-          onAddedRowsChange={onAddedRowsChange}
-          onCommitChanges={this.onCommitChanges}
-        />
-        <TableView />
-        <TableHeaderRow allowSorting allowGrouping />
-        <TableFilterRow filterCellTemplate={this.filterCellTemplate} />
-        <TableGroupRow />
-        <PagingPanel allowedPageSizes={allowedPageSizes} />
-        <GroupingPanel allowSorting />
-        <TableEditRow editCellTemplate={this.editCellTemplate} />
-        <TableEditColumn
-          allowAdding
-          allowEditing
-          commandTemplate={({ id }) => (id === 'commit' ? null : undefined)}
-        />
-      </Grid>
+      <div style={{ position: 'relative' }}>
+        <Grid rows={rows} columns={columns} getRowId={this.getRowId}>
+          <FilteringState filters={filters} onFiltersChange={onFiltersChange} />
+          <PagingState
+            pageSize={pageSize}
+            onPageSizeChange={onPageSizeChange}
+            currentPage={currentPage}
+            onCurrentPageChange={onCurrentPageChange}
+            totalCount={totalCount}
+          />
+          <SortingState sorting={sorting} onSortingChange={onSortingChange} />
+          <GroupingState
+            grouping={grouping}
+            onGroupingChange={onGroupingChange}
+            expandedGroups={expandedGroups}
+            onExpandedGroupsChange={onExpandedGroupsChange}
+          />
+          <EditingState
+            editingRows={editingRows}
+            onEditingRowsChange={onEditingRowsChange}
+            changedRows={changedRows}
+            onChangedRowsChange={onChangedRowsChange}
+            addedRows={addedRows}
+            onAddedRowsChange={onAddedRowsChange}
+            onCommitChanges={this.onCommitChanges}
+          />
+          <TableView />
+          <TableHeaderRow allowSorting allowGrouping />
+          <TableFilterRow filterCellTemplate={this.filterCellTemplate} />
+          <TableGroupRow />
+          <PagingPanel allowedPageSizes={allowedPageSizes} />
+          <GroupingPanel allowSorting />
+          <TableEditRow editCellTemplate={this.editCellTemplate} />
+          <TableEditColumn
+            allowAdding
+            allowEditing
+            commandTemplate={({ id }) => (id === 'commit' ? null : undefined)}
+          />
+        </Grid>
+        {loading && <Loading />}
+      </div>
     );
   }
 
