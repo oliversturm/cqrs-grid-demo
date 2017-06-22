@@ -30,7 +30,7 @@ sudo chmod +x /etc/init.d/mongod
 
 sudo apt-get -q install -y mongodb-org
     
-/etc/init.d/mongod start
+sudo /etc/init.d/mongod start
 
 # install bower
 npm install -g bower
