@@ -30,7 +30,37 @@ import {
   createGridReducer
 } from './grid-reducer';
 
+import DateTimePicker from 'react-datetime';
+import NumericInput from 'react-numeric-input';
+
+const DateEditor = ({ value, onValueChange }) => (
+  <td>
+    <DateTimePicker
+      closeOnSelect={true}
+      utc={true}
+      value={Date.parse(value)}
+      onChange={moment => onValueChange(moment ? moment.toDate() : null)}
+    />
+  </td>
+);
+
+const IntEditor = ({ value, onValueChange }) => (
+  <td>
+    <NumericInput
+      className="form-control"
+      value={value}
+      onChange={valueAsNumber => onValueChange(valueAsNumber)}
+    />
+  </td>
+);
+
 class ReduxGrid extends React.PureComponent {
+  constructor(props) {
+    super(props);
+    this.editCellTemplate = this.editCellTemplate.bind(this);
+    this.filterCellTemplate = this.filterCellTemplate.bind(this);
+  }
+
   render() {
     const {
       rows,
@@ -84,11 +114,11 @@ class ReduxGrid extends React.PureComponent {
         />
         <TableView />
         <TableHeaderRow allowSorting allowGrouping allowDragging />
-        <TableFilterRow />
+        <TableFilterRow filterCellTemplate={this.filterCellTemplate} />
         <TableGroupRow />
         <PagingPanel allowedPageSizes={allowedPageSizes} />
         <GroupingPanel allowSorting />
-        <TableEditRow />
+        <TableEditRow editCellTemplate={this.editCellTemplate} />
         <TableEditColumn
           allowAdding
           allowEditing
@@ -101,6 +131,7 @@ class ReduxGrid extends React.PureComponent {
   componentDidMount() {
     this.props.dispatch(gridLoad());
   }
+
   componentDidUpdate() {
     this.props.dispatch(gridLoad());
   }
@@ -112,6 +143,52 @@ class ReduxGrid extends React.PureComponent {
   // I get complaints if I don't bind onCommitChanges on EditingState
   // Guess this should be optional
   onCommitChanges() {}
+
+  editCellTemplate({ column, value, onValueChange }) {
+    switch (column.name) {
+      case 'date1':
+      case 'date2':
+        return <DateEditor value={value} onValueChange={onValueChange} />;
+
+      case 'int1':
+      case 'int2':
+        return <IntEditor value={value} onValueChange={onValueChange} />;
+
+      default:
+        return undefined;
+    }
+  }
+
+  filterCellTemplate({ column, filter, setFilter }) {
+    switch (column.name) {
+      case 'date1':
+      case 'date2':
+        return (
+          <DateEditor
+            value={filter ? filter.value : null}
+            onValueChange={filterDate =>
+              setFilter({
+                value: filterDate
+              })}
+          />
+        );
+
+      case 'int1':
+      case 'int2':
+        return (
+          <IntEditor
+            value={filter ? filter.value : null}
+            onValueChange={filterNumber =>
+              setFilter({
+                value: filterNumber
+              })}
+          />
+        );
+
+      default:
+        return undefined;
+    }
+  }
 }
 
 const mapStateToProps = state => state.grid;
