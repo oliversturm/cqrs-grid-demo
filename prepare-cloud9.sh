@@ -26,7 +26,7 @@ echo "deb [ arch=amd64 ] http://repo.mongodb.org/apt/ubuntu trusty/mongodb-org/3
 sudo apt-get -qq update
 sudo apt-get -q install -y mongodb-org
     
-/etc/init.d/mongod start
+sudo /etc/init.d/mongod start
 
 # start RabbitMQ server
 
