@@ -2,6 +2,7 @@ import qs from 'qs';
 const _ = require('lodash');
 
 const BASEDATA = '//localhost:3000/data/v1/values';
+var BASEAPI = '//localhost:3000/api/v1';
 
 const getSortingParams = loadOptions =>
   loadOptions.sorting && loadOptions.sorting.length > 0
@@ -357,4 +358,8 @@ const commitChanges = ({ added, changed, deleted }) => {
   if (changed) for (const key in changed) sendChange(changed[key], false, key);
 };
 
-export { fetchData, commitChanges };
+const createTestData = () => {
+  fetch(BASEAPI + '/createTestData?count=' + encodeURIComponent(1000));
+};
+
+export { fetchData, commitChanges, createTestData };

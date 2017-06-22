@@ -7,6 +7,7 @@ import createSagaMiddleware from 'redux-saga';
 
 import { Grid, gridReducer } from './Grid.js';
 import gridSaga from './grid-saga';
+import toolbarSaga from './toolbar-saga';
 
 import { Toolbar } from './Toolbar.js';
 
@@ -20,6 +21,7 @@ const store = createStore(
 );
 
 sagaMiddleware.run(gridSaga);
+sagaMiddleware.run(toolbarSaga);
 
 class App extends Component {
   render() {

@@ -2,7 +2,7 @@ import React from 'react';
 import { connect } from 'react-redux';
 import { Button, ButtonToolbar } from 'react-bootstrap';
 
-import { batchSave, batchDiscard } from './toolbar-reducer';
+import { batchSave, batchDiscard, createTestData } from './toolbar-reducer';
 import { gridLoad } from './grid-reducer';
 
 class Toolbar extends React.PureComponent {
@@ -11,11 +11,14 @@ class Toolbar extends React.PureComponent {
       gridHasEditingChanges,
       onReloadButtonClick,
       onSaveButtonClick,
-      onDiscardButtonClick
+      onDiscardButtonClick,
+      onTestDataButtonClick
     } = this.props;
     return (
       <ButtonToolbar>
-        <Button bsStyle="danger">Create 1000 Test Objects</Button>
+        <Button bsStyle="danger" onClick={onTestDataButtonClick}>
+          Create 1000 Test Objects
+        </Button>
         <Button onClick={onReloadButtonClick}>Reload Grid</Button>
         <Button
           bsStyle="success"
@@ -43,7 +46,8 @@ const mapStateToProps = state => ({
 const mapDispatchToProps = dispatch => ({
   onReloadButtonClick: () => dispatch(gridLoad(true)),
   onSaveButtonClick: () => dispatch(batchSave()),
-  onDiscardButtonClick: () => dispatch(batchDiscard())
+  onDiscardButtonClick: () => dispatch(batchDiscard()),
+  onTestDataButtonClick: () => dispatch(createTestData())
 });
 
 const connectedToolbar = connect(mapStateToProps, mapDispatchToProps)(Toolbar);
