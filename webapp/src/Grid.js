@@ -8,17 +8,6 @@ import {
   GroupingState,
   EditingState
 } from '@devexpress/dx-react-grid';
-import {
-  Grid,
-  TableView,
-  TableHeaderRow,
-  PagingPanel,
-  GroupingPanel,
-  TableFilterRow,
-  TableGroupRow,
-  TableEditRow,
-  TableEditColumn
-} from '@devexpress/dx-react-grid-bootstrap3';
 
 import { connect } from 'react-redux';
 
@@ -33,9 +22,27 @@ import {
 import DateTimePicker from 'react-datetime';
 import NumericInput from 'react-numeric-input';
 
-import Loading from './loading';
+import {
+  // not ported yet in material-ui alpha
+  //DatePicker as MuiDatePicker,
+  TextField as MuiTextField,
+  TableCell as MuiTableCell
+} from 'material-ui';
 
-const DateEditor = ({ value, onValueChange }) => (
+import { BsLoading, MuiLoading } from './loading';
+
+function requireGrid(ui) {
+  return {
+    material: () => require('@devexpress/dx-react-grid-material-ui'),
+    bootstrap: () => require('@devexpress/dx-react-grid-bootstrap3')
+  }[ui]();
+}
+
+// These (BS) editors don't render perfectly yet when used in the filter
+// row, because I'd have to wrap them in <th> instead of <td>. I'm not
+// doing this now - a final mechanism for custom editors should not
+// require me to deal with those details.
+const BsDateEditor = ({ value, onValueChange }) => (
   <td>
     <DateTimePicker
       closeOnSelect={true}
@@ -46,7 +53,7 @@ const DateEditor = ({ value, onValueChange }) => (
   </td>
 );
 
-const IntEditor = ({ value, onValueChange }) => (
+const BsIntEditor = ({ value, onValueChange }) => (
   <td>
     <NumericInput
       className="form-control"
@@ -54,6 +61,33 @@ const IntEditor = ({ value, onValueChange }) => (
       onChange={valueAsNumber => onValueChange(valueAsNumber)}
     />
   </td>
+);
+
+// not ported yet
+// const MuiDateEditor = ({ value, onValueChange }) => (
+//   <td>
+//     <MuiDatePicker
+//       autoOk={true}
+//       value={Date.parse(value)}
+//       onChange={(e, date) => onValueChange(date)}
+//     />
+//   </td>
+// );
+
+// This editor doesn't work quite right yet. The standard grid cells
+// use a container called EditCell, which carries extra css classes.
+// There doesn't appear to be a way at this point to reuse that behavior
+// for custom editors.
+// For the filter row, using the MUI TableCell at least takes care
+// of using <th> instead of <td>.
+const MuiIntEditor = ({ value, onValueChange }) => (
+  <MuiTableCell>
+    <MuiTextField
+      type="number"
+      value={value}
+      onChange={(e, newValue) => onValueChange(newValue)}
+    />
+  </MuiTableCell>
 );
 
 class ReduxGrid extends React.PureComponent {
@@ -87,8 +121,23 @@ class ReduxGrid extends React.PureComponent {
       onChangedRowsChange,
       addedRows,
       onAddedRowsChange,
-      loading
+      loading,
+      activeUI,
+      useCustomEditors
     } = this.props;
+    // loading the ui specific elements depending on current UI
+    const {
+      Grid,
+      TableView,
+      TableHeaderRow,
+      PagingPanel,
+      GroupingPanel,
+      TableFilterRow,
+      TableGroupRow,
+      TableEditRow,
+      TableEditColumn
+    } = requireGrid(activeUI);
+
     return (
       <div style={{ position: 'relative' }}>
         <Grid rows={rows} columns={columns} getRowId={this.getRowId}>
@@ -118,18 +167,24 @@ class ReduxGrid extends React.PureComponent {
           />
           <TableView />
           <TableHeaderRow allowSorting allowGrouping />
-          <TableFilterRow filterCellTemplate={this.filterCellTemplate} />
+          <TableFilterRow
+            filterCellTemplate={e =>
+              this.filterCellTemplate(useCustomEditors, activeUI, e)}
+          />
           <TableGroupRow />
           <PagingPanel allowedPageSizes={allowedPageSizes} />
           <GroupingPanel allowSorting />
-          <TableEditRow editCellTemplate={this.editCellTemplate} />
+          <TableEditRow
+            editCellTemplate={e =>
+              this.editCellTemplate(useCustomEditors, activeUI, e)}
+          />
           <TableEditColumn
             allowAdding
             allowEditing
             commandTemplate={({ id }) => (id === 'commit' ? null : undefined)}
           />
         </Grid>
-        {loading && <Loading />}
+        {loading && this.loadingIndicator(activeUI)}
       </div>
     );
   }
@@ -146,46 +201,87 @@ class ReduxGrid extends React.PureComponent {
   // Guess this should be optional
   onCommitChanges() {}
 
-  editCellTemplate({ column, value, onValueChange }) {
+  loadingIndicator(activeUI) {
+    if (activeUI === 'material') return <MuiLoading />;
+    else if (activeUI === 'bootstrap') return <BsLoading />;
+    else return null;
+  }
+
+  editCellTemplate(
+    useCustomEditors,
+    activeUI,
+    { column, value, onValueChange }
+  ) {
+    if (!useCustomEditors) return undefined;
+
     switch (column.name) {
       case 'date1':
       case 'date2':
-        return <DateEditor value={value} onValueChange={onValueChange} />;
+        if (activeUI === 'bootstrap')
+          return <BsDateEditor value={value} onValueChange={onValueChange} />;
+        else if (activeUI === 'material')
+          return undefined; // date picker not ported yet
+        else return undefined;
 
       case 'int1':
       case 'int2':
-        return <IntEditor value={value} onValueChange={onValueChange} />;
+        if (activeUI === 'bootstrap')
+          return <BsIntEditor value={value} onValueChange={onValueChange} />;
+        else if (activeUI === 'material')
+          return <MuiIntEditor value={value} onValueChange={onValueChange} />;
+        else return undefined;
 
       default:
         return undefined;
     }
   }
 
-  filterCellTemplate({ column, filter, setFilter }) {
+  filterCellTemplate(
+    useCustomEditors,
+    activeUI,
+    { column, filter, setFilter }
+  ) {
+    if (!useCustomEditors) return undefined;
+
     switch (column.name) {
       case 'date1':
       case 'date2':
-        return (
-          <DateEditor
-            value={filter ? filter.value : null}
-            onValueChange={filterDate =>
-              setFilter({
-                value: filterDate
-              })}
-          />
-        );
+        if (activeUI === 'bootstrap')
+          return (
+            <BsDateEditor
+              value={filter ? filter.value : null}
+              onValueChange={filterDate =>
+                setFilter({
+                  value: filterDate
+                })}
+            />
+          );
+        else if (activeUI === 'material') return undefined;
+        else return undefined; // date picker not ported yet
 
       case 'int1':
       case 'int2':
-        return (
-          <IntEditor
-            value={filter ? filter.value : null}
-            onValueChange={filterNumber =>
-              setFilter({
-                value: filterNumber
-              })}
-          />
-        );
+        if (activeUI === 'bootstrap')
+          return (
+            <BsIntEditor
+              value={filter ? filter.value : null}
+              onValueChange={filterNumber =>
+                setFilter({
+                  value: filterNumber
+                })}
+            />
+          );
+        else if (activeUI === 'material')
+          return (
+            <MuiIntEditor
+              value={filter ? filter.value : null}
+              onValueChange={filterNumber =>
+                setFilter({
+                  value: filterNumber
+                })}
+            />
+          );
+        else return undefined;
 
       default:
         return undefined;
@@ -193,7 +289,11 @@ class ReduxGrid extends React.PureComponent {
   }
 }
 
-const mapStateToProps = state => state.grid;
+const mapStateToProps = state => ({
+  ...state.grid,
+  activeUI: state.toolbar.activeUI,
+  useCustomEditors: state.toolbar.useCustomEditors
+});
 
 const mapDispatchToProps = dispatch => ({
   onSortingChange: sorting => dispatch(gridStateChange('sorting', sorting)),

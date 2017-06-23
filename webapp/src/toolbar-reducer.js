@@ -3,6 +3,7 @@ const BATCH_DISCARD = 'BATCH_DISCARD';
 const CREATE_TEST_DATA = 'CREATE_TEST_DATA';
 const ACTIVATE_BOOTSTRAP_UI = 'ACTIVATE_BOOTSTRAP_UI';
 const ACTIVATE_MATERIAL_UI = 'ACTIVATE_MATERIAL_UI';
+const SWITCH_CUSTOM_EDITORS = 'SWITCH_CUSTOM_EDITORS';
 
 const batchSave = () => ({
   type: BATCH_SAVE
@@ -24,6 +25,11 @@ const activateMaterialUI = () => ({
   type: ACTIVATE_MATERIAL_UI
 });
 
+const switchCustomEditors = on => ({
+  type: SWITCH_CUSTOM_EDITORS,
+  on
+});
+
 const createToolbarReducer = initialState => (state, action) => {
   if (!state) return initialState;
 
@@ -38,6 +44,12 @@ const createToolbarReducer = initialState => (state, action) => {
         ...state,
         activeUI: 'material'
       };
+    case SWITCH_CUSTOM_EDITORS:
+      return {
+        ...state,
+        useCustomEditors: action.on
+      };
+
     default:
       return state;
   }
@@ -49,10 +61,12 @@ export {
   createTestData,
   activateBootstrapUI,
   activateMaterialUI,
+  switchCustomEditors,
   createToolbarReducer,
   BATCH_SAVE,
   BATCH_DISCARD,
   CREATE_TEST_DATA,
   ACTIVATE_BOOTSTRAP_UI,
-  ACTIVATE_MATERIAL_UI
+  ACTIVATE_MATERIAL_UI,
+  SWITCH_CUSTOM_EDITORS
 };

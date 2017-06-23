@@ -5,7 +5,10 @@
   "dependencies": {
     "@devexpress/dx-react-grid": "^1.0.0-alpha.3",
     "@devexpress/dx-react-grid-bootstrap3": "^1.0.0-alpha.3",
+    "@devexpress/dx-react-grid-material-ui": "^1.0.0-alpha.3",
     "bootstrap": "^3.3.7",
+    "material-ui": "^1.0.0-alpha.19",
+    "material-ui-icons": "^1.0.0-alpha.3",
     "moment": "^2.18.1",
     "qs": "^6.4.0",
     "react": "^15.5.4",
@@ -14,6 +17,7 @@
     "react-dom": "^15.5.4",
     "react-numeric-input": "^2.0.7",
     "react-redux": "^5.0.5",
+    "react-tap-event-plugin": "^2.0.1",
     "redux": "^3.6.0",
     "redux-saga": "^0.15.3",
     "uuid": "^3.1.0"
