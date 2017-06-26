@@ -19,6 +19,8 @@ import {
   createGridReducer
 } from './grid-reducer';
 
+import DevExtremeDataServer from './DevExtremeDataServer';
+
 import DateTimePicker from 'react-datetime';
 import NumericInput from 'react-numeric-input';
 
@@ -165,6 +167,7 @@ class ReduxGrid extends React.PureComponent {
             onAddedRowsChange={onAddedRowsChange}
             onCommitChanges={this.onCommitChanges}
           />
+          <DevExtremeDataServer url="//localhost:3000/data/v1/values" />
           <TableView />
           <TableHeaderRow allowSorting allowGrouping />
           <TableFilterRow
@@ -190,7 +193,7 @@ class ReduxGrid extends React.PureComponent {
   }
 
   componentDidMount() {
-    this.props.dispatch(gridLoad());
+    //this.props.dispatch(gridLoad());
   }
 
   getRowId(row) {
