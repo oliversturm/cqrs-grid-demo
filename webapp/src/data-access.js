@@ -344,7 +344,7 @@ function sendChange(row, add = true, key) {
     method: add ? 'POST' : 'PUT',
     body: JSON.stringify(row)
   };
-  const url = '//localhost:3000/data/v1/values' + (add ? '' : `/${key}`);
+  const url = BASEDATA + (add ? '' : `/${key}`);
   fetch(url, params).catch(r =>
     console.log('Something went wrong POSTing this row: ', row)
   );
