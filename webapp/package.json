@@ -7,6 +7,7 @@
     "@devexpress/dx-react-grid-bootstrap3": "^1.0.0-alpha.3",
     "@devexpress/dx-react-grid-material-ui": "^1.0.0-alpha.3",
     "bootstrap": "^3.3.7",
+    "history": "^4.6.3",
     "material-ui": "^1.0.0-alpha.19",
     "material-ui-icons": "^1.0.0-alpha.3",
     "moment": "^2.18.1",
@@ -19,6 +20,8 @@
     "react-redux": "^5.0.5",
     "react-tap-event-plugin": "^2.0.1",
     "redux": "^3.6.0",
+    "redux-first-router": "^1.4.20",
+    "redux-first-router-link": "^1.0.3",
     "redux-saga": "^0.15.3",
     "uuid": "^3.1.0"
   },
