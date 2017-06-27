@@ -12,6 +12,7 @@
     "material-ui": "^1.0.0-alpha.19",
     "material-ui-icons": "^1.0.0-alpha.3",
     "moment": "^2.18.1",
+    "prop-types": "^15.5.10",
     "qs": "^6.4.0",
     "react": "^15.5.4",
     "react-bootstrap": "^0.31.0",

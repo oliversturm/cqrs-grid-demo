@@ -1,10 +1,11 @@
 import React from 'react';
+import PropTypes from 'prop-types';
 
 import { Getter, Watcher, PluginContainer } from '@devexpress/dx-react-core';
 
 import { createDataFetcher } from './data-access';
 
-export default class DevExtremeDataServer extends React.PureComponent {
+class DevExtremeDataServer extends React.PureComponent {
   constructor(props) {
     super(props);
     this.state = {
@@ -94,3 +95,15 @@ export default class DevExtremeDataServer extends React.PureComponent {
     );
   }
 }
+
+DevExtremeDataServer.defaultProps = {
+  url: undefined,
+  reloadState: 0
+};
+
+DevExtremeDataServer.propTypes = {
+  url: PropTypes.string,
+  reloadState: PropTypes.number
+};
+
+export default DevExtremeDataServer;
