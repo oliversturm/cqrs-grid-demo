@@ -18,18 +18,10 @@ export default class DevExtremeDataServer extends React.PureComponent {
   }
 
   getRows() {
-    console.log(
-      `Returning rows, loadResult ${this.state.loadResult ? 'exists' : "doesn't exist"}`
-    );
-
     return this.state.loadResult ? this.state.loadResult.rows : [];
   }
 
   getTotalCount() {
-    console.log(
-      `Returning totalCount, loadResult ${this.state.loadResult ? 'exists' : "doesn't exist"}`
-    );
-
     return this.state.loadResult ? this.state.loadResult.totalCount : 0;
   }
 
@@ -70,8 +62,6 @@ export default class DevExtremeDataServer extends React.PureComponent {
   }
 
   render() {
-    console.log('rendering data server plugin');
-
     return (
       <PluginContainer>
         <Getter name="reloadState" value={this.props.reloadState || 0} />
@@ -86,11 +76,7 @@ export default class DevExtremeDataServer extends React.PureComponent {
               'expandedGroups',
               'reloadState'
             ].map(getter)}
-          onChange={(action, ...vals) => {
-            console.log('watch triggered');
-
-            this.getData.apply(this, vals);
-          }}
+          onChange={(action, ...vals) => this.getData.apply(this, vals)}
         />
         <Getter name="totalCount" value={this.getTotalCount()} />
         <Getter name="rows" value={this.getRows()} />
