@@ -302,7 +302,7 @@ const groupQuery = (queryUrl, loadOptions) => {
     }));
 };
 
-const fetchData = (() => {
+const createDataFetcher = () => {
   let lastQueryDetails;
 
   return loadOptions => {
@@ -331,7 +331,9 @@ const fetchData = (() => {
       } else resolve({ dataFetched: false });
     });
   };
-})();
+};
+
+const fetchData = createDataFetcher();
 
 function sendChange(row, add = true, key) {
   console.log(`Sending change with add=${add}, key=${key}: `, row);
@@ -362,4 +364,4 @@ const createTestData = () => {
   fetch(BASEAPI + '/createTestData?count=' + encodeURIComponent(1000));
 };
 
-export { fetchData, commitChanges, createTestData };
+export { fetchData, createDataFetcher, commitChanges, createTestData };

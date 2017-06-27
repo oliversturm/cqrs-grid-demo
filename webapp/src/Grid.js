@@ -15,7 +15,6 @@ import {
   gridStateChange,
   gridPageSizeChange,
   gridEditingStateChange,
-  gridLoad,
   createGridReducer
 } from './grid-reducer';
 
@@ -101,14 +100,12 @@ class ReduxGrid extends React.PureComponent {
 
   render() {
     const {
-      rows,
       columns,
       sorting,
       onSortingChange,
       currentPage,
       pageSize,
       onPageSizeChange,
-      totalCount,
       allowedPageSizes,
       onCurrentPageChange,
       filters,
@@ -142,14 +139,13 @@ class ReduxGrid extends React.PureComponent {
 
     return (
       <div style={{ position: 'relative' }}>
-        <Grid rows={rows} columns={columns} getRowId={this.getRowId}>
+        <Grid rows={[]} columns={columns} getRowId={this.getRowId}>
           <FilteringState filters={filters} onFiltersChange={onFiltersChange} />
           <PagingState
             pageSize={pageSize}
             onPageSizeChange={onPageSizeChange}
             currentPage={currentPage}
             onCurrentPageChange={onCurrentPageChange}
-            totalCount={totalCount}
           />
           <SortingState sorting={sorting} onSortingChange={onSortingChange} />
           <GroupingState
@@ -165,9 +161,10 @@ class ReduxGrid extends React.PureComponent {
             onChangedRowsChange={onChangedRowsChange}
             addedRows={addedRows}
             onAddedRowsChange={onAddedRowsChange}
-            onCommitChanges={this.onCommitChanges}
           />
+
           <DevExtremeDataServer url="//localhost:3000/data/v1/values" />
+
           <TableView />
           <TableHeaderRow allowSorting allowGrouping />
           <TableFilterRow
@@ -192,17 +189,9 @@ class ReduxGrid extends React.PureComponent {
     );
   }
 
-  componentDidMount() {
-    //this.props.dispatch(gridLoad());
-  }
-
   getRowId(row) {
     return row._id || uuid();
   }
-
-  // I get complaints if I don't bind onCommitChanges on EditingState
-  // Guess this should be optional
-  onCommitChanges() {}
 
   loadingIndicator(activeUI) {
     if (activeUI === 'material') return <MuiLoading />;
@@ -341,10 +330,8 @@ const gridReducer = createGridReducer({
       title: 'string'
     }
   ],
-  rows: [],
   sorting: [],
   currentPage: 0,
-  totalCount: 0,
   pageSize: 10,
   allowedPageSizes: [5, 10, 20, 50],
   filters: [],
