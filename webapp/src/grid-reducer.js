@@ -2,6 +2,7 @@ const GRID_STATE_CHANGE = 'GRID_STATE_CHANGE';
 const GRID_PAGE_SIZE_CHANGE = 'GRID_PAGE_SIZE_CHANGE';
 const GRID_EDITING_STATE_CHANGE = 'GRID_EDITING_STATE_CHANGE';
 const GRID_RESET_EDITING_STATE = 'GRID_RESET_EDITING_STATE';
+const GRID_RELOAD = 'GRID_RELOAD';
 
 const gridStateChange = (stateFieldName, stateFieldValue) => ({
   type: GRID_STATE_CHANGE,
@@ -22,6 +23,10 @@ const gridEditingStateChange = (stateFieldName, stateFieldValue) => ({
 
 const gridResetEditingState = () => ({
   type: GRID_RESET_EDITING_STATE
+});
+
+const gridReload = () => ({
+  type: GRID_RELOAD
 });
 
 const createGridReducer = initialState => (state, action) => {
@@ -69,6 +74,11 @@ const createGridReducer = initialState => (state, action) => {
         changedRows: {},
         hasEditingChanges: false
       };
+    case GRID_RELOAD:
+      return {
+        ...state,
+        reloadState: new Date().getTime()
+      };
 
     default:
       return state;
@@ -80,9 +90,11 @@ export {
   gridPageSizeChange,
   gridEditingStateChange,
   gridResetEditingState,
+  gridReload,
   createGridReducer,
   GRID_STATE_CHANGE,
   GRID_PAGE_SIZE_CHANGE,
   GRID_EDITING_STATE_CHANGE,
-  GRID_RESET_EDITING_STATE
+  GRID_RESET_EDITING_STATE,
+  GRID_RELOAD
 };

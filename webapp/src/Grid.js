@@ -122,7 +122,8 @@ class ReduxGrid extends React.PureComponent {
       onAddedRowsChange,
       loading,
       activeUI,
-      useCustomEditors
+      useCustomEditors,
+      reloadState
     } = this.props;
     // loading the ui specific elements depending on current UI
     const {
@@ -163,7 +164,10 @@ class ReduxGrid extends React.PureComponent {
             onAddedRowsChange={onAddedRowsChange}
           />
 
-          <DevExtremeDataServer url="//localhost:3000/data/v1/values" />
+          <DevExtremeDataServer
+            url="//localhost:3000/data/v1/values"
+            reloadState={reloadState}
+          />
 
           <TableView />
           <TableHeaderRow allowSorting allowGrouping />
@@ -340,7 +344,8 @@ const gridReducer = createGridReducer({
   editingRows: [],
   addedRows: [],
   changedRows: {},
-  loading: false
+  loading: false,
+  reloadState: undefined
 });
 
 export { connectedGrid as Grid, gridReducer };

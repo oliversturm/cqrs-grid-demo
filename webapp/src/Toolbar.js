@@ -22,6 +22,7 @@ import {
   switchCustomEditors,
   createToolbarReducer
 } from './toolbar-reducer';
+import { gridReload } from './grid-reducer';
 
 class ToolbarX extends React.PureComponent {
   render() {
@@ -135,7 +136,7 @@ const mapStateToProps = state => ({
 });
 
 const mapDispatchToProps = dispatch => ({
-  onReloadButtonClick: () => undefined,
+  onReloadButtonClick: () => dispatch(gridReload()),
   onSaveButtonClick: () => dispatch(batchSave()),
   onDiscardButtonClick: () => dispatch(batchDiscard()),
   onTestDataButtonClick: () => dispatch(createTestData()),

@@ -8,7 +8,8 @@ export default class DevExtremeDataServer extends React.PureComponent {
   constructor(props) {
     super(props);
     this.state = {
-      loadResult: undefined
+      loadResult: undefined,
+      reloadState: undefined
     };
     this.getRows = this.getRows.bind(this);
     this.getTotalCount = this.getTotalCount.bind(this);
@@ -32,7 +33,15 @@ export default class DevExtremeDataServer extends React.PureComponent {
     return this.state.loadResult ? this.state.loadResult.totalCount : 0;
   }
 
-  getData(sorting, currentPage, pageSize, filters, grouping, expandedGroups) {
+  getData(
+    sorting,
+    currentPage,
+    pageSize,
+    filters,
+    grouping,
+    expandedGroups,
+    reloadState
+  ) {
     const loadOptions = {
       sorting,
       currentPage,
@@ -41,8 +50,12 @@ export default class DevExtremeDataServer extends React.PureComponent {
       grouping,
       expandedGroups: expandedGroups
         ? Array.from(expandedGroups.values())
-        : undefined
+        : undefined,
+      force: reloadState !== this.state.reloadState
     };
+    this.setState({
+      reloadState
+    });
 
     this.fetchData(loadOptions).then(res => {
       if (res.dataFetched) {
@@ -61,6 +74,7 @@ export default class DevExtremeDataServer extends React.PureComponent {
 
     return (
       <PluginContainer>
+        <Getter name="reloadState" value={this.props.reloadState || 0} />
         <Watcher
           watch={getter =>
             [
@@ -69,7 +83,8 @@ export default class DevExtremeDataServer extends React.PureComponent {
               'pageSize',
               'filters',
               'grouping',
-              'expandedGroups'
+              'expandedGroups',
+              'reloadState'
             ].map(getter)}
           onChange={(action, ...vals) => {
             console.log('watch triggered');
