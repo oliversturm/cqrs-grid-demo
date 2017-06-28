@@ -93,6 +93,33 @@ class DevExtremeDataServer extends React.PureComponent {
             pageSize ? Math.max(1, Math.ceil(totalCount / pageSize)) : 1}
           connectArgs={getter => [getter('totalCount'), getter('pageSize')]}
         />
+        {
+          // just leaving this in as a reminder - where would the old
+          // pageSize come from?
+          // <Watcher
+          //   watch={getter => [getter('pageSize'), getter('currentPage')]}
+          //   onChange={(action, pageSize, currentPage) => {
+          //     const newPage = Math.trunc(currentPage * oldPageSize / pageSize);
+          //     console.log(
+          //       `Change with pageSize=${pageSize}, currentPage=${currentPage}, setting ${newPage}`
+          //     );
+          //     action('setCurrentPage')({
+          //       page: newPage
+          //     });
+          //   }}
+          // />
+        } {
+          // make sure that when totalPages changes, currentPage remains
+          // in range
+        }
+        <Watcher
+          watch={getter => [getter('totalPages'), getter('currentPage')]}
+          onChange={(action, totalPages, currentPage) => {
+            if (totalPages - 1 < currentPage) {
+              action('setCurrentPage')({ page: Math.max(totalPages - 1, 0) });
+            }
+          }}
+        />
       </PluginContainer>
     );
   }

@@ -13,7 +13,6 @@ import { connect } from 'react-redux';
 
 import {
   gridStateChange,
-  gridPageSizeChange,
   gridEditingStateChange,
   createGridReducer
 } from './grid-reducer';
@@ -295,7 +294,7 @@ const mapDispatchToProps = dispatch => ({
   onSortingChange: sorting => dispatch(gridStateChange('sorting', sorting)),
   onCurrentPageChange: currentPage =>
     dispatch(gridStateChange('currentPage', currentPage)),
-  onPageSizeChange: pageSize => dispatch(gridPageSizeChange(pageSize)),
+  onPageSizeChange: pageSize => dispatch(gridStateChange('pageSize', pageSize)),
   onFiltersChange: filters => dispatch(gridStateChange('filters', filters)),
   onGroupingChange: grouping => dispatch(gridStateChange('grouping', grouping)),
   onExpandedGroupsChange: expandedGroups =>
