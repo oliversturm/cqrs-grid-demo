@@ -1,16 +1,33 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 
-import { Getter, Watcher, PluginContainer } from '@devexpress/dx-react-core';
+import {
+  Getter,
+  Watcher,
+  Template,
+  TemplatePlaceholder,
+  PluginContainer
+} from '@devexpress/dx-react-core';
+
+import './loading.css';
 
 import { createDataFetcher } from './data-access';
+
+// This works with Bootstrap, and it seems a harmless default since
+// it only uses styles.
+const defaultLoadingIndicator = () => (
+  <div className="loading-shading">
+    <span className="glyphicon glyphicon-refresh loading-icon" />
+  </div>
+);
 
 class DevExtremeDataServer extends React.PureComponent {
   constructor(props) {
     super(props);
     this.state = {
       loadResult: undefined,
-      reloadState: undefined
+      reloadState: undefined,
+      loading: false
     };
     this.getRows = this.getRows.bind(this);
     this.getTotalCount = this.getTotalCount.bind(this);
@@ -31,6 +48,7 @@ class DevExtremeDataServer extends React.PureComponent {
       if (res.dataFetched) {
         this.setState({
           reloadState: this.props.reloadState,
+          loading: false,
           loadResult: {
             rows: res.data.rows,
             totalCount: res.data.totalCount
@@ -54,8 +72,15 @@ class DevExtremeDataServer extends React.PureComponent {
     };
   }
 
-  componentDidUpdate() {
-    this.getData(this.getLoadOptions());
+  componentDidUpdate(prevProps, prevState) {
+    // We get here both through state updates triggered by the watcher
+    // and through prop updates (reloadState). In the latter case,
+    // we need to make sure the loading flag is set.
+    if (this.props.reloadState !== prevProps.reloadState && !this.state.loading)
+      this.setState({
+        loading: true
+      });
+    else this.getData(this.getLoadOptions());
   }
 
   render() {
@@ -78,11 +103,13 @@ class DevExtremeDataServer extends React.PureComponent {
               pageSize: vals[2],
               filters: vals[3],
               grouping: vals[4],
-              expandedGroups: vals[5]
+              expandedGroups: vals[5],
+              loading: true
             })}
         />
         <Getter name="totalCount" value={this.getTotalCount()} />
         <Getter name="rows" value={this.getRows()} />
+        <Getter name="loading" value={this.state.loading} />
         {
           // the following getter is currently required, otherwise
           // the paging mechanism gets confused
@@ -120,6 +147,14 @@ class DevExtremeDataServer extends React.PureComponent {
             }
           }}
         />
+        <Template name="root">
+          <div>
+            <TemplatePlaceholder />
+            {this.state.loading &&
+              this.props.useLoadingIndicator &&
+              this.props.loadingIndicator()}
+          </div>
+        </Template>
       </PluginContainer>
     );
   }
@@ -127,12 +162,16 @@ class DevExtremeDataServer extends React.PureComponent {
 
 DevExtremeDataServer.defaultProps = {
   url: undefined,
-  reloadState: 0
+  reloadState: 0,
+  loadingIndicator: defaultLoadingIndicator,
+  useLoadingIndicator: true
 };
 
 DevExtremeDataServer.propTypes = {
   url: PropTypes.string,
-  reloadState: PropTypes.number
+  reloadState: PropTypes.number,
+  loadingIndicator: PropTypes.func,
+  useLoadingIndicator: PropTypes.bool
 };
 
 export default DevExtremeDataServer;

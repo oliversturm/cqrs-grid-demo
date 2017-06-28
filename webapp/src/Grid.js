@@ -26,10 +26,9 @@ import {
   // not ported yet in material-ui alpha
   //DatePicker as MuiDatePicker,
   TextField as MuiTextField,
-  TableCell as MuiTableCell
+  TableCell as MuiTableCell,
+  CircularProgress as MuiCircularProgress
 } from 'material-ui';
-
-import { BsLoading, MuiLoading } from './loading';
 
 function requireGrid(ui) {
   return {
@@ -90,6 +89,12 @@ const MuiIntEditor = ({ value, onValueChange }) => (
   </MuiTableCell>
 );
 
+const MuiLoadingIndicator = () => (
+  <div className="loading-shading">
+    <MuiCircularProgress className="loading-progress" />
+  </div>
+);
+
 class ReduxGrid extends React.PureComponent {
   constructor(props) {
     super(props);
@@ -119,7 +124,6 @@ class ReduxGrid extends React.PureComponent {
       onChangedRowsChange,
       addedRows,
       onAddedRowsChange,
-      loading,
       activeUI,
       useCustomEditors,
       reloadState
@@ -166,6 +170,11 @@ class ReduxGrid extends React.PureComponent {
           <DevExtremeDataServer
             url="//localhost:3000/data/v1/values"
             reloadState={reloadState}
+            loadingIndicator={
+              activeUI === 'material'
+                ? () => <MuiLoadingIndicator />
+                : undefined // default uses bootstrap styles
+            }
           />
 
           <TableView />
@@ -187,19 +196,12 @@ class ReduxGrid extends React.PureComponent {
             commandTemplate={({ id }) => (id === 'commit' ? null : undefined)}
           />
         </Grid>
-        {loading && this.loadingIndicator(activeUI)}
       </div>
     );
   }
 
   getRowId(row) {
     return row._id || uuid();
-  }
-
-  loadingIndicator(activeUI) {
-    if (activeUI === 'material') return <MuiLoading />;
-    else if (activeUI === 'bootstrap') return <BsLoading />;
-    else return null;
   }
 
   editCellTemplate(
@@ -343,7 +345,6 @@ const gridReducer = createGridReducer({
   editingRows: [],
   addedRows: [],
   changedRows: {},
-  loading: false,
   reloadState: undefined
 });
 
