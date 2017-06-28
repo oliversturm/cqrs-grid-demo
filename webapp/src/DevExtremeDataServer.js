@@ -26,33 +26,11 @@ class DevExtremeDataServer extends React.PureComponent {
     return this.state.loadResult ? this.state.loadResult.totalCount : 0;
   }
 
-  getData(
-    sorting,
-    currentPage,
-    pageSize,
-    filters,
-    grouping,
-    expandedGroups,
-    reloadState
-  ) {
-    const loadOptions = {
-      sorting,
-      currentPage,
-      pageSize,
-      filters,
-      grouping,
-      expandedGroups: expandedGroups
-        ? Array.from(expandedGroups.values())
-        : undefined,
-      force: reloadState !== this.state.reloadState
-    };
-    this.setState({
-      reloadState
-    });
-
+  getData(loadOptions) {
     this.fetchData(loadOptions).then(res => {
       if (res.dataFetched) {
         this.setState({
+          reloadState: this.props.reloadState,
           loadResult: {
             rows: res.data.rows,
             totalCount: res.data.totalCount
@@ -62,10 +40,27 @@ class DevExtremeDataServer extends React.PureComponent {
     });
   }
 
+  getLoadOptions() {
+    return {
+      sorting: this.state.sorting,
+      currentPage: this.state.currentPage,
+      pageSize: this.state.pageSize,
+      filters: this.state.filters,
+      grouping: this.state.grouping,
+      expandedGroups: this.state.expandedGroups
+        ? Array.from(this.state.expandedGroups.values())
+        : undefined,
+      force: this.props.reloadState !== this.state.reloadState
+    };
+  }
+
+  componentDidUpdate() {
+    this.getData(this.getLoadOptions());
+  }
+
   render() {
     return (
       <PluginContainer>
-        <Getter name="reloadState" value={this.props.reloadState || 0} />
         <Watcher
           watch={getter =>
             [
@@ -74,10 +69,17 @@ class DevExtremeDataServer extends React.PureComponent {
               'pageSize',
               'filters',
               'grouping',
-              'expandedGroups',
-              'reloadState'
+              'expandedGroups'
             ].map(getter)}
-          onChange={(action, ...vals) => this.getData.apply(this, vals)}
+          onChange={(action, ...vals) =>
+            this.setState({
+              sorting: vals[0],
+              currentPage: vals[1],
+              pageSize: vals[2],
+              filters: vals[3],
+              grouping: vals[4],
+              expandedGroups: vals[5]
+            })}
         />
         <Getter name="totalCount" value={this.getTotalCount()} />
         <Getter name="rows" value={this.getRows()} />
