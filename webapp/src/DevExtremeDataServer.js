@@ -149,7 +149,7 @@ class DevExtremeDataServer extends React.PureComponent {
             // If totalPages is 0, we don't do anything - this is
             // assuming that there is no data *yet* and we don't want
             // to lose the previous currentPage state.
-            if (totalPages > 0 && totalPages - 1 < currentPage)
+            if (totalPages > 0 && totalPages - 1 <= currentPage)
               action('setCurrentPage')({ page: Math.max(totalPages - 1, 0) });
           }}
         />
