@@ -27,13 +27,7 @@ class DevExtremeDataServer extends React.PureComponent {
     this.state = {
       loadResult: undefined,
       reloadState: undefined,
-      loading: false,
-      sorting: [],
-      currentPage: 0,
-      pageSize: 10,
-      filters: [],
-      grouping: [],
-      expandedGroups: []
+      loading: false
     };
     this.getRows = this.getRows.bind(this);
     this.getTotalCount = this.getTotalCount.bind(this);
@@ -101,7 +95,11 @@ class DevExtremeDataServer extends React.PureComponent {
               'expandedGroups'
             ].map(getter)}
           onChange={(action, ...vals) => {
-            const newPage = Math.trunc(vals[1] * this.state.pageSize / vals[2]);
+            const newPage = this.state.pageSize >= 0 &&
+              this.state.pageSize !== vals[2]
+              ? Math.trunc(vals[1] * this.state.pageSize / vals[2])
+              : vals[1];
+
             this.setState({
               sorting: vals[0],
               currentPage: newPage,
