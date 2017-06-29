@@ -140,7 +140,6 @@ class ReduxGrid extends React.PureComponent {
       TableEditRow,
       TableEditColumn
     } = requireGrid(activeUI);
-
     return (
       <div style={{ position: 'relative' }}>
         <Grid rows={[]} columns={columns} getRowId={this.getRowId}>

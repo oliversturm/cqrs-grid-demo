@@ -65,8 +65,7 @@ class DevExtremeDataServer extends React.PureComponent {
       pageSize: this.state.pageSize,
       filters: this.state.filters,
       grouping: this.state.grouping,
-      expandedGroups: this.state.expandedGroups,
-      force: this.props.reloadState !== this.state.reloadState
+      expandedGroups: this.state.expandedGroups
     };
   }
 
@@ -78,7 +77,16 @@ class DevExtremeDataServer extends React.PureComponent {
       this.setState({
         loading: true
       });
-    else this.getData(this.getLoadOptions());
+    if (
+      prevState.sorting !== this.state.sorting ||
+      prevState.currentPage !== this.state.currentPage ||
+      prevState.pageSize !== this.state.pageSize ||
+      prevState.filters !== this.state.filters ||
+      prevState.grouping !== this.state.grouping ||
+      prevState.expandedGroups !== this.state.expandedGroups ||
+      prevProps.reloadState !== this.props.reloadState
+    )
+      this.getData(this.getLoadOptions());
   }
 
   render() {
@@ -109,24 +117,26 @@ class DevExtremeDataServer extends React.PureComponent {
               expandedGroups: vals[5] ? Array.from(vals[5].values()) : [],
               loading: true
             });
-            if (newPage !== vals[1]) {
+            if (newPage !== vals[1])
               action('setCurrentPage')({
                 page: newPage
               });
-            }
           }}
         />
         <Getter name="totalCount" value={this.getTotalCount()} />
         <Getter name="rows" value={this.getRows()} />
         <Getter name="loading" value={this.state.loading} />
         {
-          // the following getter is currently required, otherwise
-          // the paging mechanism gets confused
+          // The following getter is currently required, otherwise
+          // the paging mechanism gets confused. I changed the logic
+          // to return 0 if there are no pages or they can't be
+          // calculated - previously the fallback value was 1 for
+          // reasons I don't know.
         }
         <Getter
           name="totalPages"
           pureComputed={(totalCount, pageSize) =>
-            pageSize ? Math.max(1, Math.ceil(totalCount / pageSize)) : 1}
+            pageSize ? Math.ceil(totalCount / pageSize) : 0}
           connectArgs={getter => [getter('totalCount'), getter('pageSize')]}
         />
         {
@@ -136,9 +146,11 @@ class DevExtremeDataServer extends React.PureComponent {
         <Watcher
           watch={getter => [getter('totalPages'), getter('currentPage')]}
           onChange={(action, totalPages, currentPage) => {
-            if (totalPages - 1 < currentPage) {
+            // If totalPages is 0, we don't do anything - this is
+            // assuming that there is no data *yet* and we don't want
+            // to lose the previous currentPage state.
+            if (totalPages > 0 && totalPages - 1 < currentPage)
               action('setCurrentPage')({ page: Math.max(totalPages - 1, 0) });
-            }
           }}
         />
         <Template name="root">

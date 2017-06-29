@@ -1,5 +1,4 @@
 import qs from 'qs';
-const _ = require('lodash');
 
 const DEFAULTBASEDATA = '//localhost:3000/data/v1/values';
 var DEFAULTBASEAPI = '//localhost:3000/api/v1';
@@ -307,32 +306,15 @@ const createDataFetcher = (BASEDATA = DEFAULTBASEDATA) => {
       }));
   };
 
-  let lastQueryDetails;
-
   return loadOptions => {
     const queryUrl = createQueryURL(BASEDATA, loadOptions);
-    const expandedGroupsString = createExpandedGroupsString(
-      loadOptions.expandedGroups
-    );
 
     return new Promise((resolve, reject) => {
-      const thisQueryDetails = {
-        queryUrl,
-        expandedGroupsString,
-        pageSize: loadOptions.pageSize,
-        currentPage: loadOptions.currentPage
-      };
-      if (loadOptions.force || !_.isMatch(lastQueryDetails, thisQueryDetails)) {
-        console.log('Querying (decoded): ', decodeURIComponent(queryUrl));
+      console.warn('Querying (decoded): ', decodeURIComponent(queryUrl));
 
-        (loadOptions.grouping && loadOptions.grouping.length > 0
-          ? groupQuery(queryUrl, loadOptions)
-          : simpleQuery(queryUrl)).then(result => {
-          if (result.dataFetched) lastQueryDetails = thisQueryDetails;
-
-          resolve(result);
-        });
-      } else resolve({ dataFetched: false });
+      (loadOptions.grouping && loadOptions.grouping.length > 0
+        ? groupQuery(queryUrl, loadOptions)
+        : simpleQuery(queryUrl)).then(result => resolve(result));
     });
   };
 };
