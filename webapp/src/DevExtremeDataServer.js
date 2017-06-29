@@ -27,7 +27,13 @@ class DevExtremeDataServer extends React.PureComponent {
     this.state = {
       loadResult: undefined,
       reloadState: undefined,
-      loading: false
+      loading: false,
+      sorting: [],
+      currentPage: 0,
+      pageSize: 10,
+      filters: [],
+      grouping: [],
+      expandedGroups: []
     };
     this.getRows = this.getRows.bind(this);
     this.getTotalCount = this.getTotalCount.bind(this);
@@ -65,9 +71,7 @@ class DevExtremeDataServer extends React.PureComponent {
       pageSize: this.state.pageSize,
       filters: this.state.filters,
       grouping: this.state.grouping,
-      expandedGroups: this.state.expandedGroups
-        ? Array.from(this.state.expandedGroups.values())
-        : undefined,
+      expandedGroups: this.state.expandedGroups,
       force: this.props.reloadState !== this.state.reloadState
     };
   }
@@ -96,16 +100,23 @@ class DevExtremeDataServer extends React.PureComponent {
               'grouping',
               'expandedGroups'
             ].map(getter)}
-          onChange={(action, ...vals) =>
+          onChange={(action, ...vals) => {
+            const newPage = Math.trunc(vals[1] * this.state.pageSize / vals[2]);
             this.setState({
               sorting: vals[0],
-              currentPage: vals[1],
+              currentPage: newPage,
               pageSize: vals[2],
               filters: vals[3],
               grouping: vals[4],
-              expandedGroups: vals[5],
+              expandedGroups: vals[5] ? Array.from(vals[5].values()) : [],
               loading: true
-            })}
+            });
+            if (newPage !== vals[1]) {
+              action('setCurrentPage')({
+                page: newPage
+              });
+            }
+          }}
         />
         <Getter name="totalCount" value={this.getTotalCount()} />
         <Getter name="rows" value={this.getRows()} />
@@ -121,21 +132,6 @@ class DevExtremeDataServer extends React.PureComponent {
           connectArgs={getter => [getter('totalCount'), getter('pageSize')]}
         />
         {
-          // just leaving this in as a reminder - where would the old
-          // pageSize come from?
-          // <Watcher
-          //   watch={getter => [getter('pageSize'), getter('currentPage')]}
-          //   onChange={(action, pageSize, currentPage) => {
-          //     const newPage = Math.trunc(currentPage * oldPageSize / pageSize);
-          //     console.log(
-          //       `Change with pageSize=${pageSize}, currentPage=${currentPage}, setting ${newPage}`
-          //     );
-          //     action('setCurrentPage')({
-          //       page: newPage
-          //     });
-          //   }}
-          // />
-        } {
           // make sure that when totalPages changes, currentPage remains
           // in range
         }
