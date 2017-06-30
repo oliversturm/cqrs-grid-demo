@@ -23,9 +23,7 @@ const gridReload = () => ({
   type: GRID_RELOAD
 });
 
-const createGridReducer = initialState => (state, action) => {
-  if (!state) return initialState;
-
+const createGridReducer = initialState => (state = initialState, action) => {
   switch (action.type) {
     case GRID_STATE_CHANGE:
       return {
