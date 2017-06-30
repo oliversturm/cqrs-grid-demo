@@ -30,9 +30,7 @@ const switchCustomEditors = on => ({
   on
 });
 
-const createToolbarReducer = initialState => (state, action) => {
-  if (!state) return initialState;
-
+const createToolbarReducer = initialState => (state = initialState, action) => {
   switch (action.type) {
     case ACTIVATE_BOOTSTRAP_UI:
       return {
