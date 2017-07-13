@@ -1,6 +1,7 @@
 const GRID_STATE_CHANGE = 'GRID_STATE_CHANGE';
 const GRID_DATA_LOADED = 'GRID_DATA_LOADED';
 const GRID_PAGE_SIZE_CHANGE = 'GRID_PAGE_SIZE_CHANGE';
+const GRID_FILTERS_CHANGE = 'GRID_FILTERS_CHANGE';
 const GRID_EDITING_STATE_CHANGE = 'GRID_EDITING_STATE_CHANGE';
 const GRID_LOAD = 'GRID_LOAD';
 const GRID_RESET_EDITING_STATE = 'GRID_RESET_EDITING_STATE';
@@ -19,6 +20,11 @@ const gridDataLoaded = data => ({
 const gridPageSizeChange = pageSize => ({
   type: GRID_PAGE_SIZE_CHANGE,
   pageSize
+});
+
+const gridFiltersChange = filters => ({
+  type: GRID_FILTERS_CHANGE,
+  filters
 });
 
 const gridEditingStateChange = (stateFieldName, stateFieldValue) => ({
@@ -59,6 +65,12 @@ const createGridReducer = initialState => (state = initialState, action) => {
         currentPage: newPage,
         pageSize: action.pageSize
       };
+    case GRID_FILTERS_CHANGE:
+      return {
+        ...state,
+        currentPage: 0,
+        filters: action.filters
+      };
     case GRID_EDITING_STATE_CHANGE:
       const { editingRows, changedRows, addedRows } = state;
       const es = {
@@ -96,6 +108,7 @@ export {
   gridStateChange,
   gridDataLoaded,
   gridPageSizeChange,
+  gridFiltersChange,
   gridEditingStateChange,
   gridResetEditingState,
   gridLoad,
@@ -103,6 +116,7 @@ export {
   GRID_STATE_CHANGE,
   GRID_DATA_LOADED,
   GRID_PAGE_SIZE_CHANGE,
+  GRID_FILTERS_CHANGE,
   GRID_EDITING_STATE_CHANGE,
   GRID_RESET_EDITING_STATE,
   GRID_LOAD

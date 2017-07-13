@@ -4,6 +4,7 @@ import { delay } from 'redux-saga';
 import {
   GRID_LOAD,
   GRID_PAGE_SIZE_CHANGE,
+  GRID_FILTERS_CHANGE,
   GRID_STATE_CHANGE,
   gridDataLoaded,
   gridStateChange,
@@ -88,13 +89,9 @@ function* followWithGridLoad(action) {
 
 function* gridStateChangeHandler(action) {
   if (
-    [
-      'sorting',
-      'currentPage',
-      'filters',
-      'grouping',
-      'expandedGroups'
-    ].includes(action.stateFieldName)
+    ['sorting', 'currentPage', 'grouping', 'expandedGroups'].includes(
+      action.stateFieldName
+    )
   )
     yield* followWithGridLoad(action);
 }
@@ -105,6 +102,7 @@ function* gridSaga() {
   yield takeEvery(BATCH_DISCARD, batchDiscardHandler);
   yield takeEvery(GRID_PAGE_SIZE_CHANGE, followWithGridLoad);
   yield takeEvery(GRID_STATE_CHANGE, gridStateChangeHandler);
+  yield takeEvery(GRID_FILTERS_CHANGE, followWithGridLoad);
 }
 
 export default gridSaga;
