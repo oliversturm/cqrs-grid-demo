@@ -44,11 +44,20 @@ class DevExtremeDataServer extends React.PureComponent {
   }
 
   getData(loadOptions) {
+    const loadingTimer = setTimeout(() => {
+      this.setState({
+        showLoadingIndicator: true
+      });
+    }, this.props.loadingIndicatorThreshold);
+
     this.fetchData(loadOptions).then(res => {
       if (res.dataFetched) {
+        clearTimeout(loadingTimer);
+
         this.setState({
           reloadState: this.props.reloadState,
           loading: false,
+          showLoadingIndicator: false,
           loadResult: {
             rows: res.data.rows,
             totalCount: res.data.totalCount
@@ -156,7 +165,7 @@ class DevExtremeDataServer extends React.PureComponent {
         <Template name="root">
           <div>
             <TemplatePlaceholder />
-            {this.state.loading &&
+            {this.state.showLoadingIndicator &&
               this.props.useLoadingIndicator &&
               this.props.loadingIndicator()}
           </div>
@@ -170,14 +179,16 @@ DevExtremeDataServer.defaultProps = {
   url: undefined,
   reloadState: 0,
   loadingIndicator: defaultLoadingIndicator,
-  useLoadingIndicator: true
+  useLoadingIndicator: true,
+  loadingIndicatorThreshold: 500
 };
 
 DevExtremeDataServer.propTypes = {
   url: PropTypes.string,
   reloadState: PropTypes.number,
   loadingIndicator: PropTypes.func,
-  useLoadingIndicator: PropTypes.bool
+  useLoadingIndicator: PropTypes.bool,
+  loadingIndicatorThreshold: PropTypes.number
 };
 
 export default DevExtremeDataServer;
