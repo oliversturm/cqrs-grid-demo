@@ -1,4 +1,4 @@
-import { call, put, takeEvery, select } from 'redux-saga/effects';
+import { call, put, takeEvery, select, fork, cancel } from 'redux-saga/effects';
 import { delay } from 'redux-saga';
 
 import {
@@ -41,12 +41,22 @@ function loadData(loadOptions, force) {
   });
 }
 
+function* startLoadingTimer() {
+  const threshold = yield select(state => state.grid.loadingIndicatorThreshold);
+  yield delay(threshold);
+  const loading = yield select(state => state.grid.loading);
+  if (loading) yield put(gridStateChange('showLoadingIndicator', true));
+}
+
 function* gridLoadHandler(action) {
   yield put(gridStateChange('loading', true));
+  const loadingTimer = yield fork(startLoadingTimer);
   const loadOptions = yield select(getLoadOptions);
   const data = yield call(loadData, loadOptions, action.force);
   if (data) yield put(gridDataLoaded(data));
   else yield put(gridStateChange('loading', false));
+  yield cancel(loadingTimer);
+  yield put(gridStateChange('showLoadingIndicator', false));
 }
 
 function getCommitParams(state) {

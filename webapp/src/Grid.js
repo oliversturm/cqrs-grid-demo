@@ -121,7 +121,7 @@ class ReduxGrid extends React.PureComponent {
       onChangedRowsChange,
       addedRows,
       onAddedRowsChange,
-      loading,
+      showLoadingIndicator,
       activeUI,
       useCustomEditors
     } = this.props;
@@ -184,7 +184,7 @@ class ReduxGrid extends React.PureComponent {
             commandTemplate={({ id }) => (id === 'commit' ? null : undefined)}
           />
         </Grid>
-        {loading && this.loadingIndicator(activeUI)}
+        {showLoadingIndicator && this.loadingIndicator(activeUI)}
       </div>
     );
   }
@@ -350,7 +350,9 @@ const gridReducer = createGridReducer({
   editingRows: [],
   addedRows: [],
   changedRows: {},
-  loading: false
+  loading: false,
+  showLoadingIndicator: false,
+  loadingIndicatorThreshold: 500
 });
 
 export { connectedGrid as Grid, gridReducer };
