@@ -243,44 +243,32 @@ class ReduxGrid extends React.PureComponent {
   ) {
     if (!useCustomEditors) return undefined;
 
+    const editorProps = {
+      value: filter ? filter.value : null,
+      onValueChange(newValue) {
+        if (newValue !== editorProps.value)
+          setFilter(
+            newValue
+              ? {
+                  value: newValue
+                }
+              : null
+          );
+      }
+    };
+
     switch (column.name) {
       case 'date1':
       case 'date2':
-        if (activeUI === 'bootstrap')
-          return (
-            <BsDateEditor
-              value={filter ? filter.value : null}
-              onValueChange={filterDate =>
-                setFilter({
-                  value: filterDate
-                })}
-            />
-          );
+        if (activeUI === 'bootstrap') return <BsDateEditor {...editorProps} />;
         else if (activeUI === 'material') return undefined;
         else return undefined; // date picker not ported yet
 
       case 'int1':
       case 'int2':
-        if (activeUI === 'bootstrap')
-          return (
-            <BsIntEditor
-              value={filter ? filter.value : null}
-              onValueChange={filterNumber =>
-                setFilter({
-                  value: filterNumber
-                })}
-            />
-          );
+        if (activeUI === 'bootstrap') return <BsIntEditor {...editorProps} />;
         else if (activeUI === 'material')
-          return (
-            <MuiIntEditor
-              value={filter ? filter.value : null}
-              onValueChange={filterNumber =>
-                setFilter({
-                  value: filterNumber
-                })}
-            />
-          );
+          return <MuiIntEditor {...editorProps} />;
         else return undefined;
 
       default:
