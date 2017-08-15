@@ -1,3 +1,4 @@
+require('babel-polyfill');
 const seneca = require('seneca')();
 
 seneca.use('query-values').listen({
