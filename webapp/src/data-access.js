@@ -66,7 +66,10 @@ const createQueryURL = (baseUrl, loadOptions) => {
     getSortingParams(loadOptions),
     getPagingParams(loadOptions),
     getFilterParams(loadOptions),
-    getGroupParams(loadOptions) // overrides skip and take
+    getGroupParams(loadOptions), // overrides skip and take
+    {
+      tzOffset: new Date().getTimezoneOffset()
+    }
   ]);
 
   console.log('Created params: ', params);
