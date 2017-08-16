@@ -17,7 +17,7 @@ import {
   createGridReducer
 } from './grid-reducer';
 
-import DevExtremeDataServer from 'dx-react-devextreme-data-server';
+import { DevExtremeDataServer } from 'dx-react-devextreme-data-server';
 
 import DateTimePicker from 'react-datetime';
 import NumericInput from 'react-numeric-input';
