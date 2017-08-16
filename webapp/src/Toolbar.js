@@ -9,8 +9,8 @@ import {
 import {
   Toolbar as MuiToolbar,
   Button as MuiButton,
-  // Toggle would be prettier, but it's not ported yet
-  LabelCheckbox as MuiCheckbox
+  Switch as MuiSwitch,
+  FormControlLabel as MuiFormControlLabel
 } from 'material-ui';
 
 import {
@@ -117,10 +117,14 @@ class ToolbarX extends React.PureComponent {
             >
               Material UI
             </MuiButton>
-            <MuiCheckbox
+            <MuiFormControlLabel
+              control={
+                <MuiSwitch
+                  checked={useCustomEditors}
+                  onChange={(e, checked) => onCustomEditorsToggled(checked)}
+                />
+              }
               label="Use Custom Editors"
-              checked={useCustomEditors}
-              onChange={(e, checked) => onCustomEditorsToggled(checked)}
             />
 
           </MuiToolbar>

@@ -85,7 +85,7 @@ const MuiIntEditor = ({ value, onValueChange }) => (
     <MuiTextField
       type="number"
       value={value}
-      onChange={(e, newValue) => onValueChange(newValue)}
+      onChange={e => onValueChange(e.target.value)}
     />
   </MuiTableCell>
 );

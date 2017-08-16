@@ -9,7 +9,7 @@
     "@devexpress/dx-react-grid-material-ui": "1.0.0-alpha.7",
     "bootstrap": "^3.3.7",
     "history": "^4.6.3",
-    "material-ui": "1.0.0-alpha.21",
+    "material-ui": "1.0.0-beta.3",
     "material-ui-icons": "1.0.0-alpha.19",
     "moment": "^2.18.1",
     "prop-types": "^15.5.10",
