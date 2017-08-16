@@ -6,7 +6,8 @@ import {
   SortingState,
   FilteringState,
   GroupingState,
-  EditingState
+  EditingState,
+  ColumnOrderState
 } from '@devexpress/dx-react-grid';
 
 import { connect } from 'react-redux';
@@ -118,6 +119,8 @@ class ReduxGrid extends React.PureComponent {
       onGroupingChange,
       expandedGroups,
       onExpandedGroupsChange,
+      order,
+      onOrderChange,
       editingRows,
       onEditingRowsChange,
       changedRows,
@@ -138,7 +141,8 @@ class ReduxGrid extends React.PureComponent {
       TableFilterRow,
       TableGroupRow,
       TableEditRow,
-      TableEditColumn
+      TableEditColumn,
+      DragDropContext
     } = requireGrid(activeUI);
     return (
       <div style={{ position: 'relative' }}>
@@ -165,6 +169,8 @@ class ReduxGrid extends React.PureComponent {
             addedRows={addedRows}
             onAddedRowsChange={onAddedRowsChange}
           />
+          <ColumnOrderState order={order} onOrderChange={onOrderChange} />
+          <DragDropContext />
 
           <DevExtremeDataServer
             url="//localhost:3000/data/v1/values"
@@ -176,15 +182,15 @@ class ReduxGrid extends React.PureComponent {
             }
           />
 
-          <TableView />
-          <TableHeaderRow allowSorting allowGroupingByClick />
+          <TableView allowColumnReordering />
+          <TableHeaderRow allowSorting allowGroupingByClick allowDragging />
           <TableFilterRow
             filterCellTemplate={e =>
               this.filterCellTemplate(useCustomEditors, activeUI, e)}
           />
           <TableGroupRow />
           <PagingPanel allowedPageSizes={allowedPageSizes} />
-          <GroupingPanel allowSorting />
+          <GroupingPanel allowSorting allowDragging allowUngroupingByClick />
           <TableEditRow
             editCellTemplate={e =>
               this.editCellTemplate(useCustomEditors, activeUI, e)}
@@ -286,6 +292,7 @@ const mapDispatchToProps = dispatch => ({
   onPageSizeChange: pageSize => dispatch(gridStateChange('pageSize', pageSize)),
   onFiltersChange: filters => dispatch(gridStateChange('filters', filters)),
   onGroupingChange: grouping => dispatch(gridStateChange('grouping', grouping)),
+  onOrderChange: order => dispatch(gridStateChange('order', order)),
   onExpandedGroupsChange: expandedGroups =>
     dispatch(gridStateChange('expandedGroups', expandedGroups)),
   onEditingRowsChange: editingRows =>
@@ -329,6 +336,7 @@ const gridReducer = createGridReducer({
   filters: [],
   grouping: [],
   expandedGroups: [],
+  order: ['date1', 'date2', 'int1', 'int2', 'string'],
   editingRows: [],
   addedRows: [],
   changedRows: {},
