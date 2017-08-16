@@ -177,7 +177,7 @@ class ReduxGrid extends React.PureComponent {
           />
 
           <TableView />
-          <TableHeaderRow allowSorting allowGrouping />
+          <TableHeaderRow allowSorting allowGroupingByClick />
           <TableFilterRow
             filterCellTemplate={e =>
               this.filterCellTemplate(useCustomEditors, activeUI, e)}
