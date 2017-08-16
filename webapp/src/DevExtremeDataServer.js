@@ -126,21 +126,17 @@ class DevExtremeDataServer extends React.PureComponent {
               expandedGroups: vals[5] ? Array.from(vals[5].values()) : [],
               loading: true
             });
-            if (newPage !== vals[1])
-              action('setCurrentPage')({
-                page: newPage
-              });
+            if (newPage !== vals[1]) action('setCurrentPage')(newPage);
           }}
         />
         <Getter name="totalCount" value={this.getTotalCount()} />
         <Getter name="rows" value={this.getRows()} />
         <Getter name="loading" value={this.state.loading} />
         {
-          // The following getter is currently required, otherwise
-          // the paging mechanism gets confused. I changed the logic
+          // The following getter is used to change the logic
           // to return 0 if there are no pages or they can't be
-          // calculated - previously the fallback value was 1 for
-          // reasons I don't know.
+          // calculated - the standard calculation uses 1 as a
+          // fallback value.
         }
         <Getter
           name="totalPages"
@@ -159,7 +155,7 @@ class DevExtremeDataServer extends React.PureComponent {
             // assuming that there is no data *yet* and we don't want
             // to lose the previous currentPage state.
             if (totalPages > 0 && totalPages - 1 <= currentPage)
-              action('setCurrentPage')({ page: Math.max(totalPages - 1, 0) });
+              action('setCurrentPage')(Math.max(totalPages - 1, 0));
           }}
         />
         <Template name="root">
