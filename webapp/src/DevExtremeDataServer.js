@@ -36,11 +36,15 @@ class DevExtremeDataServer extends React.PureComponent {
   }
 
   getRows() {
-    return this.state.loadResult ? this.state.loadResult.rows : [];
+    return this.state.loadResult && this.state.loadResult.rows
+      ? this.state.loadResult.rows
+      : [];
   }
 
   getTotalCount() {
-    return this.state.loadResult ? this.state.loadResult.totalCount : 0;
+    return this.state.loadResult && this.state.loadResult.totalCount
+      ? this.state.loadResult.totalCount
+      : 0;
   }
 
   getData(loadOptions) {
@@ -86,6 +90,7 @@ class DevExtremeDataServer extends React.PureComponent {
       this.setState({
         loading: true
       });
+
     if (
       prevState.sorting !== this.state.sorting ||
       prevState.currentPage !== this.state.currentPage ||
@@ -112,10 +117,21 @@ class DevExtremeDataServer extends React.PureComponent {
               'expandedGroups'
             ].map(getter)}
           onChange={(action, ...vals) => {
-            const newPage = this.state.pageSize >= 0 &&
-              this.state.pageSize !== vals[2]
-              ? Math.trunc(vals[1] * this.state.pageSize / vals[2])
-              : vals[1];
+            // For initialization, state.pageSize will be undefined.
+            // Just use the new value then.
+            const oldPageSize = this.state.pageSize || vals[2];
+
+            const newPage = (() => {
+              if (oldPageSize !== vals[2])
+                // pageSize has changed. Calculate new currentPage
+                // for new pageSize > 0, otherwise currentPage will be 0.
+                return vals[2] > 0
+                  ? Math.trunc(vals[1] * oldPageSize / vals[2])
+                  : 0;
+              else
+                // pageSize hasn't changed, use given currentPage
+                return vals[1];
+            })();
 
             this.setState({
               sorting: vals[0],
@@ -141,7 +157,9 @@ class DevExtremeDataServer extends React.PureComponent {
         <Getter
           name="totalPages"
           pureComputed={(totalCount, pageSize) =>
-            pageSize ? Math.ceil(totalCount / pageSize) : 0}
+            pageSize > 0
+              ? Math.ceil(totalCount / pageSize)
+              : totalCount > 0 ? 1 : 0}
           connectArgs={getter => [getter('totalCount'), getter('pageSize')]}
         />
         {
@@ -154,7 +172,7 @@ class DevExtremeDataServer extends React.PureComponent {
             // If totalPages is 0, we don't do anything - this is
             // assuming that there is no data *yet* and we don't want
             // to lose the previous currentPage state.
-            if (totalPages > 0 && totalPages - 1 <= currentPage)
+            if (totalPages > 0 && totalPages - 1 < currentPage)
               action('setCurrentPage')(Math.max(totalPages - 1, 0));
           }}
         />
