@@ -200,14 +200,9 @@ const createDataFetcher = (BASEDATA = DEFAULTBASEDATA) => {
           _headerKey: `groupRow_${loadOptions.grouping[groupLevel].columnName}`,
           key: (parentGroupRow ? `${parentGroupRow.key}|` : '') +
             `${group.key}`,
-          colspan: parentGroupRow ? parentGroupRow.colspan + 1 : 1,
+          groupedBy: loadOptions.grouping[groupLevel].columnName,
           value: group.key,
-          type: 'groupRow',
-          column: {
-            name: loadOptions.grouping[groupLevel].columnName,
-            title: loadOptions.grouping[groupLevel].columnName
-          },
-          rows: []
+          type: 'groupRow'
         };
       }
 

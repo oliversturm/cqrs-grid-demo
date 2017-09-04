@@ -156,11 +156,10 @@ class DevExtremeDataServer extends React.PureComponent {
         }
         <Getter
           name="totalPages"
-          pureComputed={(totalCount, pageSize) =>
-            pageSize > 0
-              ? Math.ceil(totalCount / pageSize)
-              : totalCount > 0 ? 1 : 0}
-          connectArgs={getter => [getter('totalCount'), getter('pageSize')]}
+          computed={getters =>
+            getters.pageSize > 0
+              ? Math.ceil(getters.totalCount / getters.pageSize)
+              : getters.totalCount > 0 ? 1 : 0}
         />
         {
           // make sure that when totalPages changes, currentPage remains
