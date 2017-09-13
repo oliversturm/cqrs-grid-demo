@@ -43,6 +43,7 @@ stop-run-without-docker:
 
 push-to-aws:
 	@echo "Make sure you have run 'eval $(aws ecr get-login --no-include-email --region eu-west-1)'."
+	aws logs create-log-group --log-group-name cqrs-grid-demo
 	for d in $(PROJECTS); do \
 		aws ecr create-repository --repository-name sturm/cqrs-grid-demo/$$d; \
 		docker tag sturm/cqrs-grid-demo/$$d:latest 505978303296.dkr.ecr.eu-west-1.amazonaws.com/sturm/cqrs-grid-demo/$$d:latest; \

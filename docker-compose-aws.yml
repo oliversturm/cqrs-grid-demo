@@ -2,16 +2,22 @@ version: '2'
 
 services:
   web-proxy:
-    image: sturm/cqrs-grid-demo/web-proxy
+    image: 505978303296.dkr.ecr.eu-west-1.amazonaws.com/sturm/cqrs-grid-demo/web-proxy
     cpu_shares: 50
     mem_limit: 16000000
+    logging:
+      driver: "awslogs"
+      options:
+        awslogs-region: "eu-west-1"
+        awslogs-group: "cqrs-grid-demo"
+        awslogs-stream-prefix: "web-proxy"
     ports:
       - "3000:3000"
     links:
       - rabbitmq
       
   query-service:
-    image: sturm/cqrs-grid-demo/query-service
+    image: 505978303296.dkr.ecr.eu-west-1.amazonaws.com/sturm/cqrs-grid-demo/query-service
     cpu_shares: 50
     mem_limit: 16000000
     links:
@@ -19,14 +25,14 @@ services:
       - mongo
 
   command-service:
-    image: sturm/cqrs-grid-demo/command-service
+    image: 505978303296.dkr.ecr.eu-west-1.amazonaws.com/sturm/cqrs-grid-demo/command-service
     cpu_shares: 50
     mem_limit: 16000000
     links:
       - rabbitmq
 
   readmodel:
-    image: sturm/cqrs-grid-demo/readmodel
+    image: 505978303296.dkr.ecr.eu-west-1.amazonaws.com/sturm/cqrs-grid-demo/readmodel
     cpu_shares: 50
     mem_limit: 16000000
     links:
@@ -34,14 +40,14 @@ services:
       - mongo
 
   query-change-detector:
-    image: sturm/cqrs-grid-demo/query-change-detector
+    image: 505978303296.dkr.ecr.eu-west-1.amazonaws.com/sturm/cqrs-grid-demo/query-change-detector
     cpu_shares: 50
     mem_limit: 16000000
     links:
       - rabbitmq
 
   validator:
-    image: sturm/cqrs-grid-demo/validator
+    image: 505978303296.dkr.ecr.eu-west-1.amazonaws.com/sturm/cqrs-grid-demo/validator
     cpu_shares: 50
     mem_limit: 16000000
     links:
@@ -50,26 +56,26 @@ services:
   mongo:
     image: mongo:latest
     cpu_shares: 50
-    mem_limit: 16000000
+    mem_limit: 64000000
     ports:
       - "27017:27017"
 
   rabbitmq:
     image: rabbitmq:latest
     cpu_shares: 50
-    mem_limit: 16000000
+    mem_limit: 32000000
     ports:
       - "5672:5672"
 
   webapp:
-    image: sturm/cqrs-grid-demo/webapp
+    image: 505978303296.dkr.ecr.eu-west-1.amazonaws.com/sturm/cqrs-grid-demo/webapp
     cpu_shares: 50
     mem_limit: 16000000
     ports:
       - "8080:8080"
 
   testing:
-    image: sturm/cqrs-grid-demo/testing
+    image: 505978303296.dkr.ecr.eu-west-1.amazonaws.com/sturm/cqrs-grid-demo/testing
     cpu_shares: 50
     mem_limit: 16000000
     links:
