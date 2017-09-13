@@ -49,3 +49,9 @@ push-to-aws:
 		docker tag sturm/cqrs-grid-demo/$$d:latest 505978303296.dkr.ecr.eu-west-1.amazonaws.com/sturm/cqrs-grid-demo/$$d:latest; \
 		docker push 505978303296.dkr.ecr.eu-west-1.amazonaws.com/sturm/cqrs-grid-demo/$$d:latest; \
 	done
+
+ecsup:
+	ecs-cli compose --file docker-compose-aws.yml up
+
+ecsdown:
+	ecs-cli compose --file docker-compose-aws.yml down
