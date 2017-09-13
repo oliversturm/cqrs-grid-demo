@@ -42,7 +42,7 @@ stop-run-without-docker:
 	skill node
 
 push-to-aws:
-	@echo "Make sure you have run 'aws ecr get-login --no-include-email --region eu-west-1' and executed the output."
+	@echo "Make sure you have run 'eval $(aws ecr get-login --no-include-email --region eu-west-1)'."
 	for d in $(PROJECTS); do \
 		aws ecr create-repository --repository-name sturm/cqrs-grid-demo/$$d; \
 		docker tag sturm/cqrs-grid-demo/$$d:latest 505978303296.dkr.ecr.eu-west-1.amazonaws.com/sturm/cqrs-grid-demo/$$d:latest; \
