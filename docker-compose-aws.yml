@@ -1,0 +1,76 @@
+version: '2'
+
+services:
+  web-proxy:
+    image: sturm/cqrs-grid-demo/web-proxy
+    cpu_shares: 50
+    mem_limit: 16000000
+    ports:
+      - "3000:3000"
+    links:
+      - rabbitmq
+      
+  query-service:
+    image: sturm/cqrs-grid-demo/query-service
+    cpu_shares: 50
+    mem_limit: 16000000
+    links:
+      - rabbitmq
+      - mongo
+
+  command-service:
+    image: sturm/cqrs-grid-demo/command-service
+    cpu_shares: 50
+    mem_limit: 16000000
+    links:
+      - rabbitmq
+
+  readmodel:
+    image: sturm/cqrs-grid-demo/readmodel
+    cpu_shares: 50
+    mem_limit: 16000000
+    links:
+      - rabbitmq
+      - mongo
+
+  query-change-detector:
+    image: sturm/cqrs-grid-demo/query-change-detector
+    cpu_shares: 50
+    mem_limit: 16000000
+    links:
+      - rabbitmq
+
+  validator:
+    image: sturm/cqrs-grid-demo/validator
+    cpu_shares: 50
+    mem_limit: 16000000
+    links:
+      - rabbitmq
+
+  mongo:
+    image: mongo:latest
+    cpu_shares: 50
+    mem_limit: 16000000
+    ports:
+      - "27017:27017"
+
+  rabbitmq:
+    image: rabbitmq:latest
+    cpu_shares: 50
+    mem_limit: 16000000
+    ports:
+      - "5672:5672"
+
+  webapp:
+    image: sturm/cqrs-grid-demo/webapp
+    cpu_shares: 50
+    mem_limit: 16000000
+    ports:
+      - "8080:8080"
+
+  testing:
+    image: sturm/cqrs-grid-demo/testing
+    cpu_shares: 50
+    mem_limit: 16000000
+    links:
+      - rabbitmq
