@@ -43,7 +43,7 @@ stop-run-without-docker:
 
 push-to-aws:
 	@echo "Make sure you have run 'aws ecr get-login --no-include-email --region eu-west-1' and executed the output."
-	for d in $(DOCKERS); do \
+	for d in $(PROJECTS); do \
 		aws ecr create-repository --repository-name $$d; \
 		docker tag $$d:latest 505978303296.dkr.ecr.eu-west-1.amazonaws.com/$$d:latest; \
 		docker push 505978303296.dkr.ecr.eu-west-1.amazonaws.com/$$d:latest; \
