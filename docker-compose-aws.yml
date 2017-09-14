@@ -119,7 +119,7 @@ services:
         awslogs-group: "cqrs-grid-demo"
         awslogs-stream-prefix: "rabbitmq"
     environment:
-      - RABBITMQ_SERVER_ADDITIONAL_ERL_ARGS="-rabbit log_levels [{debug}]"
+      - RABBITMQ_SERVER_ADDITIONAL_ERL_ARGS=-rabbit log_levels [{debug}]
     ports:
       - "5672:5672"
 
