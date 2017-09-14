@@ -126,7 +126,7 @@ services:
   webapp:
     image: 505978303296.dkr.ecr.eu-west-1.amazonaws.com/sturm/cqrs-grid-demo/webapp
     cpu_shares: 100
-    mem_limit: 850000000
+    mem_limit: 1600000000
     logging:
       driver: "awslogs"
       options:
