@@ -10,6 +10,7 @@ services:
       options:
         awslogs-region: "eu-west-1"
         awslogs-group: "cqrs-grid-demo"
+        awslogs-stream-prefix: "web-proxy"
     environment:
       - DEPLOY=true
     ports:
@@ -26,6 +27,7 @@ services:
       options:
         awslogs-region: "eu-west-1"
         awslogs-group: "cqrs-grid-demo"
+        awslogs-stream-prefix: "query-service"
     environment:
       - DEPLOY=true
     links:
@@ -41,6 +43,7 @@ services:
       options:
         awslogs-region: "eu-west-1"
         awslogs-group: "cqrs-grid-demo"
+        awslogs-stream-prefix: "command-service"
     environment:
       - DEPLOY=true
     links:
@@ -55,6 +58,7 @@ services:
       options:
         awslogs-region: "eu-west-1"
         awslogs-group: "cqrs-grid-demo"
+        awslogs-stream-prefix: "readmodel"
     environment:
       - DEPLOY=true
     links:
@@ -70,6 +74,7 @@ services:
       options:
         awslogs-region: "eu-west-1"
         awslogs-group: "cqrs-grid-demo"
+        awslogs-stream-prefix: "query-change-detector"
     environment:
       - DEPLOY=true
     links:
@@ -84,6 +89,7 @@ services:
       options:
         awslogs-region: "eu-west-1"
         awslogs-group: "cqrs-grid-demo"
+        awslogs-stream-prefix: "validator"
     environment:
       - DEPLOY=true
     links:
@@ -98,6 +104,7 @@ services:
       options:
         awslogs-region: "eu-west-1"
         awslogs-group: "cqrs-grid-demo"
+        awslogs-stream-prefix: "mongodb"
     ports:
       - "27017:27017"
 
@@ -110,6 +117,7 @@ services:
       options:
         awslogs-region: "eu-west-1"
         awslogs-group: "cqrs-grid-demo"
+        awslogs-stream-prefix: "rabbitmq"
     ports:
       - "5672:5672"
 
@@ -122,6 +130,7 @@ services:
       options:
         awslogs-region: "eu-west-1"
         awslogs-group: "cqrs-grid-demo"
+        awslogs-stream-prefix: "webapp"
     environment:
       - DEPLOY=true
     ports:
@@ -136,6 +145,7 @@ services:
       options:
         awslogs-region: "eu-west-1"
         awslogs-group: "cqrs-grid-demo"
+        awslogs-stream-prefix: "testing"
     environment:
       - DEPLOY=true
     links:
