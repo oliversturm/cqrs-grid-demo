@@ -109,7 +109,7 @@ services:
       - "27017:27017"
 
   rabbitmq:
-    image: rabbitmq:latest
+    image: rabbitmq:alpine
     cpu_shares: 50
     mem_limit: 256000000
     logging:
@@ -118,6 +118,8 @@ services:
         awslogs-region: "eu-west-1"
         awslogs-group: "cqrs-grid-demo"
         awslogs-stream-prefix: "rabbitmq"
+    environment:
+      - RABBITMQ_SERVER_ADDITIONAL_ERL_ARGS="-rabbit log_levels [{debug}]"
     ports:
       - "5672:5672"
 
