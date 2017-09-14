@@ -3,8 +3,8 @@ version: '2'
 services:
   web-proxy:
     image: 505978303296.dkr.ecr.eu-west-1.amazonaws.com/sturm/cqrs-grid-demo/web-proxy
-    cpu_shares: 50
-    mem_limit: 128000000
+    cpu_shares: 100
+    mem_limit: 256000000
     logging:
       driver: "awslogs"
       options:
@@ -20,8 +20,8 @@ services:
       
   query-service:
     image: 505978303296.dkr.ecr.eu-west-1.amazonaws.com/sturm/cqrs-grid-demo/query-service
-    cpu_shares: 50
-    mem_limit: 48000000
+    cpu_shares: 100
+    mem_limit: 96000000
     logging:
       driver: "awslogs"
       options:
@@ -36,8 +36,8 @@ services:
 
   command-service:
     image: 505978303296.dkr.ecr.eu-west-1.amazonaws.com/sturm/cqrs-grid-demo/command-service
-    cpu_shares: 50
-    mem_limit: 96000000
+    cpu_shares: 100
+    mem_limit: 192000000
     logging:
       driver: "awslogs"
       options:
@@ -51,8 +51,8 @@ services:
 
   readmodel:
     image: 505978303296.dkr.ecr.eu-west-1.amazonaws.com/sturm/cqrs-grid-demo/readmodel
-    cpu_shares: 50
-    mem_limit: 64000000
+    cpu_shares: 100
+    mem_limit: 128000000
     logging:
       driver: "awslogs"
       options:
@@ -67,8 +67,8 @@ services:
 
   query-change-detector:
     image: 505978303296.dkr.ecr.eu-west-1.amazonaws.com/sturm/cqrs-grid-demo/query-change-detector
-    cpu_shares: 50
-    mem_limit: 64000000
+    cpu_shares: 100
+    mem_limit: 128000000
     logging:
       driver: "awslogs"
       options:
@@ -82,8 +82,8 @@ services:
 
   validator:
     image: 505978303296.dkr.ecr.eu-west-1.amazonaws.com/sturm/cqrs-grid-demo/validator
-    cpu_shares: 50
-    mem_limit: 48000000
+    cpu_shares: 100
+    mem_limit: 96000000
     logging:
       driver: "awslogs"
       options:
@@ -97,8 +97,8 @@ services:
 
   mongo:
     image: mongo:latest
-    cpu_shares: 50
-    mem_limit: 64000000
+    cpu_shares: 100
+    mem_limit: 128000000
     logging:
       driver: "awslogs"
       options:
@@ -110,8 +110,8 @@ services:
 
   rabbitmq:
     image: rabbitmq:alpine
-    cpu_shares: 50
-    mem_limit: 192000000
+    cpu_shares: 100
+    mem_limit: 384000000
     logging:
       driver: "awslogs"
       options:
@@ -125,8 +125,8 @@ services:
 
   webapp:
     image: 505978303296.dkr.ecr.eu-west-1.amazonaws.com/sturm/cqrs-grid-demo/webapp
-    cpu_shares: 50
-    mem_limit: 256000000
+    cpu_shares: 100
+    mem_limit: 512000000
     logging:
       driver: "awslogs"
       options:
@@ -140,8 +140,8 @@ services:
 
   testing:
     image: 505978303296.dkr.ecr.eu-west-1.amazonaws.com/sturm/cqrs-grid-demo/testing
-    cpu_shares: 50
-    mem_limit: 64000000
+    cpu_shares: 100
+    mem_limit: 128000000
     logging:
       driver: "awslogs"
       options:
