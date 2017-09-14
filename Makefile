@@ -55,3 +55,7 @@ ecsup:
 
 ecsdown:
 	ecs-cli compose --file docker-compose-aws.yml down
+
+build-docker-aws:
+	./prepare-aws.sh
+	make build-docker
