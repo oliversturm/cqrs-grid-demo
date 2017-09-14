@@ -3,7 +3,7 @@ const fixObject = require('../message-utils').fixObject;
 const { listValues, fetchValue } = require('./query.js');
 
 module.exports = function(o = {}) {
-  o.mongoDbName = 'cqrs_demo_events';
+  o.mongoDbName = 'cqrs_events';
   const conn = require('../db')(o);
 
   this.add('role:entitiesQuery, domain:events, cmd:list', (m, r) => {

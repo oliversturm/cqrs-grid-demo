@@ -42,7 +42,7 @@ $(function() {
       },
       columns: [
         {
-          dataField: 'name',
+          dataField: 'type',
           caption: 'Type'
         },
         {
@@ -55,7 +55,7 @@ $(function() {
             return JSON.stringify(ci.value);
           }
         },
-        'aggregate.id',
+        'aggregateId',
         {
           dataField: 'timestamp',
           dataType: 'date',
