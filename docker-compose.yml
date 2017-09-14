@@ -8,6 +8,9 @@ services:
       - ./message-utils:/usr/src/app/message-utils
     ports:
       - "3000:3000"
+    environment:
+      - RABBITMQ_HOST=rabbitmq
+      - RABBITMQ_PORT=5672
     links:
       - rabbitmq
       
@@ -17,6 +20,11 @@ services:
       - ./query-service:/usr/src/app/query-service
       - ./db:/usr/src/app/db
       - ./message-utils:/usr/src/app/message-utils
+    environment:
+      - RABBITMQ_HOST=rabbitmq
+      - RABBITMQ_PORT=5672
+      - MONGO_HOST=mongo
+      - MONGO_PORT=27017
     links:
       - rabbitmq
       - mongo
@@ -27,6 +35,11 @@ services:
       - ./command-service:/usr/src/app/command-service
       - ./resolve-bus-seneca:/usr/src/app/resolve-bus-seneca
       - ./message-utils:/usr/src/app/message-utils
+    environment:
+      - RABBITMQ_HOST=rabbitmq
+      - RABBITMQ_PORT=5672
+      - MONGO_HOST=mongo
+      - MONGO_PORT=27017
     links:
       - rabbitmq
       - mongo
@@ -37,6 +50,11 @@ services:
       - ./readmodel:/usr/src/app/readmodel
       - ./db:/usr/src/app/db
       - ./message-utils:/usr/src/app/message-utils
+    environment:
+      - RABBITMQ_HOST=rabbitmq
+      - RABBITMQ_PORT=5672
+      - MONGO_HOST=mongo
+      - MONGO_PORT=27017
     links:
       - rabbitmq
       - mongo
@@ -46,6 +64,9 @@ services:
     volumes:
       - ./query-change-detector:/usr/src/app/query-change-detector
       - ./message-utils:/usr/src/app/message-utils
+    environment:
+      - RABBITMQ_HOST=rabbitmq
+      - RABBITMQ_PORT=5672
     links:
       - rabbitmq
 
@@ -54,6 +75,9 @@ services:
     volumes:
       - ./validator:/usr/src/app/validator
       - ./message-utils:/usr/src/app/message-utils
+    environment:
+      - RABBITMQ_HOST=rabbitmq
+      - RABBITMQ_PORT=5672
     links:
       - rabbitmq
 
@@ -80,5 +104,8 @@ services:
     volumes:
       - ./testing:/usr/src/app/testing
       - ./message-utils:/usr/src/app/message-utils
+    environment:
+      - RABBITMQ_HOST=rabbitmq
+      - RABBITMQ_PORT=5672
     links:
       - rabbitmq

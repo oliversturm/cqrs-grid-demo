@@ -18,6 +18,7 @@ services:
     image: sturm/cqrs-grid-demo/command-service
     links:
       - rabbitmq
+      - mongo
 
   readmodel:
     image: sturm/cqrs-grid-demo/readmodel

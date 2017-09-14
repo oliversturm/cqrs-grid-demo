@@ -13,6 +13,8 @@ services:
         awslogs-stream-prefix: "web-proxy"
     environment:
       - DEPLOY=true
+      - RABBITMQ_HOST=rabbitmq
+      - RABBITMQ_PORT=5672
     ports:
       - "3000:3000"
     links:
@@ -30,6 +32,10 @@ services:
         awslogs-stream-prefix: "query-service"
     environment:
       - DEPLOY=true
+      - RABBITMQ_HOST=rabbitmq
+      - RABBITMQ_PORT=5672
+      - MONGO_HOST=mongo
+      - MONGO_PORT=27017
     links:
       - rabbitmq
       - mongo
@@ -46,8 +52,13 @@ services:
         awslogs-stream-prefix: "command-service"
     environment:
       - DEPLOY=true
+      - RABBITMQ_HOST=rabbitmq
+      - RABBITMQ_PORT=5672
+      - MONGO_HOST=mongo
+      - MONGO_PORT=27017
     links:
       - rabbitmq
+      - mongo
 
   readmodel:
     image: 505978303296.dkr.ecr.eu-west-1.amazonaws.com/sturm/cqrs-grid-demo/readmodel
@@ -61,6 +72,10 @@ services:
         awslogs-stream-prefix: "readmodel"
     environment:
       - DEPLOY=true
+      - RABBITMQ_HOST=rabbitmq
+      - RABBITMQ_PORT=5672
+      - MONGO_HOST=mongo
+      - MONGO_PORT=27017
     links:
       - rabbitmq
       - mongo
@@ -77,6 +92,8 @@ services:
         awslogs-stream-prefix: "query-change-detector"
     environment:
       - DEPLOY=true
+      - RABBITMQ_HOST=rabbitmq
+      - RABBITMQ_PORT=5672
     links:
       - rabbitmq
 
@@ -92,6 +109,8 @@ services:
         awslogs-stream-prefix: "validator"
     environment:
       - DEPLOY=true
+      - RABBITMQ_HOST=rabbitmq
+      - RABBITMQ_PORT=5672
     links:
       - rabbitmq
 
@@ -150,5 +169,7 @@ services:
         awslogs-stream-prefix: "testing"
     environment:
       - DEPLOY=true
+      - RABBITMQ_HOST=rabbitmq
+      - RABBITMQ_PORT=5672
     links:
       - rabbitmq

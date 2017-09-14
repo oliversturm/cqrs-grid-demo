@@ -1,6 +1,7 @@
 #!/bin/bash
 
 terminate() {
+    sleep 20
     kill -TERM "$child" 2>/dev/null
 }
 
