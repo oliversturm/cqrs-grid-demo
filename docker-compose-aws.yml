@@ -111,7 +111,7 @@ services:
   rabbitmq:
     image: rabbitmq:latest
     cpu_shares: 50
-    mem_limit: 128000000
+    mem_limit: 192000000
     logging:
       driver: "awslogs"
       options:
