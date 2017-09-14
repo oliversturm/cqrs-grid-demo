@@ -13,6 +13,7 @@
   },
   "devDependencies": {
     "bower": "^1.8.0",
+    "forever": "^0.15.3",
     "morgan": "^1.7.0",
     "nodemon": "^1.11.0"
   }

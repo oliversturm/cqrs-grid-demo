@@ -1,12 +1,12 @@
 #!/bin/bash
 
 terminate() {
-    sleep 20
     kill -TERM "$child" 2>/dev/null
 }
 
 if [ $DEPLOY ]; then
-    node --harmony index.js
+    sleep 20
+    node_modules/.bin/forever -a -v -m 20 --minUptime 20000 --spinSleepTime 20000 --no-colors -c "node --harmony" index.js
 else
     trap terminate TERM
 
