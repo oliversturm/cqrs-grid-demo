@@ -37,7 +37,7 @@ services:
   command-service:
     image: 505978303296.dkr.ecr.eu-west-1.amazonaws.com/sturm/cqrs-grid-demo/command-service
     cpu_shares: 50
-    mem_limit: 64000000
+    mem_limit: 128000000
     logging:
       driver: "awslogs"
       options:
@@ -111,7 +111,7 @@ services:
   rabbitmq:
     image: rabbitmq:alpine
     cpu_shares: 50
-    mem_limit: 256000000
+    mem_limit: 192000000
     logging:
       driver: "awslogs"
       options:
@@ -126,7 +126,7 @@ services:
   webapp:
     image: 505978303296.dkr.ecr.eu-west-1.amazonaws.com/sturm/cqrs-grid-demo/webapp
     cpu_shares: 50
-    mem_limit: 64000000
+    mem_limit: 128000000
     logging:
       driver: "awslogs"
       options:
