@@ -5,34 +5,55 @@ services:
     image: sturm/cqrs-grid-demo/web-proxy
     ports:
       - "3000:3000"
+    environment:
+      - RABBITMQ_HOST=rabbitmq
+      - RABBITMQ_PORT=5672
     links:
       - rabbitmq
       
   query-service:
     image: sturm/cqrs-grid-demo/query-service
+      - RABBITMQ_HOST=rabbitmq
+      - RABBITMQ_PORT=5672
+      - MONGO_HOST=mongo
+      - MONGO_PORT=27017
     links:
       - rabbitmq
       - mongo
 
   command-service:
     image: sturm/cqrs-grid-demo/command-service
+      - RABBITMQ_HOST=rabbitmq
+      - RABBITMQ_PORT=5672
+      - MONGO_HOST=mongo
+      - MONGO_PORT=27017
     links:
       - rabbitmq
       - mongo
 
   readmodel:
     image: sturm/cqrs-grid-demo/readmodel
+      - RABBITMQ_HOST=rabbitmq
+      - RABBITMQ_PORT=5672
+      - MONGO_HOST=mongo
+      - MONGO_PORT=27017
     links:
       - rabbitmq
       - mongo
 
   query-change-detector:
     image: sturm/cqrs-grid-demo/query-change-detector
+    environment:
+      - RABBITMQ_HOST=rabbitmq
+      - RABBITMQ_PORT=5672
     links:
       - rabbitmq
 
   validator:
     image: sturm/cqrs-grid-demo/validator
+    environment:
+      - RABBITMQ_HOST=rabbitmq
+      - RABBITMQ_PORT=5672
     links:
       - rabbitmq
 
@@ -53,5 +74,8 @@ services:
 
   testing:
     image: sturm/cqrs-grid-demo/testing
+    environment:
+      - RABBITMQ_HOST=rabbitmq
+      - RABBITMQ_PORT=5672
     links:
       - rabbitmq
