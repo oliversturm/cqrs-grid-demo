@@ -56,10 +56,6 @@ ecsup:
 ecsdown:
 	ecs-cli compose --file docker-compose-aws.yml down
 
-build-docker-aws:
-	./prepare-aws.sh
-	make build-docker
-
 clean-docker:
 	-docker rmi $$(docker images -a --filter=dangling=true -q)
 	-docker rm $$(docker ps --filter=status=exited --filter=status=created -q)

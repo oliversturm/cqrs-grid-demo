@@ -3,9 +3,9 @@ console.log('DevExtreme version: ', DevExpress.VERSION);
 $(function() {
   const dataStore = testDataStore(
     createDataStore({
-      baseDataUrl: '//localhost:3000/data/v1/entity'
+      baseDataUrl: '/data/v1/entity'
     }),
-    '//localhost:3000/api/v1'
+    '/api/v1'
   );
 
   $('#toolbar').dxToolbar({

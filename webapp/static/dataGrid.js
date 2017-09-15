@@ -6,10 +6,10 @@ $(function() {
   };
 
   var dataSource = createDataSource({
-    baseDataUrl: '//localhost:3000/data/v1/entity',
+    baseDataUrl: '/data/v1/entity',
     changeNotification: trackGridChanges(trackingConfig),
     aggregateName: 'entity',
-    socketIoUrl: '//localhost:3000'
+    socketIoUrl: '/'
   });
 
   $('#toolbar').dxToolbar({

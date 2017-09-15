@@ -98,6 +98,8 @@ services:
       - ./message-utils:/usr/src/app/message-utils
     ports:
       - "8080:8080"
+    links:
+      - web-proxy
 
   testing:
     image: sturm/cqrs-grid-demo/testing
