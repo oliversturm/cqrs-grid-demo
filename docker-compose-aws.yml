@@ -156,6 +156,8 @@ services:
       - DEPLOY=true
     ports:
       - "8080:8080"
+    links:
+      - web-proxy
 
   testing:
     image: 505978303296.dkr.ecr.eu-west-1.amazonaws.com/sturm/cqrs-grid-demo/testing
