@@ -2,7 +2,7 @@ version: '2'
 
 services:
   web-proxy:
-    image: sturm/cqrs-grid-demo/web-proxy
+    image: sturm/cqrs-grid-demo/event-sourcing/web-proxy
     volumes:
       - ./web-proxy:/usr/src/app/web-proxy
       - ./message-utils:/usr/src/app/message-utils
@@ -15,7 +15,7 @@ services:
       - rabbitmq
       
   query-service:
-    image: sturm/cqrs-grid-demo/query-service
+    image: sturm/cqrs-grid-demo/event-sourcing/query-service
     volumes:
       - ./query-service:/usr/src/app/query-service
       - ./db:/usr/src/app/db
@@ -30,7 +30,7 @@ services:
       - mongo
 
   command-service:
-    image: sturm/cqrs-grid-demo/command-service
+    image: sturm/cqrs-grid-demo/event-sourcing/command-service
     volumes:
       - ./command-service:/usr/src/app/command-service
       - ./resolve-bus-seneca:/usr/src/app/resolve-bus-seneca
@@ -45,7 +45,7 @@ services:
       - mongo
 
   readmodel:
-    image: sturm/cqrs-grid-demo/readmodel
+    image: sturm/cqrs-grid-demo/event-sourcing/readmodel
     volumes:
       - ./readmodel:/usr/src/app/readmodel
       - ./db:/usr/src/app/db
@@ -60,7 +60,7 @@ services:
       - mongo
       
   query-change-detector:
-    image: sturm/cqrs-grid-demo/query-change-detector
+    image: sturm/cqrs-grid-demo/event-sourcing/query-change-detector
     volumes:
       - ./query-change-detector:/usr/src/app/query-change-detector
       - ./message-utils:/usr/src/app/message-utils
@@ -71,7 +71,7 @@ services:
       - rabbitmq
 
   validator:
-    image: sturm/cqrs-grid-demo/validator
+    image: sturm/cqrs-grid-demo/event-sourcing/validator
     volumes:
       - ./validator:/usr/src/app/validator
       - ./message-utils:/usr/src/app/message-utils
@@ -92,7 +92,7 @@ services:
       - "5672:5672"
 
   webapp:
-    image: sturm/cqrs-grid-demo/webapp
+    image: sturm/cqrs-grid-demo/event-sourcing/webapp
     volumes:
       - ./webapp:/usr/src/app/webapp
       - ./message-utils:/usr/src/app/message-utils
@@ -102,7 +102,7 @@ services:
       - web-proxy
 
   testing:
-    image: sturm/cqrs-grid-demo/testing
+    image: sturm/cqrs-grid-demo/event-sourcing/testing
     volumes:
       - ./testing:/usr/src/app/testing
       - ./message-utils:/usr/src/app/message-utils

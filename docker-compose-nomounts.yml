@@ -2,7 +2,7 @@ version: '2'
 
 services:
   web-proxy:
-    image: sturm/cqrs-grid-demo/web-proxy
+    image: sturm/cqrs-grid-demo/event-sourcing/web-proxy
     ports:
       - "3000:3000"
     environment:
@@ -12,7 +12,7 @@ services:
       - rabbitmq
       
   query-service:
-    image: sturm/cqrs-grid-demo/query-service
+    image: sturm/cqrs-grid-demo/event-sourcing/query-service
       - RABBITMQ_HOST=rabbitmq
       - RABBITMQ_PORT=5672
       - MONGO_HOST=mongo
@@ -22,7 +22,7 @@ services:
       - mongo
 
   command-service:
-    image: sturm/cqrs-grid-demo/command-service
+    image: sturm/cqrs-grid-demo/event-sourcing/command-service
       - RABBITMQ_HOST=rabbitmq
       - RABBITMQ_PORT=5672
       - MONGO_HOST=mongo
@@ -32,7 +32,7 @@ services:
       - mongo
 
   readmodel:
-    image: sturm/cqrs-grid-demo/readmodel
+    image: sturm/cqrs-grid-demo/event-sourcing/readmodel
       - RABBITMQ_HOST=rabbitmq
       - RABBITMQ_PORT=5672
       - MONGO_HOST=mongo
@@ -42,7 +42,7 @@ services:
       - mongo
 
   query-change-detector:
-    image: sturm/cqrs-grid-demo/query-change-detector
+    image: sturm/cqrs-grid-demo/event-sourcing/query-change-detector
     environment:
       - RABBITMQ_HOST=rabbitmq
       - RABBITMQ_PORT=5672
@@ -50,7 +50,7 @@ services:
       - rabbitmq
 
   validator:
-    image: sturm/cqrs-grid-demo/validator
+    image: sturm/cqrs-grid-demo/event-sourcing/validator
     environment:
       - RABBITMQ_HOST=rabbitmq
       - RABBITMQ_PORT=5672
@@ -68,14 +68,14 @@ services:
       - "5672:5672"
 
   webapp:
-    image: sturm/cqrs-grid-demo/webapp
+    image: sturm/cqrs-grid-demo/event-sourcing/webapp
     ports:
       - "8080:8080"
     links:
       - web-proxy
 
   testing:
-    image: sturm/cqrs-grid-demo/testing
+    image: sturm/cqrs-grid-demo/event-sourcing/testing
     environment:
       - RABBITMQ_HOST=rabbitmq
       - RABBITMQ_PORT=5672
