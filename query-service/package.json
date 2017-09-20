@@ -14,7 +14,8 @@
     "lodash": "^4.17.4",
     "mongodb": "^2.2.22",
     "seneca": "^3.3.0",
-    "try-expression": "^1.0.0"
+    "try-expression": "^1.0.0",
+    "wait-on": "^2.0.2"
   },
   "devDependencies": {
     "chai": "^3.5.0",
