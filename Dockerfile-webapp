@@ -7,7 +7,7 @@ COPY message-utils /usr/src/app/message-utils
 WORKDIR /usr/src/app/webapp
 RUN npm install
 
-EXPOSE 8080 57575
+EXPOSE 8080
 
 RUN chmod 755 start-service.sh
 CMD [ "./start-service.sh" ]

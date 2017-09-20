@@ -10,7 +10,8 @@
   "license": "SEE LICENSE IN LICENSE",
   "dependencies": {
     "parambulator": "^1.5.2",
-    "seneca": "^3.2.2"
+    "seneca": "^3.2.2",
+    "wait-on": "^2.0.2"
   },
   "devDependencies": {
     "chai": "^3.5.0",
