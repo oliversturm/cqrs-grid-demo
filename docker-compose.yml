@@ -2,7 +2,7 @@ version: '2'
 
 services:
   web-proxy:
-    image: sturm/cqrs-grid-demo/react-frontend/web-proxy
+    image: sturm/cqrs-grid-demo/knockout-frontend/web-proxy
     volumes:
       - ./web-proxy:/usr/src/app/web-proxy
       - ./message-utils:/usr/src/app/message-utils
@@ -15,7 +15,7 @@ services:
       - testing
       
   query-service:
-    image: sturm/cqrs-grid-demo/react-frontend/query-service
+    image: sturm/cqrs-grid-demo/knockout-frontend/query-service
     volumes:
       - ./query-service:/usr/src/app/query-service
       - ./db:/usr/src/app/db
@@ -26,7 +26,7 @@ services:
       - mongo
 
   command-service:
-    image: sturm/cqrs-grid-demo/react-frontend/command-service
+    image: sturm/cqrs-grid-demo/knockout-frontend/command-service
     volumes:
       - ./command-service:/usr/src/app/command-service
       - ./db:/usr/src/app/db
@@ -38,7 +38,7 @@ services:
       - validator
 
   validator:
-    image: sturm/cqrs-grid-demo/react-frontend/validator
+    image: sturm/cqrs-grid-demo/knockout-frontend/validator
     volumes:
       - ./validator:/usr/src/app/validator
       - ./message-utils:/usr/src/app/message-utils
@@ -51,7 +51,7 @@ services:
       - "27017:27017"
 
   webapp:
-    image: sturm/cqrs-grid-demo/react-frontend/webapp
+    image: sturm/cqrs-grid-demo/knockout-frontend/webapp
     volumes:
       - ./webapp:/usr/src/app/webapp
       - ./message-utils:/usr/src/app/message-utils
@@ -59,7 +59,7 @@ services:
       - "8080:8080"
 
   testing:
-    image: sturm/cqrs-grid-demo/react-frontend/testing
+    image: sturm/cqrs-grid-demo/knockout-frontend/testing
     volumes:
       - ./testing:/usr/src/app/testing
       - ./message-utils:/usr/src/app/message-utils
