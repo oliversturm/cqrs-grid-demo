@@ -56,7 +56,7 @@ services:
       - "8080:8080"
 
   testing:
-    image: sturm/cqrs-grid-demo/react-frontend/testing
+    image: sturm/cqrs-grid-demo/netcore-frontend/testing
     volumes:
       - ./testing:/usr/src/app/testing
       - ./message-utils:/usr/src/app/message-utils
