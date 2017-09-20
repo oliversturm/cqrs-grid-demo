@@ -1,28 +1,46 @@
+const waitOn = require('wait-on');
 const express = require('express');
 const proxy = require('http-proxy-middleware');
 
-var app = express();
+const webProxy = `${process.env.WEB_PROXY_HOST || 'web-proxy'}:${process.env.WEB_PROXY_PORT || 3000}`;
+const webProxyHttp = `http://${webProxy}`;
 
-app.use(require('morgan')(process.env.DEPLOY ? 'combined' : 'dev'));
-app.use(express.static('static'));
+waitOn(
+  {
+    resources: [`tcp:${webProxy}`]
+  },
+  waitErr => {
+    if (waitErr) {
+      console.error('Error waiting for resources: ', waitErr);
+      return;
+    }
 
-app.use(
-  proxy('/data', {
-    target: 'http://web-proxy:3000'
-  })
+    var app = express();
+
+    app.use(require('morgan')(process.env.DEPLOY ? 'combined' : 'dev'));
+    app.use(express.static('static'));
+
+    app.use(
+      proxy('/data', {
+        target: webProxyHttp
+      })
+    );
+    app.use(
+      proxy('/api', {
+        target: webProxyHttp
+      })
+    );
+
+    app.use(
+      proxy(webProxyHttp, {
+        ws: true
+      })
+    );
+
+    const webAppPort = parseInt(process.env.WEBAPP_PORT) || 8080;
+
+    app.listen(webAppPort, function() {
+      console.log(`Web server running on port ${webAppPort}`);
+    });
+  }
 );
-app.use(
-  proxy('/api', {
-    target: 'http://web-proxy:3000'
-  })
-);
-
-app.use(
-  proxy('http://web-proxy:3000', {
-    ws: true
-  })
-);
-
-app.listen(8080, function() {
-  console.log('Web server running on port 8080');
-});

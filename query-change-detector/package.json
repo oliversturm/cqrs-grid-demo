@@ -11,7 +11,8 @@
   "dependencies": {
     "seneca": "^3.3.0",
     "seneca-amqp-transport": "^2.1.0",
-    "uuid": "^3.0.1"
+    "uuid": "^3.0.1",
+    "wait-on": "^2.0.2"
   },
   "devDependencies": {
     "forever": "^0.15.3",

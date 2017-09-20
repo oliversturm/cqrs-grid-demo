@@ -6,9 +6,8 @@ COPY web-proxy /usr/src/app/web-proxy
 COPY message-utils /usr/src/app/message-utils
 WORKDIR /usr/src/app/web-proxy
 RUN npm install
-RUN npm install -g node-inspector@0.7.5
 
-EXPOSE 3000 57575
+EXPOSE 3000 9229
 
 RUN chmod 755 start-service.sh
 CMD [ "./start-service.sh" ]

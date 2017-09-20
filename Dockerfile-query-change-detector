@@ -6,9 +6,8 @@ COPY query-change-detector /usr/src/app/query-change-detector
 COPY message-utils /usr/src/app/message-utils
 WORKDIR /usr/src/app/query-change-detector
 RUN npm install
-RUN npm install -g node-inspector@0.7.5
 
-EXPOSE 57575
+EXPOSE 9229
 
 RUN chmod 755 start-service.sh
 CMD [ "./start-service.sh" ]

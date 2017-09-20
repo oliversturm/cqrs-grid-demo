@@ -20,7 +20,8 @@
     "seneca-web-adapter-express": "^1.0.2",
     "socket.io": "^1.7.3",
     "uuid": "^3.0.1",
-    "uuid-validate": "0.0.2"
+    "uuid-validate": "0.0.2",
+    "wait-on": "^2.0.2"
   },
   "devDependencies": {
     "chai": "^3.5.0",

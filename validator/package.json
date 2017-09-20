@@ -11,7 +11,8 @@
   "dependencies": {
     "parambulator": "^1.5.2",
     "seneca": "^3.2.2",
-    "seneca-amqp-transport": "^2.1.0"
+    "seneca-amqp-transport": "^2.1.0",
+    "wait-on": "^2.0.2"
   },
   "devDependencies": {
     "chai": "^3.5.0",

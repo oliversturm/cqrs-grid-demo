@@ -9,9 +9,8 @@ WORKDIR /usr/src/app/db
 RUN npm install
 WORKDIR /usr/src/app/readmodel
 RUN npm install
-RUN npm install -g node-inspector@0.7.5
 
-EXPOSE 57575
+EXPOSE 9229
 
 RUN chmod 755 start-service.sh
 CMD [ "./start-service.sh" ]
