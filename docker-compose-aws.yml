@@ -154,6 +154,8 @@ services:
         awslogs-stream-prefix: "webapp"
     environment:
       - DEPLOY=true
+      - WEB_PROXY_HOST=web-proxy
+      - WEB_PROXY_PORT=3000
     ports:
       - "8080:8080"
     links:
