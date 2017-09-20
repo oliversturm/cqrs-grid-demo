@@ -12,10 +12,10 @@ test:
 
 bd-webapp:
 	pushd webapp && make publish; popd
-	docker build -t sturm/cqrs-grid-demo/webapp -f Dockerfile-webapp .
+	docker build -t sturm/cqrs-grid-demo/netcore-frontend/webapp -f Dockerfile-webapp .
 
 bd-%:
-	docker build -t sturm/cqrs-grid-demo/$* -f Dockerfile-$* .
+	docker build -t sturm/cqrs-grid-demo/netcore-frontend/$* -f Dockerfile-$* .
 
 build-docker: $(DOCKERS) bd-webapp
 
