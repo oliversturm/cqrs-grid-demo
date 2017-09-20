@@ -10,9 +10,8 @@ WORKDIR /usr/src/app/db
 RUN npm install
 WORKDIR /usr/src/app/command-service
 RUN npm install
-RUN npm install -g node-inspector@0.7.5
 
-EXPOSE 3002 57575
+EXPOSE 3002 9229
 
 RUN chmod 755 start-service.sh
 CMD [ "./start-service.sh" ]
