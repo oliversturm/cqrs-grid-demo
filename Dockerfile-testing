@@ -6,9 +6,8 @@ COPY testing /usr/src/app/testing
 COPY message-utils /usr/src/app/message-utils
 WORKDIR /usr/src/app/testing
 RUN npm install
-RUN npm install -g node-inspector@0.7.5
 
-EXPOSE 3005 57575
+EXPOSE 3005 9229
 
 RUN chmod 755 start-service.sh
 CMD [ "./start-service.sh" ]
