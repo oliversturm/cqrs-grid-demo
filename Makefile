@@ -11,7 +11,7 @@ test:
 	done
 
 bd-%:
-	docker build -t sturm/cqrs-grid-demo/$* -f Dockerfile-$* .
+	docker build -t sturm/cqrs-grid-demo/react-plugin/$* -f Dockerfile-$* .
 
 build-docker: $(DOCKERS)
 

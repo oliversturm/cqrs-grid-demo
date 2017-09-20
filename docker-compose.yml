@@ -2,7 +2,7 @@ version: '2'
 
 services:
   web-proxy:
-    image: sturm/cqrs-grid-demo/web-proxy
+    image: sturm/cqrs-grid-demo/react-plugin/web-proxy
     volumes:
       - ./web-proxy:/usr/src/app/web-proxy
       - ./message-utils:/usr/src/app/message-utils
@@ -15,7 +15,7 @@ services:
       - testing
       
   query-service:
-    image: sturm/cqrs-grid-demo/query-service
+    image: sturm/cqrs-grid-demo/react-plugin/query-service
     volumes:
       - ./query-service:/usr/src/app/query-service
       - ./db:/usr/src/app/db
@@ -26,7 +26,7 @@ services:
       - mongo
 
   command-service:
-    image: sturm/cqrs-grid-demo/command-service
+    image: sturm/cqrs-grid-demo/react-plugin/command-service
     volumes:
       - ./command-service:/usr/src/app/command-service
       - ./db:/usr/src/app/db
@@ -38,7 +38,7 @@ services:
       - validator
 
   validator:
-    image: sturm/cqrs-grid-demo/validator
+    image: sturm/cqrs-grid-demo/react-plugin/validator
     volumes:
       - ./validator:/usr/src/app/validator
       - ./message-utils:/usr/src/app/message-utils
@@ -51,14 +51,14 @@ services:
       - "27017:27017"
 
   webapp:
-    image: sturm/cqrs-grid-demo/webapp
+    image: sturm/cqrs-grid-demo/react-plugin/webapp
     volumes:
       - ./webapp:/usr/src/app/webapp
     ports:
       - "8080:8080"
 
   testing:
-    image: sturm/cqrs-grid-demo/testing
+    image: sturm/cqrs-grid-demo/react-plugin/testing
     volumes:
       - ./testing:/usr/src/app/testing
       - ./message-utils:/usr/src/app/message-utils
