@@ -2,7 +2,7 @@ version: '2'
 
 services:
   web-proxy:
-    image: 505978303296.dkr.ecr.eu-west-1.amazonaws.com/sturm/cqrs-grid-demo/web-proxy
+    image: 505978303296.dkr.ecr.eu-west-1.amazonaws.com/sturm/cqrs-grid-demo/event-sourcing/web-proxy
     cpu_shares: 100
     mem_limit: 1024000000
     logging:
@@ -21,7 +21,7 @@ services:
       - rabbitmq
       
   query-service:
-    image: 505978303296.dkr.ecr.eu-west-1.amazonaws.com/sturm/cqrs-grid-demo/query-service
+    image: 505978303296.dkr.ecr.eu-west-1.amazonaws.com/sturm/cqrs-grid-demo/event-sourcing/query-service
     cpu_shares: 100
     mem_limit: 96000000
     logging:
@@ -41,7 +41,7 @@ services:
       - mongo
 
   command-service:
-    image: 505978303296.dkr.ecr.eu-west-1.amazonaws.com/sturm/cqrs-grid-demo/command-service
+    image: 505978303296.dkr.ecr.eu-west-1.amazonaws.com/sturm/cqrs-grid-demo/event-sourcing/command-service
     cpu_shares: 100
     mem_limit: 192000000
     logging:
@@ -61,7 +61,7 @@ services:
       - mongo
 
   readmodel:
-    image: 505978303296.dkr.ecr.eu-west-1.amazonaws.com/sturm/cqrs-grid-demo/readmodel
+    image: 505978303296.dkr.ecr.eu-west-1.amazonaws.com/sturm/cqrs-grid-demo/event-sourcing/readmodel
     cpu_shares: 100
     mem_limit: 96000000
     logging:
@@ -81,7 +81,7 @@ services:
       - mongo
 
   query-change-detector:
-    image: 505978303296.dkr.ecr.eu-west-1.amazonaws.com/sturm/cqrs-grid-demo/query-change-detector
+    image: 505978303296.dkr.ecr.eu-west-1.amazonaws.com/sturm/cqrs-grid-demo/event-sourcing/query-change-detector
     cpu_shares: 100
     mem_limit: 96000000
     logging:
@@ -98,7 +98,7 @@ services:
       - rabbitmq
 
   validator:
-    image: 505978303296.dkr.ecr.eu-west-1.amazonaws.com/sturm/cqrs-grid-demo/validator
+    image: 505978303296.dkr.ecr.eu-west-1.amazonaws.com/sturm/cqrs-grid-demo/event-sourcing/validator
     cpu_shares: 100
     mem_limit: 96000000
     logging:
@@ -143,7 +143,7 @@ services:
       - "5672:5672"
 
   webapp:
-    image: 505978303296.dkr.ecr.eu-west-1.amazonaws.com/sturm/cqrs-grid-demo/webapp
+    image: 505978303296.dkr.ecr.eu-west-1.amazonaws.com/sturm/cqrs-grid-demo/event-sourcing/webapp
     cpu_shares: 100
     mem_limit: 512000000
     logging:
@@ -160,7 +160,7 @@ services:
       - web-proxy
 
   testing:
-    image: 505978303296.dkr.ecr.eu-west-1.amazonaws.com/sturm/cqrs-grid-demo/testing
+    image: 505978303296.dkr.ecr.eu-west-1.amazonaws.com/sturm/cqrs-grid-demo/event-sourcing/testing
     cpu_shares: 100
     mem_limit: 96000000
     logging:
