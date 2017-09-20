@@ -81,6 +81,9 @@ $(function() {
         },
         'string'
       ],
+      paging: {
+        pageSize: 8
+      },
       editing: {
         mode: 'batch',
         allowAdding: true,
