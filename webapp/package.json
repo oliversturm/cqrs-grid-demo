@@ -3,14 +3,14 @@
   "version": "0.1.0",
   "private": true,
   "dependencies": {
-    "@devexpress/dx-react-grid": "1.0.0-alpha.9",
-    "@devexpress/dx-react-grid-bootstrap3": "1.0.0-alpha.9",
-    "@devexpress/dx-react-grid-material-ui": "1.0.0-alpha.9",
-    "@devexpress/dx-react-core": "1.0.0-alpha.9",
+    "@devexpress/dx-react-grid": "1.0.0-alpha.13",
+    "@devexpress/dx-react-grid-bootstrap3": "1.0.0-alpha.13",
+    "@devexpress/dx-react-grid-material-ui": "1.0.0-alpha.13",
+    "@devexpress/dx-react-core": "1.0.0-alpha.13",
     "bootstrap": "^3.3.7",
     "history": "^4.6.3",
-    "material-ui": "1.0.0-beta.7",
-    "material-ui-icons": "1.0.0-beta.5",
+    "material-ui": "1.0.0-beta.17",
+    "material-ui-icons": "1.0.0-beta.17",
     "moment": "^2.18.1",
     "qs": "^6.4.0",
     "react": "^15.5.4",
@@ -27,7 +27,7 @@
     "uuid": "^3.1.0"
   },
   "devDependencies": {
-    "react-scripts": "^1.0.7"
+    "react-scripts": "^1.0.14"
   },
   "scripts": {
     "start": "PORT=8080 react-scripts start",

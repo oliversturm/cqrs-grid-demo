@@ -1,6 +1,7 @@
 import uuid from 'uuid/v4';
 
 import React from 'react';
+import { Getter } from '@devexpress/dx-react-core';
 import {
   PagingState,
   SortingState,
@@ -146,6 +147,7 @@ class ReduxGrid extends React.PureComponent {
     return (
       <div style={{ position: 'relative' }}>
         <Grid rows={rows} columns={columns} getRowId={this.getRowId}>
+          <Getter name="isGroupRow" value={row => row.type === 'group'} />
           <FilteringState filters={filters} onFiltersChange={onFiltersChange} />
           <PagingState
             pageSize={pageSize}
