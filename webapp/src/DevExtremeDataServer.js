@@ -145,6 +145,7 @@ class DevExtremeDataServer extends React.PureComponent {
             if (newPage !== vals[1]) action('setCurrentPage')(newPage);
           }}
         />
+        <Getter name="isGroupRow" value={row => row.type === 'group'} />
         <Getter name="totalCount" value={this.getTotalCount()} />
         <Getter name="rows" value={this.getRows()} />
         <Getter name="loading" value={this.state.loading} />
