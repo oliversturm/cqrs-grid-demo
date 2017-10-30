@@ -9,9 +9,13 @@ import {
   PluginContainer
 } from '@devexpress/dx-react-core';
 
+import { CustomGrouping } from '@devexpress/dx-react-grid';
+
 import './loading.css';
 
 import { createDataFetcher } from './data-access';
+
+//const diff = require('object-diff');
 
 // This works with Bootstrap, and it seems a harmless default since
 // it only uses styles.
@@ -66,9 +70,31 @@ class DevExtremeDataServer extends React.PureComponent {
             rows: res.data.rows,
             totalCount: res.data.totalCount
           }
+          // tempGrouping: null,
+          // tempExpandedGroups: null
         });
       }
     });
+  }
+
+  getChildGroups(currentRows, grouping) {
+    //console.log('getChildGroups with currentRows: ', currentRows);
+    // temp exit:
+    if (currentRows.length === 0 || currentRows[0].type !== 'groupRow') {
+      // console.error(
+      //   'getChildGroups: Got data in wrong format, returning without result.'
+      // );
+      return [];
+    }
+    return currentRows.reduce((acc, row) => {
+      //console.log('Handling row with grouping: ', [row, grouping]);
+      if (row.type === 'groupRow' && row.groupedBy === grouping.columnName) {
+        acc.push({ key: row.key, value: row.value, childRows: [] });
+      } else {
+        acc[acc.length - 1].childRows.push(row);
+      }
+      return acc;
+    }, []);
   }
 
   getLoadOptions() {
@@ -99,8 +125,9 @@ class DevExtremeDataServer extends React.PureComponent {
       prevState.grouping !== this.state.grouping ||
       prevState.expandedGroups !== this.state.expandedGroups ||
       prevProps.reloadState !== this.props.reloadState
-    )
+    ) {
       this.getData(this.getLoadOptions());
+    } //else console.log('Component updated, but no relevant state changes');
   }
 
   render() {
@@ -117,6 +144,30 @@ class DevExtremeDataServer extends React.PureComponent {
               'expandedGroups'
             ].map(getter)}
           onChange={(action, ...vals) => {
+            // // my current relevant state
+            // const s = {
+            //   sorting: this.state.sorting,
+            //   currentPage: this.state.currentPage,
+            //   pageSize: this.state.pageSize,
+            //   filters: this.state.filters,
+            //   grouping: this.state.grouping,
+            //   expandedGroups: this.state.expandedGroups
+            // };
+
+            // // the new values - something here should be different from s
+            // const v = {
+            //   sorting: vals[0],
+            //   currentPage: vals[1],
+            //   pageSize: vals[2],
+            //   filters: vals[3],
+            //   grouping: vals[4],
+            //   expandedGroups: vals[5] ? Array.from(vals[5].values()) : []
+            // };
+
+            // const stateDiff = diff(s, v);
+
+            // console.log('Watcher diff: ' + JSON.stringify(stateDiff));
+
             // For initialization, state.pageSize will be undefined.
             // Just use the new value then.
             const oldPageSize = this.state.pageSize || vals[2];
@@ -133,7 +184,7 @@ class DevExtremeDataServer extends React.PureComponent {
                 return vals[1];
             })();
 
-            this.setState({
+            const newState = {
               sorting: vals[0],
               currentPage: newPage,
               pageSize: vals[2],
@@ -141,13 +192,21 @@ class DevExtremeDataServer extends React.PureComponent {
               grouping: vals[4],
               expandedGroups: vals[5] ? Array.from(vals[5].values()) : [],
               loading: true
-            });
+            };
+
+            // if (stateDiff.grouping && stateDiff.grouping.length > 0) {
+            //   newState.tempGrouping = []; //this.state.grouping;
+            //   newState.tempExpandedGroups = []; //this.state.expandedGroups;
+            // }
+
+            this.setState(newState);
             if (newPage !== vals[1]) action('setCurrentPage')(newPage);
           }}
         />
-        <Getter name="isGroupRow" value={row => row.type === 'group'} />
+
         <Getter name="totalCount" value={this.getTotalCount()} />
         <Getter name="rows" value={this.getRows()} />
+        <CustomGrouping getChildGroups={this.getChildGroups} />
         <Getter name="loading" value={this.state.loading} />
         {
           // The following getter is used to change the logic
