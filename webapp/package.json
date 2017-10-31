@@ -9,6 +9,7 @@
     "@devexpress/dx-react-grid-material-ui": "^1.0.0-alpha.14",
     "bootstrap": "^3.3.7",
     "history": "^4.6.3",
+    "lodash": "^4.17.4",
     "material-ui": "1.0.0-beta.17",
     "material-ui-icons": "1.0.0-beta.17",
     "moment": "^2.18.1",
