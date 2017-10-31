@@ -177,10 +177,13 @@ class DevExtremeDataServer extends React.PureComponent {
               loading: true
             };
 
-            if (!_.isEqual(this.state.grouping, grouping)) {
+            if (
+              !_.isEqual(this.state.grouping, grouping) ||
+              !_.isEqual(this.state.expandedGroups, expandedGroups)
+            ) {
               newState.tempGrouping = this.state.grouping;
               newState.tempExpandedGroups = this.state.expandedGroups
-                ? Array.from(expandedGroups.values())
+                ? Array.from(this.state.expandedGroups.values())
                 : [];
             }
 
@@ -208,10 +211,10 @@ class DevExtremeDataServer extends React.PureComponent {
         }
         <Getter
           name="totalPages"
-          computed={getters =>
-            getters.pageSize > 0
-              ? Math.ceil(getters.totalCount / getters.pageSize)
-              : getters.totalCount > 0 ? 1 : 0}
+          computed={({ pageSize, totalCount }) =>
+            pageSize > 0
+              ? Math.ceil(totalCount / pageSize)
+              : totalCount > 0 ? 1 : 0}
         />
         {
           // make sure that when totalPages changes, currentPage remains
