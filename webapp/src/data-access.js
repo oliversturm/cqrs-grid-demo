@@ -291,6 +291,21 @@ const createDataFetcher = (BASEDATA = DEFAULTBASEDATA) => {
       }));
   };
 
+  // Algorithm for group queries:
+  // - construct query url with group parameters, setting all groups to
+  //   isExpanded false (so no detail data will be returned), and
+  //   skip and take to undefined (I'm not completely sure why this is
+  //   important - perhaps it could be optimized) (createQueryURL)
+  // - query data on query url, this returns all groups on all levels
+  // - generate content queries by iterating over group list, counting rows
+  //   required per group, taking into account page size and current page,
+  //   and yielding simple query URLs for the groups that are visible at
+  //   least partly on the current page (createContentQueries)
+  // - execute the detail queries (getContentData)
+  // - (generateRows) Iterate group data recursively, counting carefully
+  //   the number of rows actually yielded (yieldRow). Data from the detail
+  //   queries is pulled from the result sets at the right point (getGroupContent)
+
   const groupQuery = (queryUrl, loadOptions) => {
     return fetch(queryUrl)
       .then(response => response.json())
