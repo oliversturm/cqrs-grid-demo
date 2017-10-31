@@ -86,7 +86,7 @@ const createDataFetcher = (BASEDATA = DEFAULTBASEDATA) => {
   const createGroupQueryData = (data, loadOptions) => {
     const isExpanded = groupKey => {
       //console.log('Testing groupKey for expanded: ', groupKey);
-      return loadOptions.expandedGroups.includes(groupKey);
+      return loadOptions.expandedGroups.has(groupKey);
     };
     const furtherGroupLevels = groupLevel =>
       groupLevel + 1 < loadOptions.grouping.length;
