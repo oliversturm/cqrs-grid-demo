@@ -187,7 +187,9 @@ class DevExtremeDataServer extends React.PureComponent {
                 : [];
             }
 
-            this.setState(newState);
+            // using setTimeout to prevent React from complaining
+            // about state change during state change
+            setTimeout(() => this.setState(newState));
 
             if (newPage !== currentPage) actions.setCurrentPage(newPage);
 
