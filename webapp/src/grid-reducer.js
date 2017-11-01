@@ -5,6 +5,8 @@ const GRID_FILTERS_CHANGE = 'GRID_FILTERS_CHANGE';
 const GRID_EDITING_STATE_CHANGE = 'GRID_EDITING_STATE_CHANGE';
 const GRID_LOAD = 'GRID_LOAD';
 const GRID_RESET_EDITING_STATE = 'GRID_RESET_EDITING_STATE';
+const GRID_GROUPING_STATE_CHANGE = 'GRID_GROUPING_STATE_CHANGE';
+const GRID_RESET_TEMP_GROUPING = 'GRID_RESET_TEMP_GROUPING';
 
 const gridStateChange = (stateFieldName, stateFieldValue) => ({
   type: GRID_STATE_CHANGE,
@@ -42,6 +44,16 @@ const gridResetEditingState = () => ({
   type: GRID_RESET_EDITING_STATE
 });
 
+const gridGroupingStateChange = (stateFieldName, stateFieldValue) => ({
+  type: GRID_GROUPING_STATE_CHANGE,
+  stateFieldName,
+  stateFieldValue
+});
+
+const gridResetTempGrouping = () => ({
+  type: GRID_RESET_TEMP_GROUPING
+});
+
 const createGridReducer = initialState => (state = initialState, action) => {
   switch (action.type) {
     case GRID_STATE_CHANGE:
@@ -49,12 +61,27 @@ const createGridReducer = initialState => (state = initialState, action) => {
         ...state,
         [action.stateFieldName]: action.stateFieldValue
       };
+    case GRID_GROUPING_STATE_CHANGE:
+      return {
+        ...state,
+        [action.stateFieldName]: action.stateFieldValue,
+        tempGrouping: state.grouping,
+        tempExpandedGroups: state.expandedGroups
+      };
     case GRID_DATA_LOADED:
       return {
         ...state,
         rows: action.data.rows,
         totalCount: action.data.totalCount,
-        loading: false
+        loading: false,
+        tempGrouping: null,
+        tempExpandedGroups: null
+      };
+    case GRID_RESET_TEMP_GROUPING:
+      return {
+        ...state,
+        tempGrouping: null,
+        tempExpandedGroups: null
       };
     case GRID_PAGE_SIZE_CHANGE:
       const newPage = Math.trunc(
@@ -112,6 +139,8 @@ export {
   gridEditingStateChange,
   gridResetEditingState,
   gridLoad,
+  gridGroupingStateChange,
+  gridResetTempGrouping,
   createGridReducer,
   GRID_STATE_CHANGE,
   GRID_DATA_LOADED,
@@ -119,5 +148,7 @@ export {
   GRID_FILTERS_CHANGE,
   GRID_EDITING_STATE_CHANGE,
   GRID_RESET_EDITING_STATE,
-  GRID_LOAD
+  GRID_LOAD,
+  GRID_GROUPING_STATE_CHANGE,
+  GRID_RESET_TEMP_GROUPING
 };

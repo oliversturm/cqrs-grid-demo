@@ -1,14 +1,14 @@
 import uuid from 'uuid/v4';
 
 import React from 'react';
-import { Getter } from '@devexpress/dx-react-core';
 import {
   PagingState,
   SortingState,
   FilteringState,
   GroupingState,
   EditingState,
-  ColumnOrderState
+  ColumnOrderState,
+  CustomGrouping
 } from '@devexpress/dx-react-grid';
 
 import { connect } from 'react-redux';
@@ -19,6 +19,7 @@ import {
   gridFiltersChange,
   gridEditingStateChange,
   gridLoad,
+  gridGroupingStateChange,
   createGridReducer
 } from './grid-reducer';
 
@@ -128,7 +129,9 @@ class ReduxGrid extends React.PureComponent {
       onAddedRowsChange,
       showLoadingIndicator,
       activeUI,
-      useCustomEditors
+      useCustomEditors,
+      tempExpandedGroups,
+      tempGrouping
     } = this.props;
     // loading the ui specific elements depending on current UI
     const {
@@ -147,7 +150,6 @@ class ReduxGrid extends React.PureComponent {
     return (
       <div style={{ position: 'relative' }}>
         <Grid rows={rows} columns={columns} getRowId={this.getRowId}>
-          <Getter name="isGroupRow" value={row => row.type === 'group'} />
           <FilteringState filters={filters} onFiltersChange={onFiltersChange} />
           <PagingState
             pageSize={pageSize}
@@ -174,6 +176,11 @@ class ReduxGrid extends React.PureComponent {
           />
           <ColumnOrderState order={order} onOrderChange={onOrderChange} />
           <DragDropContext />
+          <CustomGrouping
+            getChildGroups={this.getChildGroups}
+            grouping={tempGrouping}
+            expandedGroups={tempExpandedGroups}
+          />
           <TableView allowColumnReordering />
           <TableHeaderRow allowSorting allowGroupingByClick allowDragging />
           <TableFilterRow
@@ -204,6 +211,32 @@ class ReduxGrid extends React.PureComponent {
 
   getRowId(row) {
     return row._id || uuid();
+  }
+
+  getChildGroups(currentRows, grouping) {
+    //console.log('getChildGroups with currentRows: ', currentRows);
+    if (currentRows.length === 0 || currentRows[0].type !== 'groupRow') {
+      // In spite of the efforts with the temp bindings to CustomGrouping.grouping
+      // and CustomGrouping.expandedGroups, I still receive a call to this function
+      // right after grouping is first established, where the rows passed are
+      // the wrong (i.e. non-grouping) format and can't be processed. I can
+      // ignore this easily enough, but it is unclear to me why this happens
+      // or whether there isn't a way to prevent it.
+      //
+      // console.error(
+      //   'getChildGroups: Got data in wrong format, returning without result.'
+      // );
+      return [];
+    }
+    return currentRows.reduce((acc, row) => {
+      //console.log('Handling row with grouping: ', [row, grouping]);
+      if (row.type === 'groupRow' && row.groupedBy === grouping.columnName) {
+        acc.push({ key: row.key, value: row.value, childRows: [] });
+      } else {
+        acc[acc.length - 1].childRows.push(row);
+      }
+      return acc;
+    }, []);
   }
 
   // I get complaints if I don't bind onCommitChanges on EditingState
@@ -298,10 +331,11 @@ const mapDispatchToProps = dispatch => ({
     dispatch(gridStateChange('currentPage', currentPage)),
   onPageSizeChange: pageSize => dispatch(gridPageSizeChange(pageSize)),
   onFiltersChange: filters => dispatch(gridFiltersChange(filters)),
-  onGroupingChange: grouping => dispatch(gridStateChange('grouping', grouping)),
+  onGroupingChange: grouping =>
+    dispatch(gridGroupingStateChange('grouping', grouping)),
   onOrderChange: order => dispatch(gridStateChange('order', order)),
   onExpandedGroupsChange: expandedGroups =>
-    dispatch(gridStateChange('expandedGroups', expandedGroups)),
+    dispatch(gridGroupingStateChange('expandedGroups', expandedGroups)),
   onEditingRowsChange: editingRows =>
     dispatch(gridEditingStateChange('editingRows', editingRows)),
   onAddedRowsChange: addedRows =>
@@ -345,6 +379,8 @@ const gridReducer = createGridReducer({
   filters: [],
   grouping: [],
   expandedGroups: [],
+  tempGrouping: null,
+  tempExpandedGroups: null,
   order: ['date1', 'date2', 'int1', 'int2', 'string'],
   editingRows: [],
   addedRows: [],

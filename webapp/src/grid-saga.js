@@ -6,10 +6,12 @@ import {
   GRID_PAGE_SIZE_CHANGE,
   GRID_FILTERS_CHANGE,
   GRID_STATE_CHANGE,
+  GRID_GROUPING_STATE_CHANGE,
   gridDataLoaded,
   gridStateChange,
   gridLoad,
-  gridResetEditingState
+  gridResetEditingState,
+  gridResetTempGrouping
 } from './grid-reducer';
 import { BATCH_SAVE, BATCH_DISCARD } from './toolbar-reducer';
 
@@ -38,7 +40,10 @@ function loadData(loadOptions, force) {
   if (force) loadOptions.force = true;
   return fetchData(loadOptions).then(res => {
     if (res.dataFetched) return res.data;
-    else return undefined;
+    else {
+      console.error('Data not fetched: ', res.reason);
+      return undefined;
+    }
   });
 }
 
@@ -55,7 +60,10 @@ function* gridLoadHandler(action) {
   const loadOptions = yield select(getLoadOptions);
   const data = yield call(loadData, loadOptions, action.force);
   if (data) yield put(gridDataLoaded(data));
-  else yield put(gridStateChange('loading', false));
+  else {
+    yield put(gridStateChange('loading', false));
+    yield put(gridResetTempGrouping());
+  }
   yield cancel(loadingTimer);
   yield put(gridStateChange('showLoadingIndicator', false));
 }
@@ -87,14 +95,21 @@ function* followWithGridLoad(action) {
   yield put(gridLoad());
 }
 
-function* gridStateChangeHandler(action) {
-  if (
-    ['sorting', 'currentPage', 'grouping', 'expandedGroups'].includes(
-      action.stateFieldName
-    )
-  )
-    yield* followWithGridLoad(action);
+function selectiveFollowWithGridLoad(fields) {
+  const fieldList = new Set(fields);
+  return function*(action) {
+    if (fieldList.has(action.stateFieldName)) yield* followWithGridLoad(action);
+  };
 }
+
+const gridStateChangeHandler = selectiveFollowWithGridLoad([
+  'sorting',
+  'currentPage'
+]);
+const gridGroupingStateChangeHandler = selectiveFollowWithGridLoad([
+  'grouping',
+  'expandedGroups'
+]);
 
 function* gridSaga() {
   yield takeEvery(GRID_LOAD, gridLoadHandler);
@@ -102,6 +117,7 @@ function* gridSaga() {
   yield takeEvery(BATCH_DISCARD, batchDiscardHandler);
   yield takeEvery(GRID_PAGE_SIZE_CHANGE, followWithGridLoad);
   yield takeEvery(GRID_STATE_CHANGE, gridStateChangeHandler);
+  yield takeEvery(GRID_GROUPING_STATE_CHANGE, gridGroupingStateChangeHandler);
   yield takeEvery(GRID_FILTERS_CHANGE, followWithGridLoad);
 }
 
