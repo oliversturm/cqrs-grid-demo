@@ -189,7 +189,12 @@ class DevExtremeDataServer extends React.PureComponent {
 
             // using setTimeout to prevent React from complaining
             // about state change during state change
-            setTimeout(() => this.setState(newState));
+            //setTimeout(() => this.setState(newState));
+
+            // not using setTimeout anymore because it breaks
+            // the "delay" functionality of tempGrouping and
+            // tempExpandedGroups
+            this.setState(newState);
 
             if (newPage !== currentPage) actions.setCurrentPage(newPage);
 
