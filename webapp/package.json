@@ -8,6 +8,7 @@
     "@devexpress/dx-react-grid-bootstrap3": "^1.0.0-alpha.14",
     "@devexpress/dx-react-grid-material-ui": "^1.0.0-alpha.14",
     "bootstrap": "^3.3.7",
+    "dx-react-devextreme-data-server": "^1.0.19",
     "history": "^4.6.3",
     "lodash": "^4.17.4",
     "material-ui": "1.0.0-beta.17",
